@@ -12,5 +12,6 @@ public static class DisplayCommandsCommand
     public static void Execute()
     {
         Console.WriteLine($"{DisplayCommandsCommand.Name} - {DisplayCommandsCommand.GetInfo()}");
+        Console.WriteLine($"{ExitCommand.Name} - {ExitCommand.GetInfo()}");
     }
 }

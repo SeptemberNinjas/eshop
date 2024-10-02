@@ -38,6 +38,9 @@ public static class Program
             case DisplayCommandsCommand.Name:
                 DisplayCommandsCommand.Execute();
                 break;
+            case ExitCommand.Name:
+                ExitCommand.Execute();
+                break;
             default:
                 Console.WriteLine("Ошибка: неизвестная команда");
                 break;
