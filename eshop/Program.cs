@@ -7,6 +7,7 @@ public static class Program
     public static void Main(string[] args)
     {
         Console.WriteLine("Программа: 'Интернет магазин'");
+        DisplayCommandsCommand.Execute();
 
         while (true)
         {
@@ -34,6 +35,9 @@ public static class Program
 
         switch (commandName)
         {
+            case DisplayCommandsCommand.Name:
+                DisplayCommandsCommand.Execute();
+                break;
             default:
                 Console.WriteLine("Ошибка: неизвестная команда");
                 break;
