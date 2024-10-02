@@ -13,5 +13,7 @@ public static class DisplayCommandsCommand
     {
         Console.WriteLine($"{DisplayCommandsCommand.Name} - {DisplayCommandsCommand.GetInfo()}");
         Console.WriteLine($"{ExitCommand.Name} - {ExitCommand.GetInfo()}");
+        Console.WriteLine($"{DisplayProductsCommand.Name} - {DisplayProductsCommand.GetInfo()}");
+        Console.WriteLine($"{DisplayServicesCommand.Name} - {DisplayServicesCommand.GetInfo()}");
     }
 }
