@@ -1,9 +1,22 @@
 ﻿using eshop.Commands;
+using eshop.Core;
 
 namespace eshop;
 
 public static class Program
 {
+    private static readonly Product[] Products = new[]
+    {
+        new Product(1, "Лопата", 9.99m, 3),
+        new Product(2, "Трактор", 300, 4)
+    };
+    
+    private static readonly Service[] Services = new[]
+    {
+        new Service(3, "Раскопать яму", 5.49m),
+        new Service(4, "Вспахать поле", 1000)
+    };
+    
     public static void Main(string[] args)
     {
         Console.WriteLine("Программа: 'Интернет магазин'");
@@ -40,6 +53,14 @@ public static class Program
                 break;
             case ExitCommand.Name:
                 ExitCommand.Execute();
+                break;
+            case DisplayProductsCommand.Name:
+                var productsCommand = new DisplayProductsCommand(Products);
+                productsCommand.Execute(args);
+                break;
+            case DisplayServicesCommand.Name:
+                var servicesCommand = new DisplayServicesCommand(Services);
+                servicesCommand.Execute(args);
                 break;
             default:
                 Console.WriteLine("Ошибка: неизвестная команда");

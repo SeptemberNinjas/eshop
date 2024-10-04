@@ -1,9 +1,9 @@
 ﻿namespace eshop.Core;
 
 /// <summary>
-/// Товар
+/// Услуга
 /// </summary>
-public class Product
+public class Service
 {
     /// <summary>
     /// Идентификатор
@@ -19,26 +19,20 @@ public class Product
     /// Цена
     /// </summary>
     public decimal Price;
-    
-    /// <summary>
-    /// Остатки
-    /// </summary>
-    public int Remains;
 
-    /// <inheritdoc cref="Product"/>
-    public Product(int id, string name, decimal price, int remains)
+    /// <inheritdoc cref="Service"/>
+    public Service(int id, string name, decimal price)
     {
         Id = id;
         Name = name;
         Price = price;
-        Remains = remains;
     }
-
+    
     /// <summary>
-    /// Получить строку для отображения товара
+    /// Получить строку для отображения услуги
     /// </summary>
     public string GetDisplayText()
     {
-        return $"{Id}. {Name}. Цена: {Price:F2}. Остаток: {Remains}";
+        return $"{Id}. {Name}. Цена: {Price:F2}";
     }
 }
