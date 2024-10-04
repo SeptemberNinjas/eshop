@@ -23,15 +23,15 @@ public class Product
     /// <summary>
     /// Остатки
     /// </summary>
-    public int Remains;
+    public int Stock;
 
     /// <inheritdoc cref="Product"/>
-    public Product(int id, string name, decimal price, int remains)
+    public Product(int id, string name, decimal price, int stock)
     {
         Id = id;
         Name = name;
         Price = price;
-        Remains = remains;
+        Stock = stock;
     }
 
     /// <summary>
@@ -39,6 +39,6 @@ public class Product
     /// </summary>
     public string GetDisplayText()
     {
-        return $"{Id}. {Name}. Цена: {Price:F2}. Остаток: {Remains}";
+        return $"{Id}. {Name}. Цена: {Price:F2}. Остаток: {Stock}";
     }
 }
