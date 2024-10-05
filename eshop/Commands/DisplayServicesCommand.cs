@@ -1,4 +1,5 @@
-﻿using eshop.Core;
+﻿using System.Text;
+using eshop.Core;
 
 namespace eshop.Commands;
 
@@ -9,8 +10,14 @@ public class DisplayServicesCommand
 {
     private readonly Service[] _services;
     
+    /// <summary>
+    /// Имя команды
+    /// </summary>
     public const string Name = "DisplayServices";
     
+    /// <summary>
+    /// Получить описание команды
+    /// </summary>
     public static string GetInfo()
     {
         return "Вывести список услуг";
@@ -25,16 +32,19 @@ public class DisplayServicesCommand
     /// <summary>
     /// Выполнить команду
     /// </summary>
-    public void Execute(string[] args)
+    public string Execute(string[]? args)
     {
-        if (args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
+        if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
         {
             count = _services.Length;
         }
  
+        var message = new StringBuilder();
         for (var i = 0; i < Math.Min(_services.Length, count); i++)
         {
-            Console.WriteLine(_services[0].GetDisplayText());
+            message.AppendLine(_services[i].GetDisplayText());
         }
+
+        return message.ToString();
     }
 }
