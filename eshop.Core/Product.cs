@@ -5,25 +5,31 @@
 /// </summary>
 public class Product
 {
+    private int _stock;
+
     /// <summary>
     /// Идентификатор
     /// </summary>
-    public int Id;
+    public int Id { get; }
 
     /// <summary>
     /// Наименование
     /// </summary>
-    public string Name;
+    public string Name { get; }
 
     /// <summary>
     /// Цена
     /// </summary>
-    public decimal Price;
-    
+    public decimal Price { get; }
+
     /// <summary>
     /// Остатки
     /// </summary>
-    public int Stock;
+    public int Stock
+    {
+        get => _stock;
+        set => _stock = value < 0 ? 0 : value;
+    }
 
     /// <inheritdoc cref="Product"/>
     public Product(int id, string name, decimal price, int stock)
