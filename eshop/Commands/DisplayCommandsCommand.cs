@@ -29,6 +29,7 @@ public static class DisplayCommandsCommand
             $"{ExitCommand.Name} - {ExitCommand.GetInfo()}",
             $"{DisplayProductsCommand.Name} - {DisplayProductsCommand.GetInfo()}",
             $"{DisplayServicesCommand.Name} - {DisplayServicesCommand.GetInfo()}",
+            $"{AddBasketLineCommand.Name} - {AddBasketLineCommand.GetInfo()}"
         };
 
         return string.Join('\n', messages);

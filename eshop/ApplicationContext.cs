@@ -31,6 +31,7 @@ public class ApplicationContext
         new Service(4, "Вспахать поле", 1000)
     };
 
+    private Basket _basket = new();
 
     /// <summary>
     /// Выполнить стартовую команду
