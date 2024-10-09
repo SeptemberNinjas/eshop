@@ -14,6 +14,12 @@ public class DisplayBasketCommand
     /// </summary>
     public const string Name = "DisplayBasket";
     
+    /// <inheritdoc cref="DisplayBasketCommand"/>
+    public DisplayBasketCommand(Basket basket)
+    {
+        _basket = basket;
+    }
+        
     /// <summary>
     /// Получить описание команды
     /// </summary>
@@ -22,12 +28,6 @@ public class DisplayBasketCommand
         return "Отобразить корзину";
     }
     
-    /// <inheritdoc cref="DisplayBasketCommand"/>
-    public DisplayBasketCommand(Basket basket)
-    {
-        _basket = basket;
-    }
-
     /// <summary>
     /// Выполнить команду
     /// </summary>

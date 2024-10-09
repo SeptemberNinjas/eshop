@@ -50,9 +50,8 @@ public class Basket
         if (_lines.Count == 0)
             return null;
 
-        // Создаём копию списка, чтобы метод иначе список линий очистится и в заказе.
-        var orderLines = _lines.ToList();
-        var order = new Order(orderLines);
+        // Создаём копию списка, иначе список линий очистится и в заказе.
+        var order = new Order(_lines.ToList());
         _lines.Clear();
 
         return order;
