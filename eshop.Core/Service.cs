@@ -3,17 +3,8 @@
 /// <summary>
 /// Услуга
 /// </summary>
-public class Service
+public class Service : SaleItem
 {
-    /// <summary>
-    /// Идентификатор
-    /// </summary>
-    public int Id { get; }
-
-    /// <summary>
-    /// Наименование
-    /// </summary>
-    public string Name { get; }
 
     /// <summary>
     /// Цена
@@ -21,17 +12,13 @@ public class Service
     public decimal Price { get; }
 
     /// <inheritdoc cref="Service"/>
-    public Service(int id, string name, decimal price)
+    public Service(int id, string name, decimal price) : base(id, name)
     {
-        Id = id;
-        Name = name;
         Price = price;
     }
-    
-    /// <summary>
-    /// Получить строку для отображения услуги
-    /// </summary>
-    public string GetDisplayText()
+
+    /// <inheritdoc/>
+    public override string GetDisplayText()
     {
         return $"{Id}. {Name}. Цена: {Price:F2}";
     }
