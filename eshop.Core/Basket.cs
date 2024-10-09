@@ -1,11 +1,13 @@
-﻿namespace eshop.Core;
+﻿using System.Text;
+
+namespace eshop.Core;
 
 /// <summary>
 /// Корзина
 /// </summary>
 public class Basket
 {
-    private readonly List<BasketLine> _lines = new ();
+    private readonly List<ItemsListLine> _lines = new ();
 
     /// <summary>
     /// Добавить товар в корзину
@@ -19,10 +21,11 @@ public class Basket
             return $"Нельзя добавить товар в корзину, недостаточно остатков. Имеется {product.Stock}, Требуется {requestedCount}";
 
         product.Stock -= requestedCount;
+        
         if (IsLineExists(product, out var line))
             line.Count += requestedCount;
         else
-            _lines.Add(new BasketLine(product, requestedCount));
+            _lines.Add(new ItemsListLine(product, requestedCount));
 
         return $"В корзину добавлено {requestedCount} единиц товара \'{product.Name}\'";
     }
@@ -32,14 +35,52 @@ public class Basket
     /// </summary>
     public string AddLine(Service service)
     {
-        if (IsLineExists(service, out var line))
+        if (IsLineExists(service, out _))
             return $"Ошибка при добавлении услуги. Услуга \'{service.Name}\' уже добавлена в корзину";
         
-        _lines.Add(new BasketLine(service));
+        _lines.Add(new ItemsListLine(service));
         return $"В корзину добавлена услуга \'{service.Name}\'";
     }
+    
+    /// <summary>
+    /// Преобразовать корзину в заказ
+    /// </summary>
+    public Order? CreateOrderFromBasket()
+    {
+        if (_lines.Count == 0)
+            return null;
 
-    private bool IsLineExists(Product product, out BasketLine line)
+        // Создаём копию списка, чтобы метод иначе список линий очистится и в заказе.
+        var orderLines = _lines.ToList();
+        var order = new Order(orderLines);
+        _lines.Clear();
+
+        return order;
+    }
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        if (_lines.Count == 0)
+            return "Корзина пуста";
+        
+        var result = new StringBuilder();
+        result.AppendLine("Корзина:");
+        
+        var total = 0m;
+        for (var i = 0; i < _lines.Count; i++)
+        {
+            var line = _lines[i];
+            result.AppendLine($"{i+1}. {line.Text}");
+            total += line.LineSum;
+        }
+
+        result.AppendLine($"Итого: {total:F2}");
+
+        return result.ToString();
+    }
+
+    private bool IsLineExists(Product product, out ItemsListLine line)
     {
         foreach (var ln in _lines)
         {
@@ -53,7 +94,7 @@ public class Basket
         return false;
     }
     
-    private bool IsLineExists(Service service, out BasketLine line)
+    private bool IsLineExists(Service service, out ItemsListLine line)
     {
         foreach (var ln in _lines)
         {
