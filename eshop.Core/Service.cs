@@ -8,17 +8,17 @@ public class Service
     /// <summary>
     /// Идентификатор
     /// </summary>
-    public int Id;
+    public int Id { get; }
 
     /// <summary>
     /// Наименование
     /// </summary>
-    public string Name;
+    public string Name { get; }
 
     /// <summary>
     /// Цена
     /// </summary>
-    public decimal Price;
+    public decimal Price { get; }
 
     /// <inheritdoc cref="Service"/>
     public Service(int id, string name, decimal price)

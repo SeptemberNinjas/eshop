@@ -1,19 +1,37 @@
 ﻿namespace eshop.Commands;
 
+/// <summary>
+/// Команда отображения команд
+/// </summary>
 public static class DisplayCommandsCommand
 {
+    /// <summary>
+    /// Имя команды
+    /// </summary>
     public const string Name = "DisplayCommands";
     
+    /// <summary>
+    /// Получить описание команды
+    /// </summary>
     public static string GetInfo()
     {
         return "Вывести список команд";
     }
     
-    public static void Execute()
+    /// <summary>
+    /// Выполнить команду
+    /// </summary>
+    public static string Execute()
     {
-        Console.WriteLine($"{DisplayCommandsCommand.Name} - {DisplayCommandsCommand.GetInfo()}");
-        Console.WriteLine($"{ExitCommand.Name} - {ExitCommand.GetInfo()}");
-        Console.WriteLine($"{DisplayProductsCommand.Name} - {DisplayProductsCommand.GetInfo()}");
-        Console.WriteLine($"{DisplayServicesCommand.Name} - {DisplayServicesCommand.GetInfo()}");
+        var messages = new[]
+        {
+            $"{DisplayCommandsCommand.Name} - {DisplayCommandsCommand.GetInfo()}",
+            $"{ExitCommand.Name} - {ExitCommand.GetInfo()}",
+            $"{DisplayProductsCommand.Name} - {DisplayProductsCommand.GetInfo()}",
+            $"{DisplayServicesCommand.Name} - {DisplayServicesCommand.GetInfo()}",
+            $"{AddBasketLineCommand.Name} - {AddBasketLineCommand.GetInfo()}"
+        };
+
+        return string.Join('\n', messages);
     }
 }
