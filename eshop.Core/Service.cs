@@ -5,17 +5,8 @@
 /// </summary>
 public class Service : SaleItem
 {
-
-    /// <summary>
-    /// Цена
-    /// </summary>
-    public decimal Price { get; }
-
     /// <inheritdoc cref="Service"/>
-    public Service(int id, string name, decimal price) : base(id, name)
-    {
-        Price = price;
-    }
+    public Service(int id, string name, decimal price) : base(id, name, price) { }
 
     /// <inheritdoc/>
     public override string GetDisplayText()

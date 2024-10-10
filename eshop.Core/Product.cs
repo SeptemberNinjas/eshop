@@ -8,11 +8,6 @@ public class Product : SaleItem
     private int _stock;
 
     /// <summary>
-    /// Цена
-    /// </summary>
-    public decimal Price { get; }
-
-    /// <summary>
     /// Остатки
     /// </summary>
     public int Stock
@@ -22,9 +17,8 @@ public class Product : SaleItem
     }
 
     /// <inheritdoc cref="Product"/>
-    public Product(int id, string name, decimal price, int stock) : base(id, name)
+    public Product(int id, string name, decimal price, int stock) : base(id, name, price)
     {
-        Price = price;
         Stock = stock;
     }
 

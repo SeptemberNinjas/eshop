@@ -8,17 +8,23 @@
         /// <summary>
         /// Идентификатор
         /// </summary>
-        public int Id { get; }
+        public int Id { get; init; }
 
         /// <summary>
         /// Наименование
         /// </summary>
-        public string Name { get; }
+        public string Name { get; init; }
 
-        public SaleItem(int id, string name)
+        /// <summary>
+        /// Цена
+        /// </summary>
+        public decimal Price { get; init; }
+
+        public SaleItem(int id, string name, decimal price)
         {
             Id = id;
             Name = name;
+            Price = price;
         }
 
         /// <summary>
