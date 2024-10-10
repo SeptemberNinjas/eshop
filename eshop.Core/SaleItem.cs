@@ -32,5 +32,10 @@
         /// </summary>
         /// <returns></returns>
         public abstract string GetDisplayText();
+
+        /// <summary>
+        /// Флаг, обозначающий, что может быть только одна товарная единица 
+        /// </summary>
+        public virtual bool OnyOneItem => false;
     }
 }

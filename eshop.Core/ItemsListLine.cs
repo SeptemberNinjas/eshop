@@ -1,60 +1,42 @@
 ﻿namespace eshop.Core;
 
 /// <summary>
-/// Линия списка товаров
+/// Линия списка торговой единицы
 /// </summary>
-public class ItemsListLine
+public class ItemsListLine<T> where T : SaleItem
 {
-    private readonly Product? _product;
-    private readonly Service? _service;
+    private readonly T _lineItem;
     private int _count;
 
     /// <summary>
     /// Идентификатор элемента
     /// </summary>
-    public int ItemId => _product?.Id ?? _service!.Id;
+    public int ItemId => _lineItem.Id;
 
     /// <summary>
     /// Тип элемента
     /// </summary>
-    public ItemTypes ItemType => _product is not null ? ItemTypes.Product : ItemTypes.Service;
+    public ItemTypes ItemType => _lineItem is Product ? ItemTypes.Product : ItemTypes.Service;
 
     /// <summary>
     /// Текст, отображаемый в списке элементов
     /// </summary>
-    public string Text => $"{ItemType}: {_product?.Name ?? _service!.Name} | Цена: {_product?.Price ?? _service!.Price:F2} | Кол-во: {Count}";
+    public string Text => $"{ItemType}: {_lineItem?.Name} | Цена: {_lineItem?.Price:F2} | Кол-во: {Count}";
 
     /// <summary>
     /// Количество элементов в линии
     /// </summary>
-    public int Count
-    {
-        get => _count;
-        set
-        {
-            if (_service is not null || value < 1)
-                return;
-
-            _count = value;
-        }
-    }
+    public int Count { get; set; }
 
     /// <summary>
     /// Суммарная стоимость по линии
     /// </summary>
-    public decimal LineSum => (_product?.Price ?? _service!.Price) * Count;
+    public decimal LineSum => (_lineItem?.Price ?? 0) * Count;
 
     /// <inheritdoc cref="ItemsListLine"/>
-    public ItemsListLine(Product product, int requestedCount)
+    public ItemsListLine(T lineItem, int requestedCount)
     {
-        _product = product;
+        _lineItem = lineItem;
         Count = requestedCount;
-    }
-    
-    /// <inheritdoc cref="ItemsListLine"/>
-    public ItemsListLine(Service service)
-    {
-        _service = service;
-        _count = 1;
     }
 }

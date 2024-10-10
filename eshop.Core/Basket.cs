@@ -7,7 +7,7 @@ namespace eshop.Core;
 /// </summary>
 public class Basket
 {
-    private readonly List<ItemsListLine> _lines = new ();
+    private readonly List<ItemsListLine<SaleItem>> _lines = new ();
 
     /// <summary>
     /// Добавить товар в корзину
@@ -29,19 +29,24 @@ public class Basket
 
         return $"В корзину добавлено {requestedCount} единиц товара \'{product.Name}\'";
     }
-    
+
     /// <summary>
     /// Добавить услугу в корзину
     /// </summary>
     public string AddLine(Service service)
     {
-        if (IsLineExists(service, out _))
-            return $"Ошибка при добавлении услуги. Услуга \'{service.Name}\' уже добавлена в корзину";
-        
+        var saleItem = service as SaleItem;
+
+        if (IsLineExists(saleItem, out _))
+        {
+            if (saleItem.OnyOneItem)
+                return $"Ошибка при добавлении услуги. Услуга \'{service.Name}\' уже добавлена в корзину";
+        }
+
         _lines.Add(new ItemsListLine(service));
         return $"В корзину добавлена услуга \'{service.Name}\'";
     }
-    
+        
     /// <summary>
     /// Преобразовать корзину в заказ
     /// </summary>
@@ -79,7 +84,7 @@ public class Basket
         return result.ToString();
     }
 
-    private bool IsLineExists(Product product, out ItemsListLine line)
+    private bool IsLineExists(Product product, out ItemsListLine<SaleItem> line)
     {
         foreach (var ln in _lines)
         {
@@ -92,15 +97,32 @@ public class Basket
         line = null!;
         return false;
     }
-    
-    private bool IsLineExists(Service service, out ItemsListLine line)
+
+    private bool IsLineExists(Service service, out ItemsListLine<SaleItem> line)
     {
         foreach (var ln in _lines)
         {
-            if (ln.ItemType != ItemTypes.Service || ln.ItemId != service.Id) 
+            if (ln.ItemType != ItemTypes.Service || ln.ItemId != service.Id)
                 continue;
             line = ln;
             return true;
+        }
+
+        line = null!;
+        return false;
+    }
+
+    private bool IsLineExists(SaleItem saleItem, out ItemsListLine<SaleItem> line)
+    {
+        var saleItemType = saleItem is Service ? ItemTypes.Service : ItemTypes.Product;
+
+        foreach (var ln in _lines)
+        {
+            if (ln.ItemType == saleItemType && ln.ItemId == saleItem.Id)
+            {
+                line = ln;
+                return true;
+            }
         }
 
         line = null!;

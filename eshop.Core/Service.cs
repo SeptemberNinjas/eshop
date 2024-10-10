@@ -13,4 +13,7 @@ public class Service : SaleItem
     {
         return $"{Id}. {Name}. Цена: {Price:F2}";
     }
+
+    /// <inheritdoc/>
+    public override bool OnyOneItem => true;
 }
