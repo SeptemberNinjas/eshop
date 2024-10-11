@@ -1,9 +1,9 @@
 ﻿namespace eshop.Core;
 
 /// <summary>
-/// Линия корзины
+/// Линия списка товаров
 /// </summary>
-public class BasketLine
+public class ItemsListLine
 {
     private readonly Product? _product;
     private readonly Service? _service;
@@ -20,12 +20,12 @@ public class BasketLine
     public ItemTypes ItemType => _product is not null ? ItemTypes.Product : ItemTypes.Service;
 
     /// <summary>
-    /// Текст, отображаемый в списке элементов корзины
+    /// Текст, отображаемый в списке элементов
     /// </summary>
-    public string Text => $"{_product?.Name ?? _service!.Name} | {Count}";
+    public string Text => $"{ItemType}: {_product?.Name ?? _service!.Name} | Цена: {_product?.Price ?? _service!.Price:F2} | Кол-во: {Count}";
 
     /// <summary>
-    /// Количество элементов в корзине
+    /// Количество элементов в линии
     /// </summary>
     public int Count
     {
@@ -39,15 +39,20 @@ public class BasketLine
         }
     }
 
-    /// <inheritdoc cref="BasketLine"/>
-    public BasketLine(Product product, int requestedCount)
+    /// <summary>
+    /// Суммарная стоимость по линии
+    /// </summary>
+    public decimal LineSum => (_product?.Price ?? _service!.Price) * Count;
+
+    /// <inheritdoc cref="ItemsListLine"/>
+    public ItemsListLine(Product product, int requestedCount)
     {
         _product = product;
         Count = requestedCount;
     }
     
-    /// <inheritdoc cref="BasketLine"/>
-    public BasketLine(Service service)
+    /// <inheritdoc cref="ItemsListLine"/>
+    public ItemsListLine(Service service)
     {
         _service = service;
         _count = 1;

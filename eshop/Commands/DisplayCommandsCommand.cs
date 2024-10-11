@@ -29,7 +29,10 @@ public static class DisplayCommandsCommand
             $"{ExitCommand.Name} - {ExitCommand.GetInfo()}",
             $"{DisplayProductsCommand.Name} - {DisplayProductsCommand.GetInfo()}",
             $"{DisplayServicesCommand.Name} - {DisplayServicesCommand.GetInfo()}",
-            $"{AddBasketLineCommand.Name} - {AddBasketLineCommand.GetInfo()}"
+            $"{AddBasketLineCommand.Name} - {AddBasketLineCommand.GetInfo()}",
+            $"{DisplayBasketCommand.Name} - {DisplayBasketCommand.GetInfo()}",
+            $"{CreateOrderCommand.Name} - {CreateOrderCommand.GetInfo()}",
+            $"{DisplayOrdersCommand.Name} - {DisplayOrdersCommand.GetInfo()}"
         };
 
         return string.Join('\n', messages);
