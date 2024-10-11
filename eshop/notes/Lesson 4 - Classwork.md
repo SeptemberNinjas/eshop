@@ -227,3 +227,28 @@
 
         public Order(List<ItemsListLine<SaleItem>> lines)
     ```
+
+8. Удаляем реализации методов `IsLineExists` под каждый свой тип.
+    При этом видим, что проект у нас продолжаем компилироваться.
+    В методе `AddLine(Service service)` У нас есть явное приведение типа `Service` к `SaleItem` поэтом здесь ничего не меняется, а вот в `AddLine(Product product, int requestedCount)` такого приведения нет и он начинает использовать следующую подходящую реализацию.
+
+9. Убираем лишнее приведение типов в методе `AddLine(Service service)`
+
+    ```csharp
+
+        /// <summary>
+        /// Добавить услугу в корзину
+        /// </summary>
+        public string AddLine(Service service)
+        {
+            if (IsLineExists(service, out _))
+            {
+                if (service.OnyOneItem)
+                    return $"Ошибка при добавлении услуги. Услуга \'{service.Name}\' уже добавлена в корзину";
+            }
+
+            _lines.Add(new ItemsListLine(service));
+            return $"В корзину добавлена услуга \'{service.Name}\'";
+        }
+
+    ```

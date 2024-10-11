@@ -35,11 +35,9 @@ public class Basket
     /// </summary>
     public string AddLine(Service service)
     {
-        var saleItem = service as SaleItem;
-
-        if (IsLineExists(saleItem, out _))
+        if (IsLineExists(service, out _))
         {
-            if (saleItem.OnyOneItem)
+            if (service.OnyOneItem)
                 return $"Ошибка при добавлении услуги. Услуга \'{service.Name}\' уже добавлена в корзину";
         }
 
@@ -82,34 +80,6 @@ public class Basket
         result.AppendLine($"Итого: {total:F2}");
 
         return result.ToString();
-    }
-
-    private bool IsLineExists(Product product, out ItemsListLine<SaleItem> line)
-    {
-        foreach (var ln in _lines)
-        {
-            if (ln.ItemType != ItemTypes.Product || ln.ItemId != product.Id) 
-                continue;
-            line = ln;
-            return true;
-        }
-
-        line = null!;
-        return false;
-    }
-
-    private bool IsLineExists(Service service, out ItemsListLine<SaleItem> line)
-    {
-        foreach (var ln in _lines)
-        {
-            if (ln.ItemType != ItemTypes.Service || ln.ItemId != service.Id)
-                continue;
-            line = ln;
-            return true;
-        }
-
-        line = null!;
-        return false;
     }
 
     private bool IsLineExists(SaleItem saleItem, out ItemsListLine<SaleItem> line)
