@@ -52,11 +52,11 @@ public class AddBasketLineCommand
         switch (type)
         {
             case ItemTypes.Product:
-                if (!TryGetProduct(id, out var product))
+                if (!TryGetItem(id, _products, out var product))
                     return $"Не найден товар с идентификатором {id}";
                 return _basket.AddLine(product, count);
             case ItemTypes.Service:
-                if (!TryGetService(id, out var service))
+                if (!TryGetItem(id, _services, out var service))
                     return $"Не найдена услуга с идентификатором {id}";
                 return _basket.AddLine(service);
             default:
@@ -64,31 +64,18 @@ public class AddBasketLineCommand
         }
     }
 
-    private bool TryGetService(int id, out Service service)
+    private static bool TryGetItem<T>(int id, IEnumerable<T> items, out T item)
+        where T: SaleItem
     {
-        foreach (var s in _services)
+        foreach (var saleItem in items)
         {
-            if (s.Id != id)
+            if (saleItem.Id != id)
                 continue;
-            service = s;
+            item = saleItem;
             return true;
         }
 
-        service = null!;
-        return false;
-    }
-
-    private bool TryGetProduct(int id, out Product product)
-    {
-        foreach (var pr in _products)
-        {
-            if (pr.Id != id)
-                continue;
-            product = pr;
-            return true;
-        }
-
-        product = null!;
+        item = null!;
         return false;
     }
 }
