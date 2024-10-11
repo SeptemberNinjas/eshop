@@ -254,3 +254,22 @@
         }
 
     ```
+
+10. В команде добавления элемента в корзину `AddBasketLineCommand.cs` используем полиморфизм. Удаляем ненужные методы `TryGetService`, `TryGetProduct`
+
+    ```csharp
+    private static bool TryGetItem<T>(int id, IEnumerable<T> items, out T item)
+        where T: SaleItem
+    {
+        foreach (var saleItem in items)
+        {
+            if (saleItem.Id != id)
+                continue;
+            item = saleItem;
+            return true;
+        }
+
+        item = null!;
+        return false;
+    }
+    ```
