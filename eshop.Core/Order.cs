@@ -7,7 +7,7 @@ namespace eshop.Core;
 /// </summary>
 public class Order
 {
-    private readonly List<ItemsListLine<SaleItem>> _lines;
+    private readonly List<ItemsListLine> _lines;
     
     /// <summary>
     /// Идентификатор заказа
@@ -20,7 +20,7 @@ public class Order
     public OrderStatus Status { get; private set; }
 
     /// <inheritdoc cref="Order"/>
-    public Order(List<ItemsListLine<SaleItem>> lines)
+    public Order(List<ItemsListLine> lines)
     {
         Status = OrderStatus.New;
         Id = Guid.NewGuid();

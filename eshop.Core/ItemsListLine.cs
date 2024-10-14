@@ -3,10 +3,9 @@
 /// <summary>
 /// Линия списка торговой единицы
 /// </summary>
-public class ItemsListLine<T> where T : SaleItem
+public class ItemsListLine
 {
-    private readonly T _lineItem;
-    private int _count;
+    private readonly SaleItem _lineItem;
 
     /// <summary>
     /// Идентификатор элемента
@@ -34,9 +33,16 @@ public class ItemsListLine<T> where T : SaleItem
     public decimal LineSum => (_lineItem?.Price ?? 0) * Count;
 
     /// <inheritdoc cref="ItemsListLine"/>
-    public ItemsListLine(T lineItem, int requestedCount)
+    public ItemsListLine(Product product, int requestedCount)
     {
-        _lineItem = lineItem;
+        _lineItem = product;
         Count = requestedCount;
+    }
+    
+    /// <inheritdoc cref="ItemsListLine"/>
+    public ItemsListLine(Service service)
+    {
+        _lineItem = service;
+        Count = 1;
     }
 }
