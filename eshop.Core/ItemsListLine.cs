@@ -16,7 +16,7 @@ public class ItemsListLine<T> where T : SaleItem
     /// <summary>
     /// Тип элемента
     /// </summary>
-    public ItemTypes ItemType => _lineItem is Product ? ItemTypes.Product : ItemTypes.Service;
+    public ItemTypes ItemType => _lineItem.ItemType;
 
     /// <summary>
     /// Текст, отображаемый в списке элементов

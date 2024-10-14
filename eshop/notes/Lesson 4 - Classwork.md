@@ -27,6 +27,11 @@
             /// </summary>
             public decimal Price { get; init; }
 
+            /// <summary>
+            /// Тип элемента
+            /// </summary>
+            public abstract ItemTypes ItemType { get; }
+
             public SaleItem(int id, string name)
             {
                 Id = id;
@@ -39,6 +44,7 @@
 
     - из Product удаляем свойства Id, Name, Price
     - добавляем вызов базового конструктора
+    - реализуем абстрактное свойство `ItemType`
 
 3. В SaleItem объявляем абстрактный метод `GetDisplayText` и его реализации в `Product` и `Service`
 
@@ -91,7 +97,7 @@
             /// <summary>
             /// Тип элемента
             /// </summary>
-            public ItemTypes ItemType => _lineItem is Product ? ItemTypes.Product : ItemTypes.Service;
+            public ItemTypes ItemType => _lineItem.ItemType;
 
             /// <summary>
             /// Текст, отображаемый в списке элементов
@@ -181,11 +187,9 @@
         // Добавляем новый метод проверки существования линии в корзине для использования обобщенного типа
         private bool IsLineExists(SaleItem saleItem, out ItemsListLine<SaleItem> line)
         {
-            var saleItemType = saleItem is Service ? ItemTypes.Service : ItemTypes.Product;
-
             foreach (var ln in _lines)
             {
-                if (ln.ItemType == saleItemType && ln.ItemId == saleItem.Id)
+                if (ln.ItemType == saleItem.ItemType && ln.ItemId == saleItem.Id)
                 {
                     line = ln;
                     return true;

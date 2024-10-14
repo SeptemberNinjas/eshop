@@ -7,6 +7,9 @@ public class Product : SaleItem
 {
     private int _stock;
 
+    /// <inheritdoc/>
+    public override ItemTypes ItemType => ItemTypes.Product;
+
     /// <summary>
     /// Остатки
     /// </summary>

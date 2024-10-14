@@ -20,6 +20,11 @@
         /// </summary>
         public decimal Price { get; init; }
 
+        /// <summary>
+        /// Тип элемента
+        /// </summary>
+        public abstract ItemTypes ItemType { get; }
+
         public SaleItem(int id, string name, decimal price)
         {
             Id = id;

@@ -84,11 +84,9 @@ public class Basket
 
     private bool IsLineExists(SaleItem saleItem, out ItemsListLine<SaleItem> line)
     {
-        var saleItemType = saleItem is Service ? ItemTypes.Service : ItemTypes.Product;
-
         foreach (var ln in _lines)
         {
-            if (ln.ItemType == saleItemType && ln.ItemId == saleItem.Id)
+            if (ln.ItemType == saleItem.ItemType && ln.ItemId == saleItem.Id)
             {
                 line = ln;
                 return true;
