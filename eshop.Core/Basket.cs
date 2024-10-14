@@ -37,7 +37,7 @@ public class Basket
     {
         if (IsLineExists(service, out _))
         {
-            if (service.OnyOneItem)
+            if (service.OnlyOneItem)
                 return $"Ошибка при добавлении услуги. Услуга \'{service.Name}\' уже добавлена в корзину";
         }
 

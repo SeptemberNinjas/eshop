@@ -40,7 +40,7 @@
         }
     ```
 
-2. Наследуем `Product` и `Service` от от `SaleItem`
+2. Наследуем `Product` и `Service` от `SaleItem`
 
     - из Product удаляем свойства Id, Name, Price
     - добавляем вызов базового конструктора
@@ -142,14 +142,14 @@
         /// <summary>
         /// Флаг, обозначающий, что может быть только одна товарная единица 
         /// </summary>
-        public virtual bool OnyOneItem => false;
+        public virtual bool OnlyOneItem => false;
     ```
 
     Делаем его перегрузку в `Service`:
 
     ```csharp
         /// <inheritdoc/>
-        public override bool OnyOneItem => true;
+        public override bool OnlyOneItem => true;
     ```
 
     В `ItemsListLine` дорабатываем свойство `Count`.
@@ -213,7 +213,7 @@
 
             if (IsLineExists(saleItem, out _))
             {
-                if (saleItem.OnyOneItem)
+                if (saleItem.OnlyOneItem)
                     return $"Ошибка при добавлении услуги. Услуга \'{service.Name}\' уже добавлена в корзину";
             }
 
@@ -249,7 +249,7 @@
         {
             if (IsLineExists(service, out _))
             {
-                if (service.OnyOneItem)
+                if (service.OnlyOneItem)
                     return $"Ошибка при добавлении услуги. Услуга \'{service.Name}\' уже добавлена в корзину";
             }
 

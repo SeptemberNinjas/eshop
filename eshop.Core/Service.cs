@@ -18,5 +18,5 @@ public class Service : SaleItem
     }
 
     /// <inheritdoc/>
-    public override bool OnyOneItem => true;
+    public override bool OnlyOneItem => true;
 }
