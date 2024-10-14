@@ -32,6 +32,8 @@ public class ApplicationContext
     };
 
     private Basket _basket = new();
+    
+    private List<Order> _orders = new();
 
     /// <summary>
     /// Выполнить стартовую команду
@@ -52,6 +54,10 @@ public class ApplicationContext
             ExitCommand.Name => ExitCommand.Execute(),
             DisplayProductsCommand.Name => new DisplayProductsCommand(_products).Execute(args),
             DisplayServicesCommand.Name => new DisplayServicesCommand(_services).Execute(args),
+            AddBasketLineCommand.Name => new AddBasketLineCommand(_basket, _products, _services).Execute(args),
+            DisplayBasketCommand.Name => new DisplayBasketCommand(_basket).Execute(),
+            CreateOrderCommand.Name => new CreateOrderCommand(_basket, _orders).Execute(),
+            DisplayOrdersCommand.Name => new DisplayOrdersCommand(_orders).Execute(),
             var _ => "Ошибка: неизвестная команда"
         };
     }
