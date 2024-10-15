@@ -1,4 +1,8 @@
 ﻿using eshop.Commands;
+using eshop.Commands.CatalogCommands;
+using eshop.Commands.OrderCommands;
+using eshop.Commands.PaymentCommands;
+using eshop.Commands.SystemCommands;
 using eshop.Core;
 
 namespace eshop;
@@ -31,34 +35,33 @@ public class ApplicationContext
         new Service(4, "Вспахать поле", 1000)
     };
 
-    private Basket _basket = new();
+    private readonly Basket _basket = new();
+    private readonly List<Order> _orders = [new Order([new ItemsListLine(new Product(1, "Лопата", 9.99m, 3), 3)])];
     
-    private List<Order> _orders = new();
-
-    /// <summary>
-    /// Выполнить стартовую команду
-    /// </summary>
-    public string ExecuteStartupCommand()
+    public IEshopCommand CreateCommand(CommandType commandType)
     {
-        return ExecuteCommandByName(DisplayCommandsCommand.Name);
+        return commandType switch
+        {
+            CommandType.Exit => new ExitCommand(),
+            CommandType.Back => new BackCommand(),
+            CommandType.GoToRoot => new GoToRootPageCommand(),
+            CommandType.DisplaySaleItems => new DisplaySaleItemsCommand(),
+            CommandType.DisplayProducts => new DisplayProductsCommand(_products),
+            CommandType.DisplayServices => new DisplayServicesCommand(_services),
+            CommandType.DisplayBasket => new DisplayBasketCommand(_basket),
+            CommandType.AddProductToBasket => new AddBasketLineCommand(_basket, _products.Cast<SaleItem>().ToArray()),
+            CommandType.AddServiceToBasket => new AddBasketLineCommand(_basket, _services.Cast<SaleItem>().ToArray()),
+            CommandType.CreateOrder => new CreateOrderCommand(_basket, _orders),
+            CommandType.DisplayOrders => new DisplayOrdersCommand(_orders),
+            CommandType.StartOrderPayment => new StartOrderPaymentCommand(_orders),
+            CommandType.SelectPaymentType => new SelectPaymentTypeCommand(),
+            CommandType.TransferMoney => new TransferMoneyCommand(_orders),
+            _ => throw new NotSupportedException()
+        };
     }
 
-    /// <summary>
-    /// Выполнить команду по имени
-    /// </summary>
-    public string ExecuteCommandByName(string commandName, string[]? args = null)
+    public ICommandWithCommandsList GetInitialCommand()
     {
-        return commandName switch
-        {
-            DisplayCommandsCommand.Name => DisplayCommandsCommand.Execute(),
-            ExitCommand.Name => ExitCommand.Execute(),
-            DisplayProductsCommand.Name => new DisplayProductsCommand(_products).Execute(args),
-            DisplayServicesCommand.Name => new DisplayServicesCommand(_services).Execute(args),
-            AddBasketLineCommand.Name => new AddBasketLineCommand(_basket, _products, _services).Execute(args),
-            DisplayBasketCommand.Name => new DisplayBasketCommand(_basket).Execute(),
-            CreateOrderCommand.Name => new CreateOrderCommand(_basket, _orders).Execute(),
-            DisplayOrdersCommand.Name => new DisplayOrdersCommand(_orders).Execute(),
-            var _ => "Ошибка: неизвестная команда"
-        };
+        return new InitialCommand(Title);
     }
 }

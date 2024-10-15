@@ -17,7 +17,9 @@ public class Order
     /// <summary>
     /// Статус заказа.
     /// </summary>
-    public OrderStatus Status { get; private set; }
+    public OrderStatus Status { get; set; }
+
+    public decimal Sum => _lines.Sum(l => l.LineSum);
 
     /// <inheritdoc cref="Order"/>
     public Order(List<ItemsListLine> lines)
@@ -37,15 +39,13 @@ public class Order
         result.AppendLine($"Заказ {Id}:");
         result.AppendLine($"Статус заказа: {Status}");
         
-        var total = 0m;
         for (var i = 0; i < _lines.Count; i++)
         {
             var line = _lines[i];
             result.AppendLine($"{i+1}. {line.Text}");
-            total += line.LineSum;
         }
 
-        result.AppendLine($"Итого: {total:F2}");
+        result.AppendLine($"Итого: {Sum:F2}");
 
         return result.ToString();
     }
