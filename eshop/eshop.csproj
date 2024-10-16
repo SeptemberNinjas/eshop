@@ -11,4 +11,19 @@
     <ProjectReference Include="..\eshop.Core\eshop.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ApplicationDefinition Include="data\products.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ApplicationDefinition>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="data\products.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="data\services.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
