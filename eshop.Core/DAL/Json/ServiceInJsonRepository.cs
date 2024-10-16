@@ -15,13 +15,13 @@ namespace eshop.Core.DAL.Json
         /// <inheritdoc/>
         public IReadOnlyCollection<Service> GetAll()
         {
-            return (IReadOnlyCollection<Service>)GetProducts();
+            return (IReadOnlyCollection<Service>)GetServices();
         }
 
         /// <inheritdoc/>
         public Service? GetById(int id)
         {
-            var products = GetProducts();
+            var products = GetServices();
 
             return products.FirstOrDefault(item => item.Id == id);
         }
@@ -29,7 +29,7 @@ namespace eshop.Core.DAL.Json
         /// <inheritdoc/>
         public int GetCount()
         {
-            var products = GetProducts();
+            var products = GetServices();
 
             return products.Count();
         }
@@ -40,17 +40,17 @@ namespace eshop.Core.DAL.Json
             throw new NotImplementedException();
         }
 
-        private IEnumerable<Service> GetProducts()
+        private static IEnumerable<Service> GetServices()
         {
-            if (!File.Exists("products.json"))
+            if (!File.Exists("data\\services.json"))
             {
-                using var sw = new StreamWriter("products.json");
+                using var sw = new StreamWriter("data\\services.json");
                 sw.WriteLine("[]");
             }
 
-            using var sr = new StreamReader("products.json");
+            using var sr = new StreamReader("data\\services.json");
 
-            var result = JsonSerializer.Deserialize<IEnumerable<Product>>(sr.BaseStream);
+            var result = JsonSerializer.Deserialize<IEnumerable<Service>>(sr.BaseStream);
 
             return (IReadOnlyCollection<Service>)(result ?? []);
         }
