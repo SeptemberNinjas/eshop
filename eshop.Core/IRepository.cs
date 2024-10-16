@@ -24,11 +24,5 @@
         /// <param name="id">Идентификатор</param>
         /// <returns></returns>
         T? GetById(int id);
-
-        /// <summary>
-        /// Добавить новый элемент
-        /// </summary>
-        /// <param name="item"></param>
-        void Insert(T item);
     }
 }

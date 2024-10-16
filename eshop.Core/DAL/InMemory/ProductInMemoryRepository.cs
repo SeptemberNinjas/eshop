@@ -33,11 +33,5 @@
         {
             return _products.FirstOrDefault(item => item.Id == id);
         }
-
-        /// <inheritdoc/>
-        public void Insert(Product item)
-        {
-            _products.Add(item);
-        }
     }
 }

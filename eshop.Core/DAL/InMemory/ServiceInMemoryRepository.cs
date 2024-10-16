@@ -29,11 +29,5 @@
         {
             return _services.FirstOrDefault(item => item.Id == id);
         }
-
-        /// <inheritdoc/>
-        public void Insert(Service item)
-        {
-            _services.Add(item);
-        }
     }
 }
