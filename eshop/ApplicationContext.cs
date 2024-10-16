@@ -5,6 +5,7 @@ using eshop.Commands.PaymentCommands;
 using eshop.Commands.SystemCommands;
 using eshop.Core;
 using eshop.Core.DAL.InMemory;
+using eshop.Core.DAL.Json;
 
 namespace eshop;
 
@@ -43,7 +44,7 @@ public class ApplicationContext
     
     public ApplicationContext()
     {
-        _productRepositoyFactory = new ProductInMemoryRepositoryFactory();
+        _productRepositoyFactory = new ProductInJsonRepositoryFactory();
         _serviceRepositoryFactory = new ServiceInMemoryRepositoryFactory();
 
         _products = _productRepositoyFactory.Create();

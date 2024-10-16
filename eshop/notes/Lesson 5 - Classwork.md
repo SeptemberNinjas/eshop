@@ -70,7 +70,7 @@
     - Меняем массив товаров на интерфейс
     - Меняем аргументы конструктора
 
-    ```csharp 
+    ```csharp
         private readonly IRepository<Product> _products;
 
         /// <inheritdoc cref="DisplayProductsCommand"/>
@@ -223,4 +223,101 @@
             _products = _productRepositoyFactory.Create();
             _services = _serviceRepositoryFactory.Create();
         }
+    ```
+
+11. Пишем реализацию хранения товаров в Json-файлах:
+
+    ```csharp
+        /// <summary>
+        /// Реализация репозитория для хранения товаров в json'е
+        /// </summary>
+        internal class ProductInJsonRepository : IRepository<Product>
+        {
+            /// <inheritdoc/>
+            public IReadOnlyCollection<Product> GetAll()
+            {
+                return (IReadOnlyCollection<Product>)GetProducts();
+            }
+
+            /// <inheritdoc/>
+            public Product? GetById(int id)
+            {
+                var products = GetProducts();
+
+                return products.FirstOrDefault(item => item.Id == id);
+            }
+
+            /// <inheritdoc/>
+            public int GetCount()
+            {
+                var products = GetProducts();
+
+                return products.Count();
+            }
+
+            /// <inheritdoc/>
+            public void Insert(Product item)
+            {
+                throw new NotImplementedException();
+            }
+
+            private IEnumerable<Product> GetProducts()
+            {
+                if (!File.Exists("products.json"))
+                {
+                    using var sw = new StreamWriter("products.json");
+                    sw.WriteLine("[]");
+                }
+                
+                using var sr = new StreamReader("products.json");
+
+                var result = JsonSerializer.Deserialize<IEnumerable<Product>>(sr.BaseStream);
+
+                return (IReadOnlyCollection<Product>)(result ?? []);
+            }
+        }
+    ```
+
+12. Пишем фабрику для создания нового репозитория
+
+    ```csharp
+        /// <summary>
+        /// Реализация фабрики для хранения товаров в json'е
+        /// </summary>
+        public class ProductInJsonRepositoryFactory : RepositoyFactory<Product>
+        {
+            public override IRepository<Product> Create()
+            {
+                return new ProductInJsonRepository();
+            }
+        }
+    ```
+
+13. Меняем реализацию фабрики в `ApplicationContext`:
+
+    ```csharp
+        _productRepositoyFactory = new ProductInJsonRepositoryFactory();
+    ```
+
+14. Запускаем приложением и пытаемся просмотреть список товаров.
+
+    Если мы все сделали правильно, то у нас должен быть пустой список товаров.
+
+15. Наполняем файл `products.json`, который лежит в папке в `Debug` данные о товарах:
+
+    ```json
+        [
+            {
+                "Id": 1,
+                "Name": "Лопата",
+                "Price": 9.99,
+                "Stock": 3
+            },
+            {
+                "Id": 2,
+                "Name": "Трактор",
+                "Price": 300,
+                "Stock": 4
+            }
+        ]
     ```
