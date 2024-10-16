@@ -45,7 +45,7 @@ public class ApplicationContext
     public ApplicationContext()
     {
         _productRepositoyFactory = new ProductInJsonRepositoryFactory();
-        _serviceRepositoryFactory = new ServiceInMemoryRepositoryFactory();
+        _serviceRepositoryFactory = new ServiceInJsonRepositoryFactory();
 
         _products = _productRepositoyFactory.Create();
         _services = _serviceRepositoryFactory.Create();
