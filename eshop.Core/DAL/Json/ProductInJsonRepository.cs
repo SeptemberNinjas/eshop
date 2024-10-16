@@ -35,15 +35,15 @@ namespace eshop.Core.DAL.Json
             throw new NotImplementedException();
         }
 
-        private IEnumerable<Product> GetProducts()
+        private static IEnumerable<Product> GetProducts()
         {
-            if (!File.Exists("products.json"))
+            if (!File.Exists("data\\products.json"))
             {
-                using var sw = new StreamWriter("products.json");
+                using var sw = new StreamWriter("data\\products.json");
                 sw.WriteLine("[]");
             }
             
-            using var sr = new StreamReader("products.json");
+            using var sr = new StreamReader("data\\products.json");
 
             var result = JsonSerializer.Deserialize<IEnumerable<Product>>(sr.BaseStream);
 
