@@ -7,13 +7,16 @@ namespace eshop.Core;
 /// </summary>
 public class Basket
 {
-    private readonly List<ItemsListLine<SaleItem>> _lines = new ();
+    private readonly List<ItemsListLine> _lines = new ();
 
     /// <summary>
     /// Добавить товар в корзину
     /// </summary>
-    public string AddLine(Product product, int requestedCount)
+    public string AddLine(Product? product, int requestedCount)
     {
+        if (product is null)
+            return "Товар не найден";
+        
         if (requestedCount < 1)
             return "Запрашиваемое количество товара должно быть больше 0";
         
@@ -33,12 +36,14 @@ public class Basket
     /// <summary>
     /// Добавить услугу в корзину
     /// </summary>
-    public string AddLine(Service service)
+    public string AddLine(Service? service)
     {
-        if (IsLineExists(service, out _))
+        if (service is null)
+            return "Услуга не найдена";
+        
+        if (IsLineExists(service, out _) && service.OnlyOneItem)
         {
-            if (service.OnlyOneItem)
-                return $"Ошибка при добавлении услуги. Услуга \'{service.Name}\' уже добавлена в корзину";
+            return $"Ошибка при добавлении услуги. Услуга \'{service.Name}\' уже добавлена в корзину";
         }
 
         _lines.Add(new ItemsListLine(service));
@@ -82,15 +87,14 @@ public class Basket
         return result.ToString();
     }
 
-    private bool IsLineExists(SaleItem saleItem, out ItemsListLine<SaleItem> line)
+    private bool IsLineExists(SaleItem saleItem, out ItemsListLine line)
     {
         foreach (var ln in _lines)
         {
-            if (ln.ItemType == saleItem.ItemType && ln.ItemId == saleItem.Id)
-            {
-                line = ln;
-                return true;
-            }
+            if (ln.ItemType != saleItem.ItemType || ln.ItemId != saleItem.Id) 
+                continue;
+            line = ln;
+            return true;
         }
 
         line = null!;
