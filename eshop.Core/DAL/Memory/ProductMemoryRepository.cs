@@ -1,13 +1,13 @@
-﻿namespace eshop.Core.DAL.InMemory
+﻿namespace eshop.Core.DAL.Memory
 {
     /// <summary>
     /// Реализация репозитория для хранения товаров в памяти
     /// </summary>
-    internal class ProductInMemoryRepository : IRepository<Product>
+    internal class ProductMemoryRepository : IRepository<Product>
     {
         private readonly List<Product> _products;
 
-        public ProductInMemoryRepository()
+        public ProductMemoryRepository()
         {
             _products =
             [

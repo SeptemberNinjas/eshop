@@ -1,10 +1,10 @@
-﻿namespace eshop.Core.DAL.InMemory
+﻿namespace eshop.Core.DAL.Memory
 {
-    internal class ServiceInMemoryRepository : IRepository<Service>
+    internal class ServiceMemoryRepository : IRepository<Service>
     {
         private readonly List<Service> _services;
 
-        public ServiceInMemoryRepository() {
+        public ServiceMemoryRepository() {
             _services =
             [
                 new Service(3, "Раскопать яму", 5.49m),

@@ -2,10 +2,19 @@
 {
     /// <summary>
     /// Абстрактная фабрика для создания репозиториев
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public abstract class RepositoyFactory<T>
+    /// </summary>    
+    public abstract class RepositoyFactory
     {
-        public abstract IRepository<T> Create();
+        /// <summary>
+        /// Создать репозиторий для работы с товарами
+        /// </summary>
+        /// <returns></returns>
+        public abstract IRepository<Product> CreateProductRepository();
+
+        /// <summary>
+        /// Создать репозиторий для работы с услугами
+        /// </summary>
+        /// <returns></returns>
+        public abstract IRepository<Service> CreateServiceRepository();
     }
 }

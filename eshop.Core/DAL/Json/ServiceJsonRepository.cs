@@ -10,7 +10,7 @@ namespace eshop.Core.DAL.Json
     /// <summary>
     /// Реализация репозитория для хранения услуг в json'е
     /// </summary>
-    internal class ServiceInJsonRepository : IRepository<Service>
+    internal class ServiceJsonRepository : IRepository<Service>
     {
         /// <inheritdoc/>
         public IReadOnlyCollection<Service> GetAll()

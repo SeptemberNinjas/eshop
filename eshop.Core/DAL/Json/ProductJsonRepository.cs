@@ -5,7 +5,7 @@ namespace eshop.Core.DAL.Json
     /// <summary>
     /// Реализация репозитория для хранения товаров в json'е
     /// </summary>
-    internal class ProductInJsonRepository : IRepository<Product>
+    internal class ProductJsonRepository : IRepository<Product>
     {
         /// <inheritdoc/>
         public IReadOnlyCollection<Product> GetAll()

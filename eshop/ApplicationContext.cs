@@ -4,7 +4,7 @@ using eshop.Commands.OrderCommands;
 using eshop.Commands.PaymentCommands;
 using eshop.Commands.SystemCommands;
 using eshop.Core;
-using eshop.Core.DAL.InMemory;
+using eshop.Core.DAL.Memory;
 using eshop.Core.DAL.Json;
 
 namespace eshop;
@@ -20,19 +20,14 @@ public class ApplicationContext
     public const string Title = "Программа: 'Интернет магазин'";
 
     /// <summary>
-    /// Фабрика, для создания репозитория с продуктами
+    /// Фабрика, для создания репозиторией
     /// </summary>
-    private readonly RepositoyFactory<Product> _productRepositoyFactory;
+    private readonly RepositoyFactory _repositoryFactory;
 
     /// <summary>
     /// Список товаров
     /// </summary>
     private readonly IRepository<Product> _products;
-
-    /// <summary>
-    /// Фабрика, для создания репозитория с услугами
-    /// </summary>
-    private readonly RepositoyFactory<Service> _serviceRepositoryFactory;
 
     /// <summary>
     /// Список услуг
@@ -44,11 +39,10 @@ public class ApplicationContext
     
     public ApplicationContext()
     {
-        _productRepositoyFactory = new ProductInJsonRepositoryFactory();
-        _serviceRepositoryFactory = new ServiceInJsonRepositoryFactory();
+        _repositoryFactory = new JsonRepositoryFactory();
 
-        _products = _productRepositoyFactory.Create();
-        _services = _serviceRepositoryFactory.Create();
+        _products = _repositoryFactory.CreateProductRepository();
+        _services = _repositoryFactory.CreateServiceRepository();
     }
 
     public IEshopCommand CreateCommand(CommandType commandType)
