@@ -8,7 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DAL\eshop.DAL.csproj" />
     <ProjectReference Include="..\eshop.Core\eshop.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="data\products.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="data\services.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

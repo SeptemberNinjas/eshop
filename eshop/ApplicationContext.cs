@@ -4,6 +4,9 @@ using eshop.Commands.OrderCommands;
 using eshop.Commands.PaymentCommands;
 using eshop.Commands.SystemCommands;
 using eshop.Core;
+using eshop.DAL;
+using eshop.DAL.JSON;
+using eshop.DAL.Memory;
 
 namespace eshop;
 
@@ -17,27 +20,22 @@ public class ApplicationContext
     /// </summary>
     public const string Title = "Программа: 'Интернет магазин'";
 
-    /// <summary>
-    /// Список товаров
-    /// </summary>
-    private readonly Product[] _products = new[]
-    {
-        new Product(1, "Лопата", 9.99m, 3),
-        new Product(2, "Трактор", 300, 4)
-    };
-
-    /// <summary>
-    /// Список услуг
-    /// </summary>
-    private readonly Service[] _services = new[]
-    {
-        new Service(3, "Раскопать яму", 5.49m),
-        new Service(4, "Вспахать поле", 1000)
-    };
+    private readonly IRepository<Product> _products;
+    private readonly IRepository<Service> _services;
 
     private readonly Basket _basket = new();
     private readonly List<Order> _orders = [new Order([new ItemsListLine(new Product(1, "Лопата", 9.99m, 3), 3)])];
-    
+
+    private readonly RepositoryFactory _repositoryFactory;
+
+    public ApplicationContext()
+    {
+        _repositoryFactory = new JsonRepositoryFactory();
+
+        _products = _repositoryFactory.CreateProductRepository();
+        _services = _repositoryFactory.CreateServiceRepository();
+    }
+
     public IEshopCommand CreateCommand(CommandType commandType)
     {
         return commandType switch
@@ -49,8 +47,8 @@ public class ApplicationContext
             CommandType.DisplayProducts => new DisplayProductsCommand(_products),
             CommandType.DisplayServices => new DisplayServicesCommand(_services),
             CommandType.DisplayBasket => new DisplayBasketCommand(_basket),
-            CommandType.AddProductToBasket => new AddBasketLineCommand(_basket, _products.Cast<SaleItem>().ToArray()),
-            CommandType.AddServiceToBasket => new AddBasketLineCommand(_basket, _services.Cast<SaleItem>().ToArray()),
+            CommandType.AddProductToBasket => new AddBasketLineCommand(_basket, _products.GetAll().ToArray()),
+            CommandType.AddServiceToBasket => new AddBasketLineCommand(_basket, _services.GetAll().ToArray()),
             CommandType.CreateOrder => new CreateOrderCommand(_basket, _orders),
             CommandType.DisplayOrders => new DisplayOrdersCommand(_orders),
             CommandType.StartOrderPayment => new StartOrderPaymentCommand(_orders),
