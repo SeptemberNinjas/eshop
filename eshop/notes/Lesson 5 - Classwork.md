@@ -35,12 +35,6 @@
             /// <param name="id">Идентификатор</param>
             /// <returns></returns>
             T? GetById(int id);
-
-            /// <summary>
-            /// Добавить новый элемент
-            /// </summary>
-            /// <param name="item"></param>
-            void Insert(T item);
         }
     ```
 
@@ -110,11 +104,11 @@
         /// <summary>
         /// Реализация репозитория для хранения товаров в памяти
         /// </summary>
-        internal class ProductInMemoryRepository : IRepository<Product>
+        internal class ProductMemoryRepository : IRepository<Product>
         {
             private readonly List<Product> _products;
 
-            public ProductInMemoryRepository()
+            public ProductMemoryRepository()
             {
                 _products =
                 [
@@ -149,18 +143,27 @@
         }
     ```
 
-7. Пишем реализацию для хранения услуг - `ServiceInMemoryRepository` - аналогичным образом
+7. Пишем реализацию для хранения услуг - `ServiceMemoryRepository` - аналогичным образом
 
 8. Пишем абстрактный класс `RepositoryFactory` для реализации паттерна "Фабричный метод" и создания нужных репозиториев:
 
     ```csharp
         /// <summary>
         /// Абстрактная фабрика для создания репозиториев
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public abstract class RepositoyFactory<T>
+        /// </summary>    
+        public abstract class RepositoyFactory
         {
-            public abstract IRepository<T> Create();
+            /// <summary>
+            /// Создать репозиторий для работы с товарами
+            /// </summary>
+            /// <returns></returns>
+            public abstract IRepository<Product> CreateProductRepository();
+
+            /// <summary>
+            /// Создать репозиторий для работы с услугами
+            /// </summary>
+            /// <returns></returns>
+            public abstract IRepository<Service> CreateServiceRepository();
         }
     ```
 
@@ -170,46 +173,33 @@
 
     ```csharp
         /// <summary>
-        /// Реализация фабрики для хранения товаров в памяти
+        /// Реализация фабрики для хранения в памяти
         /// </summary>
-        public class ProductInMemoryRepositoryFactory : RepositoyFactory<Product>
+        public class MemoryRepositoryFactory : RepositoyFactory
         {
-            public override IRepository<Product> Create()
+            /// <inheritdoc/>
+            public override IRepository<Product> CreateProductRepository()
             {
-                return new ProductInMemoryRepository();
+                return new ProductMemoryRepository();
             }
-        }
-    ```
 
-    Для услуг:
-
-    ```csharp
-        /// <summary>
-        /// Реализация фабрики для хранения услуг в памяти
-        /// </summary>
-        public class ServiceInMemoryRepositoryFactory : RepositoyFactory<Service>
-        {
-            public override IRepository<Service> Create()
+            /// <inheritdoc/>
+            public override IRepository<Service> CreateServiceRepository()
             {
-                return new ServiceInMemoryRepository();
+                return new ServiceMemoryRepository();
             }
         }
     ```
 
 10. Добавляем создание репозиториев в `ApplicationContext`:
 
-    Добавляем поля для хранения фабрик создания репозиториев:
+    Добавляем поле для хранения фабрик создания репозиториев:
 
     ```csharp
         /// <summary>
-        /// Фабрика, для создания репозитория с продуктами
+        /// Фабрика, для создания репозиторией
         /// </summary>
-        private readonly RepositoyFactory<Product> _productRepositoyFactory;
-
-        /// <summary>
-        /// Фабрика, для создания репозитория с услугами
-        /// </summary>
-        private readonly RepositoyFactory<Service> _serviceRepositoryFactory;
+        private readonly RepositoyFactory _repositoryFactory;
     ```
 
     Добавляем конструктор по умолчанию:
@@ -217,11 +207,10 @@
     ```csharp
         public ApplicationContext()
         {
-            _productRepositoyFactory = new ProductInMemoryRepositoryFactory();
-            _serviceRepositoryFactory = new ServiceInMemoryRepositoryFactory();
+            _repositoryFactory = new MemoryRepositoryFactory();
 
-            _products = _productRepositoyFactory.Create();
-            _services = _serviceRepositoryFactory.Create();
+            _products = _repositoryFactory.CreateProductRepository();
+            _services = _repositoryFactory.CreateServiceRepository();
         }
     ```
 
@@ -231,7 +220,7 @@
         /// <summary>
         /// Реализация репозитория для хранения товаров в json'е
         /// </summary>
-        internal class ProductInJsonRepository : IRepository<Product>
+        internal class ProductJsonRepository : IRepository<Product>
         {
             /// <inheritdoc/>
             public IReadOnlyCollection<Product> GetAll()
@@ -261,15 +250,15 @@
                 throw new NotImplementedException();
             }
 
-            private IEnumerable<Product> GetProducts()
+            private static IEnumerable<Product> GetProducts()
             {
-                if (!File.Exists("products.json"))
+                if (!File.Exists("data\\products.json"))
                 {
-                    using var sw = new StreamWriter("products.json");
+                    using var sw = new StreamWriter("data\\products.json");
                     sw.WriteLine("[]");
                 }
                 
-                using var sr = new StreamReader("products.json");
+                using var sr = new StreamReader("data\\products.json");
 
                 var result = JsonSerializer.Deserialize<IEnumerable<Product>>(sr.BaseStream);
 
@@ -278,32 +267,11 @@
         }
     ```
 
-12. Пишем фабрику для создания нового репозитория
+12. Пишем реализацию хранения услуг в Json-файлах аналогичным образом
 
-    ```csharp
-        /// <summary>
-        /// Реализация фабрики для хранения товаров в json'е
-        /// </summary>
-        public class ProductInJsonRepositoryFactory : RepositoyFactory<Product>
-        {
-            public override IRepository<Product> Create()
-            {
-                return new ProductInJsonRepository();
-            }
-        }
-    ```
+13. Создаем json-файлы `products.json` и `services.json` в самом проект в папке `data` и наполняем его данными.
 
-13. Меняем реализацию фабрики в `ApplicationContext`:
-
-    ```csharp
-        _productRepositoyFactory = new ProductInJsonRepositoryFactory();
-    ```
-
-14. Запускаем приложением и пытаемся просмотреть список товаров.
-
-    Если мы все сделали правильно, то у нас должен быть пустой список товаров.
-
-15. Наполняем файл `products.json`, который лежит в папке в `Debug` данные о товарах:
+    Контент для товаров:
 
     ```json
         [
@@ -322,4 +290,51 @@
         ]
     ```
 
-16. Пишем реализацию хранения услуг в Json-файлах аналогичным образом и меняем фабрику в `ApplicationContext`
+    Контент для услуг:
+
+    ```json
+        [
+            {
+                "Id": 3,
+                "Name": "Раскопать яму",
+                "Price": 5.49
+            },
+            {
+                "Id": 4,
+                "Name": "Вспахать поле",
+                "Price": 1000
+            }
+        ]
+    ```
+
+    Для файла устанавливаем свойство - `Всегда копировать`
+
+14. Пишем фабрику для создания нового репозитория
+
+    ```csharp
+        /// <summary>
+        /// Реализация фабрики для хранения в json'е
+        /// </summary>
+        public class JsonRepositoryFactory : RepositoyFactory
+        {
+            /// <inheritdoc/>
+            public override IRepository<Product> CreateProductRepository()
+            {
+                return new ProductJsonRepository();
+            }
+
+            /// <inheritdoc/>
+            public override IRepository<Service> CreateServiceRepository()
+            {
+                return new ServiceJsonRepository();
+            }
+        }
+    ```
+
+15. Меняем реализацию фабрики в `ApplicationContext`:
+
+    ```csharp
+        _repositoryFactory = new JsonRepositoryFactory();
+    ```
+
+16. Запускаем приложением и пытаемся просмотреть список товаров и услуг.
