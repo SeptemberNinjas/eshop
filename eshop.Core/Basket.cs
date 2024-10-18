@@ -8,6 +8,11 @@ namespace eshop.Core;
 public class Basket
 {
     private readonly List<ItemsListLine> _lines = new ();
+    
+    /// <summary>
+    /// Признак наличия изменений в корзине
+    /// </summary>
+    public bool HasChanges { get; private set; }
 
     /// <summary>
     /// Добавить товар в корзину
@@ -30,6 +35,8 @@ public class Basket
         else
             _lines.Add(new ItemsListLine(product, requestedCount));
 
+        HasChanges = true;
+
         return $"В корзину добавлено {requestedCount} единиц товара \'{product.Name}\'";
     }
 
@@ -42,11 +49,10 @@ public class Basket
             return "Услуга не найдена";
         
         if (IsLineExists(service, out _) && service.OnlyOneItem)
-        {
             return $"Ошибка при добавлении услуги. Услуга \'{service.Name}\' уже добавлена в корзину";
-        }
-
+        
         _lines.Add(new ItemsListLine(service));
+        HasChanges = true;
         return $"В корзину добавлена услуга \'{service.Name}\'";
     }
         
@@ -61,6 +67,7 @@ public class Basket
         // Создаём копию списка, иначе список линий очистится и в заказе.
         var order = new Order(_lines.ToList());
         _lines.Clear();
+        HasChanges = true;
 
         return order;
     }

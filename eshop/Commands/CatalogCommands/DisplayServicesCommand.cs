@@ -10,7 +10,7 @@ namespace eshop.Commands.CatalogCommands;
 /// </summary>
 public class DisplayServicesCommand : ICommandWithCommandsList
 {
-    private readonly IRepository<Service> _services;
+    private readonly IReadOnlyRepository<Service> _services;
 
     public string? Result { get; private set; }
     public bool ExecutionSuccess => true;
@@ -31,7 +31,7 @@ public class DisplayServicesCommand : ICommandWithCommandsList
     public override string ToString() => Info;
 
     /// <inheritdoc cref="DisplayServicesCommand"/>
-    public DisplayServicesCommand(IRepository<Service> services)
+    public DisplayServicesCommand(IReadOnlyRepository<Service> services)
     {
         _services = services;
     }

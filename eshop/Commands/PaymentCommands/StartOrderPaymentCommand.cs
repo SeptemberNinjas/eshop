@@ -9,10 +9,10 @@ namespace eshop.Commands.PaymentCommands;
 /// </summary>
 public class StartOrderPaymentCommand : ICommandWithCommandsList, ICommandWithContext
 {
-    private readonly List<Order> _orders;
+    private readonly IRepository<Order> _orders;
     public object? Context { get; set; }
     
-    public StartOrderPaymentCommand(List<Order> orders)
+    public StartOrderPaymentCommand(IRepository<Order> orders)
     {
         _orders = orders;
     }
@@ -20,13 +20,13 @@ public class StartOrderPaymentCommand : ICommandWithCommandsList, ICommandWithCo
     /// <inheritdoc />
     public void Execute(string[]? args)
     {
-        if (args is null || args.Length == 0 || !Guid.TryParse(args[0], out var id))
+        if (args is null || args.Length == 0 || !int.TryParse(args[0], out var id))
         {
             Result = "Необходимо указать идентификатор заказа для оплаты";
             return;
         }
 
-        var order = _orders.FirstOrDefault(o => o.Id == id);
+        var order = _orders.GetById(id);
 
         if (order is null)
         {

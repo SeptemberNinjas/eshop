@@ -5,18 +5,18 @@ namespace eshop.DAL.Json
     /// <summary>
     /// Реализация фабрики для хранения в json'е
     /// </summary>
-    public class JsonRepositoryFactory : RepositoyFactory
+    public class JsonRepositoryFactory : RepositoryFactory
     {
         /// <inheritdoc/>
-        public override IRepository<Product> CreateProductRepository()
-        {
-            return new ProductJsonRepository();
-        }
+        public override IReadOnlyRepository<Product> CreateProductRepository() => new ProductJsonReadOnlyRepository();
 
         /// <inheritdoc/>
-        public override IRepository<Service> CreateServiceRepository()
-        {
-            return new ServiceJsonRepository();
-        }
+        public override IReadOnlyRepository<Service> CreateServiceRepository() => new ServiceJsonReadOnlyRepository();
+
+        /// <inheritdoc/>
+        public override IRepository<Basket> CreateBasketRepository() => new BasketJsonRepository();
+
+        /// <inheritdoc />
+        public override IRepository<Order> CreateOrdersRepository() => new OrdersJsonRepository();
     }
 }

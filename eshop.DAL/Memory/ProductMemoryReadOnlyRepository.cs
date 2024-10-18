@@ -5,11 +5,11 @@ namespace eshop.DAL.Memory
     /// <summary>
     /// Реализация репозитория для хранения товаров в памяти
     /// </summary>
-    internal class ProductMemoryRepository : IRepository<Product>
+    internal class ProductMemoryReadOnlyRepository : IReadOnlyRepository<Product>
     {
         private readonly List<Product> _products;
 
-        public ProductMemoryRepository()
+        public ProductMemoryReadOnlyRepository()
         {
             _products =
             [

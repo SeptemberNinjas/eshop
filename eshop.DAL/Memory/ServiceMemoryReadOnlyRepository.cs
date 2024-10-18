@@ -2,11 +2,11 @@
 
 namespace eshop.DAL.Memory
 {
-    internal class ServiceMemoryRepository : IRepository<Service>
+    internal class ServiceMemoryReadOnlyRepository : IReadOnlyRepository<Service>
     {
         private readonly List<Service> _services;
 
-        public ServiceMemoryRepository() {
+        public ServiceMemoryReadOnlyRepository() {
             _services =
             [
                 new Service(3, "Раскопать яму", 5.49m),

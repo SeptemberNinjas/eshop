@@ -9,13 +9,13 @@ public class AddBasketLineCommand : IEshopCommand
 {
     private const string ArgsErrorMessage = "Для добавления в корзину необходимо указать идентификатор и количество (для товара)";
     
-    private readonly Basket _basket;
-    private readonly SaleItem[] _list;
+    private readonly IRepository<Basket> _basketRepository;
+    private readonly IEnumerable<SaleItem> _list;
     
     /// <inheritdoc cref="AddBasketLineCommand"/>
-    public AddBasketLineCommand(Basket basket, SaleItem[] list)
+    public AddBasketLineCommand(IRepository<Basket> basketRepository, IEnumerable<SaleItem> list)
     {
-        _basket = basket;
+        _basketRepository = basketRepository;
         _list = list;
     }
 
@@ -29,6 +29,8 @@ public class AddBasketLineCommand : IEshopCommand
     /// <inheritdoc />
     public void Execute(string[]? args)
     {
+        var basket = _basketRepository.GetAll().FirstOrDefault() ?? new Basket();
+
         if (args is null 
             || args.Length < 1 
             || !int.TryParse(args[0], out var id))
@@ -49,14 +51,17 @@ public class AddBasketLineCommand : IEshopCommand
         {
             if (!TryGetItem(id, _list, out var product))
                 Result = $"Не найден товар с идентификатором {id}";
-            Result = _basket.AddLine(product as Product, count);
+            Result = basket.AddLine(product as Product, count);
         }
         else if (type == ItemTypes.Service)
         {
             if (!TryGetItem(id, _list, out var service))
                 Result = $"Не найдена услуга с идентификатором {id}";
-            Result = _basket.AddLine(service as Service);
+            Result = basket.AddLine(service as Service);
         }
+
+        if (basket.HasChanges)
+            _basketRepository.Update(basket);
     }
 
     private static bool TryGetItem<T>(int id, IEnumerable<T> items, out T item)

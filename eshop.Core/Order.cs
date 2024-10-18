@@ -12,20 +12,24 @@ public class Order
     /// <summary>
     /// Идентификатор заказа
     /// </summary>
-    public Guid Id { get; }
+    public int Id { get; private set; }
     
     /// <summary>
     /// Статус заказа.
     /// </summary>
-    public OrderStatus Status { get; set; }
+    public OrderStatus Status { get; private set; }
 
     public decimal Sum => _lines.Sum(l => l.LineSum);
+    
+    /// <summary>
+    /// Признак наличия изменений
+    /// </summary>
+    public bool HasChanges { get; private set; }
 
     /// <inheritdoc cref="Order"/>
     public Order(List<ItemsListLine> lines)
     {
         Status = OrderStatus.New;
-        Id = Guid.NewGuid();
         _lines = lines;
     }
 
@@ -48,5 +52,31 @@ public class Order
         result.AppendLine($"Итого: {Sum:F2}");
 
         return result.ToString();
+    }
+
+    /// <summary>
+    /// Присвоение идентификатора новому заказу
+    /// </summary>
+    public void SetNewOrderId(int id)
+    {
+        if (Status is not OrderStatus.New)
+            throw new ApplicationException("Идентификатор можно присвоить только новому заказу");
+        
+        if (Id != default)
+            return;
+
+        Id = id;
+    }
+    
+    /// <summary>
+    /// Пометить заказ как оплаченный
+    /// </summary>
+    public bool SetPaidStatus()
+    {
+        if (Status is not OrderStatus.New)
+            return false;
+
+        Status = OrderStatus.Paid;
+        return true;
     }
 }

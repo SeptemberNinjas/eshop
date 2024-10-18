@@ -5,18 +5,30 @@ namespace eshop.DAL.Memory
     /// <summary>
     /// Реализация фабрики для хранения в памяти
     /// </summary>
-    public class MemoryRepositoryFactory : RepositoyFactory
+    public class MemoryRepositoryFactory : RepositoryFactory
     {
         /// <inheritdoc/>
-        public override IRepository<Product> CreateProductRepository()
+        public override IReadOnlyRepository<Product> CreateProductRepository()
         {
-            return new ProductMemoryRepository();
+            return new ProductMemoryReadOnlyRepository();
         }
 
         /// <inheritdoc/>
-        public override IRepository<Service> CreateServiceRepository()
+        public override IReadOnlyRepository<Service> CreateServiceRepository()
         {
-            return new ServiceMemoryRepository();
+            return new ServiceMemoryReadOnlyRepository();
+        }
+
+        /// <inheritdoc/>
+        public override IRepository<Basket> CreateBasketRepository()
+        {
+            throw new NotSupportedException("Работа с корзиной в памяти не поддерживается");
+        }
+
+        /// <inheritdoc />
+        public override IRepository<Order> CreateOrdersRepository()
+        {
+            throw new NotSupportedException("Работа с заказами в памяти не поддерживается");
         }
     }
 }
