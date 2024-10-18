@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
+using eshop.Core;
 
-namespace eshop.Core.DAL.Json
+namespace eshop.DAL.Json
 {
     /// <summary>
     /// Реализация репозитория для хранения товаров в json'е

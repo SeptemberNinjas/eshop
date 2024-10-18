@@ -1,4 +1,6 @@
-﻿namespace eshop.Core
+﻿using eshop.Core;
+
+namespace eshop.DAL
 {
     /// <summary>
     /// Абстрактная фабрика для создания репозиториев

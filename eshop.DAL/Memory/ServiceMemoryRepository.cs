@@ -1,4 +1,6 @@
-﻿namespace eshop.Core.DAL.Memory
+﻿using eshop.Core;
+
+namespace eshop.DAL.Memory
 {
     internal class ServiceMemoryRepository : IRepository<Service>
     {

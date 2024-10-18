@@ -1,4 +1,6 @@
-﻿namespace eshop.Core.DAL.Json
+﻿using eshop.Core;
+
+namespace eshop.DAL.Json
 {
     /// <summary>
     /// Реализация фабрики для хранения в json'е

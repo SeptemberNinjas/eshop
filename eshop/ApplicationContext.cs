@@ -4,8 +4,8 @@ using eshop.Commands.OrderCommands;
 using eshop.Commands.PaymentCommands;
 using eshop.Commands.SystemCommands;
 using eshop.Core;
-using eshop.Core.DAL.Memory;
-using eshop.Core.DAL.Json;
+using eshop.DAL;
+using eshop.DAL.Json;
 
 namespace eshop;
 
