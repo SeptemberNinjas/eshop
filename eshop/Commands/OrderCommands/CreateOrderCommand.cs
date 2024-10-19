@@ -27,7 +27,8 @@ public class CreateOrderCommand : IEshopCommand
     /// <inheritdoc />
     public void Execute(string[]? args)
     {
-        var order = _basket.GetById(default)?.CreateOrderFromBasket();
+        var currentBasket = _basket.GetById(default);
+        var order = currentBasket?.CreateOrderFromBasket();
         if (order is null)
         {
             Result = "Ошибка при создании заказа. Корзина пуста";
@@ -35,6 +36,7 @@ public class CreateOrderCommand : IEshopCommand
         }
                 
         var id = _orders.Insert(order);
+        _basket.Update(currentBasket!);
 
         Result = $"Создан заказ {id}";
     }

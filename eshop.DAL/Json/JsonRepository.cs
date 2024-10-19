@@ -23,9 +23,9 @@ internal abstract class JsonRepository<T>
             sw.WriteLine("[]");
         }
 
-        using var sr = new StreamReader(ResourceFilePath);
+        var str = File.ReadAllText(ResourceFilePath);
 
-        var result = JsonSerializer.Deserialize<IEnumerable<T>>(sr.BaseStream);
+        var result = JsonSerializer.Deserialize<IEnumerable<T>>(str);
 
         return (IReadOnlyCollection<T>)(result ?? []);
     }
