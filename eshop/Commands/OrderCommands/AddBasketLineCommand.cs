@@ -10,14 +10,22 @@ public class AddBasketLineCommand : IEshopCommand
     private const string ArgsErrorMessage = "Для добавления в корзину необходимо указать идентификатор и количество (для товара)";
     
     private readonly IRepository<Basket> _basketRepository;
-    private readonly IEnumerable<SaleItem> _list;
+    private readonly IReadOnlyRepository<SaleItem> _itemsRepository;
     
     /// <inheritdoc cref="AddBasketLineCommand"/>
-    public AddBasketLineCommand(IRepository<Basket> basketRepository, IEnumerable<SaleItem> list)
+    public AddBasketLineCommand(IRepository<Basket> basketRepository, IRepository<SaleItem> itemsRepository)
     {
         _basketRepository = basketRepository;
-        _list = list;
+        _itemsRepository = itemsRepository;
     }
+    
+    /// <inheritdoc cref="AddBasketLineCommand"/>
+    public AddBasketLineCommand(IRepository<Basket> basketRepository, IReadOnlyRepository<SaleItem> itemsRepository)
+    {
+        _basketRepository = basketRepository;
+        _itemsRepository = itemsRepository;
+    }
+
 
     public const string Info = "Добавить позицию в корзину";
     
@@ -30,6 +38,7 @@ public class AddBasketLineCommand : IEshopCommand
     public void Execute(string[]? args)
     {
         var basket = _basketRepository.GetAll().FirstOrDefault() ?? new Basket();
+        var list = _itemsRepository.GetAll();
 
         if (args is null 
             || args.Length < 1 
@@ -40,7 +49,7 @@ public class AddBasketLineCommand : IEshopCommand
         }
 
         var count = 0;
-        var type = _list.FirstOrDefault()?.ItemType;
+        var type = list.FirstOrDefault()?.ItemType;
         if (type is null || (type is ItemTypes.Product && (args.Length < 2 || !int.TryParse(args[1], out count))))
         {
             Result = ArgsErrorMessage;
@@ -49,13 +58,15 @@ public class AddBasketLineCommand : IEshopCommand
 
         if (type == ItemTypes.Product)
         {
-            if (!TryGetItem(id, _list, out var product))
+            if (!TryGetItem(id, list, out var product))
                 Result = $"Не найден товар с идентификатором {id}";
             Result = basket.AddLine(product as Product, count);
+            if (_itemsRepository is IRepository<SaleItem> updatableRepository)
+                updatableRepository.Update(product);
         }
         else if (type == ItemTypes.Service)
         {
-            if (!TryGetItem(id, _list, out var service))
+            if (!TryGetItem(id, list, out var service))
                 Result = $"Не найдена услуга с идентификатором {id}";
             Result = basket.AddLine(service as Service);
         }

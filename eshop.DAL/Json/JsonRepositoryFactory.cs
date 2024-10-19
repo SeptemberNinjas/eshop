@@ -8,7 +8,7 @@ namespace eshop.DAL.Json
     public class JsonRepositoryFactory : RepositoryFactory
     {
         /// <inheritdoc/>
-        public override IReadOnlyRepository<Product> CreateProductRepository() => new ProductJsonReadOnlyRepository();
+        public override IRepository<Product> CreateProductRepository() => new ProductJsonReadOnlyRepository();
 
         /// <inheritdoc/>
         public override IReadOnlyRepository<Service> CreateServiceRepository() => new ServiceJsonReadOnlyRepository();

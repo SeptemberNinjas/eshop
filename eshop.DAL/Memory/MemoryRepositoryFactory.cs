@@ -8,7 +8,7 @@ namespace eshop.DAL.Memory
     public class MemoryRepositoryFactory : RepositoryFactory
     {
         /// <inheritdoc/>
-        public override IReadOnlyRepository<Product> CreateProductRepository()
+        public override IRepository<Product> CreateProductRepository()
         {
             return new ProductMemoryReadOnlyRepository();
         }

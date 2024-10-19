@@ -10,7 +10,7 @@ namespace eshop.DAL
         /// <summary>
         /// Создать репозиторий для работы с товарами
         /// </summary>
-        public abstract IReadOnlyRepository<Product> CreateProductRepository();
+        public abstract IRepository<Product> CreateProductRepository();
 
         /// <summary>
         /// Создать репозиторий для работы с услугами
