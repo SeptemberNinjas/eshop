@@ -10,7 +10,7 @@ namespace eshop.Commands.CatalogCommands;
 /// </summary>
 public class DisplayServicesCommand : ICommandWithCommandsList
 {
-    private readonly Service[] _services;
+    private readonly IRepository<Service> _services;
 
     public string? Result { get; private set; }
     public bool ExecutionSuccess => true;
@@ -31,7 +31,7 @@ public class DisplayServicesCommand : ICommandWithCommandsList
     public override string ToString() => Info;
 
     /// <inheritdoc cref="DisplayServicesCommand"/>
-    public DisplayServicesCommand(Service[] services)
+    public DisplayServicesCommand(IRepository<Service> services)
     {
         _services = services;
     }
@@ -41,13 +41,15 @@ public class DisplayServicesCommand : ICommandWithCommandsList
     {
         if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
         {
-            count = _services.Length;
+            count = _services.GetCount();
         }
- 
+
+        var allItems = _services.GetAll();
+            
         var message = new StringBuilder("Услуги:").AppendLine();
-        for (var i = 0; i < Math.Min(_services.Length, count); i++)
+        for (var i = 0; i < Math.Min(_services.GetCount(), count); i++)
         {
-            message.AppendLine(_services[i].GetDisplayText());
+            message.AppendLine(allItems.ElementAt(i).GetDisplayText());
         }
 
         Result = message.ToString();

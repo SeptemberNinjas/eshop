@@ -10,10 +10,10 @@ namespace eshop.Commands.CatalogCommands;
 /// </summary>
 public class DisplayProductsCommand : ICommandWithCommandsList
 {
-    private readonly Product[] _products;
+    private readonly IRepository<Product> _products;
 
     /// <inheritdoc cref="DisplayProductsCommand"/>
-    public DisplayProductsCommand(Product[] products)
+    public DisplayProductsCommand(IRepository<Product> products)
     {
         _products = products;
     }
@@ -41,13 +41,15 @@ public class DisplayProductsCommand : ICommandWithCommandsList
     {
         if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
         {
-            count = _products.Length;
+            count = _products.GetCount();
         }
 
+        var allItems = _products.GetAll();
+
         var message = new StringBuilder("Товары:").AppendLine();
-        for (var i = 0; i < Math.Min(_products.Length, count); i++)
+        for (var i = 0; i < Math.Min(_products.GetCount(), count); i++)
         {
-            message.AppendLine(_products[i].GetDisplayText());
+            message.AppendLine(allItems.ElementAt(i).GetDisplayText());
         }
 
         Result = message.ToString();
