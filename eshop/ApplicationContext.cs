@@ -5,7 +5,10 @@ using eshop.Commands.PaymentCommands;
 using eshop.Commands.SystemCommands;
 using eshop.Core;
 using eshop.DAL;
+using eshop.DAL.Database;
 using eshop.DAL.Json;
+
+using Microsoft.Extensions.Configuration;
 
 namespace eshop;
 
@@ -18,6 +21,11 @@ public class ApplicationContext
     /// Описание приложения
     /// </summary>
     public const string Title = "Программа: 'Интернет магазин'";
+
+    /// <summary>
+    /// Конфигурация приложения
+    /// </summary>
+    private readonly IConfiguration _configuration;
 
     /// <summary>
     /// Фабрика, для создания репозиторией
@@ -37,9 +45,11 @@ public class ApplicationContext
     private readonly Basket _basket = new();
     private readonly List<Order> _orders = [new Order([new ItemsListLine(new Product(1, "Лопата", 9.99m, 3), 3)])];
     
-    public ApplicationContext()
+    public ApplicationContext(IConfiguration configuration)
     {
-        _repositoryFactory = new JsonRepositoryFactory();
+        _configuration = configuration;
+
+        _repositoryFactory = new DatabaseRepositoryFactory(configuration["ConnectionString"] ?? "");
 
         _products = _repositoryFactory.CreateProductRepository();
         _services = _repositoryFactory.CreateServiceRepository();

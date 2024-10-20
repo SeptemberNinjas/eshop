@@ -1,16 +1,21 @@
-﻿using eshop.Commands;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace eshop;
 
 public static class Program
 {
-    private static readonly ApplicationContext App = new ();
     public static void Main(string[] args)
     {
+        var confBuilder = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: false)
+            .Build();
+
+        var app = new ApplicationContext(confBuilder);
+
         Console.WriteLine(ApplicationContext.Title);
-        var initialCommand = App.GetInitialCommand();
+        var initialCommand = app.GetInitialCommand();
         initialCommand.Execute(null);
-        var page = new ConsolePage(App, initialCommand, null);
+        var page = new ConsolePage(app, initialCommand, null);
         page.DisplayInitial();
         while (true)
         {
