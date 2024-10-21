@@ -2,6 +2,7 @@
 using eshop.Commands.OrderCommands;
 using eshop.Commands.SystemCommands;
 using eshop.Core;
+using eshop.DAL;
 
 namespace eshop.Commands.CatalogCommands;
 
@@ -11,11 +12,18 @@ namespace eshop.Commands.CatalogCommands;
 public class DisplayProductsCommand : ICommandWithCommandsList
 {
     private readonly IReadOnlyRepository<Product> _products;
+  
 
     /// <inheritdoc cref="DisplayProductsCommand"/>
-    public DisplayProductsCommand(IReadOnlyRepository<Product> products)
+    public DisplayProductsCommand(RepositoryFactory repositoryFactory)
     {
-        _products = products;
+        _products = repositoryFactory.CreateProductRepository();
+    }
+
+    public DisplayProductsCommand(RepositoryFactory repositoryFactory, string numb)
+    {
+        
+        _products = repositoryFactory.CreateProductRepository();
     }
 
     public string? Result { get; private set; }
