@@ -6,7 +6,6 @@ using eshop.Commands.SystemCommands;
 using eshop.Core;
 using eshop.DAL;
 using eshop.DAL.Database;
-using eshop.DAL.Json;
 
 using Microsoft.Extensions.Configuration;
 
@@ -23,19 +22,13 @@ public class ApplicationContext
     public const string Title = "Программа: 'Интернет магазин'";
 
     /// <summary>
-    /// Конфигурация приложения
-    /// </summary>
-    private readonly IConfiguration _configuration;
-
-    /// <summary>
     /// Фабрика, для создания репозиторией
     /// </summary>
     private readonly RepositoryFactory _repositoryFactory;
-    
+
     public ApplicationContext(IConfiguration configuration)
     {
         _repositoryFactory = new DatabaseRepositoryFactory(configuration["ConnectionString"] ?? "");
-        _configuration = configuration;
     }
 
     public IEshopCommand CreateCommand(CommandType commandType)

@@ -1,11 +1,6 @@
 ﻿using Npgsql;
 
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace eshop.DAL.Database
 {
@@ -35,6 +30,9 @@ namespace eshop.DAL.Database
         /// <returns></returns>
         public NpgsqlConnection GetConnection()
         {
+            if (_connection != null && _connection.State == ConnectionState.Open)
+                return _connection;
+
             _connection = new NpgsqlConnection(_connectionString);
 
             _connection.Open();
@@ -48,11 +46,11 @@ namespace eshop.DAL.Database
         /// <param name="connection"></param>
         /// <param name="text"></param>
         /// <returns></returns>
-        public NpgsqlCommand GetCommand(NpgsqlConnection connection, string text)
+        public NpgsqlCommand GetCommand(string text)
         {
             return new NpgsqlCommand
             {
-                Connection = connection,
+                Connection = GetConnection(),
                 CommandType = CommandType.Text,
                 CommandText = text
             };

@@ -16,9 +16,7 @@ namespace eshop.DAL.Database
         /// <inheritdoc/>
         public IReadOnlyCollection<Service> GetAll()
         {
-            using var connection = GetConnection();
-
-            using var command = GetCommand(connection,
+            using var command = GetCommand(
                 @"select c.*
                     from catalog c
                     where type = 2");
@@ -38,9 +36,7 @@ namespace eshop.DAL.Database
         /// <inheritdoc/>
         public Service? GetById(int id)
         {
-            using var connection = GetConnection();
-
-            using var command = GetCommand(connection,
+            using var command = GetCommand(
                 $@"select c.*
                     from catalog c
                     where type = 2 and c.id = {id}");
@@ -56,9 +52,7 @@ namespace eshop.DAL.Database
         /// <inheritdoc/>
         public int GetCount()
         {
-            using var connection = GetConnection();
-
-            using var command = GetCommand(connection,
+            using var command = GetCommand(
                 "select count(*) from catalog where type = 2");
 
             var result = command.ExecuteScalar();
@@ -79,7 +73,7 @@ namespace eshop.DAL.Database
             throw new NotImplementedException();
         }
 
-        private Service GetService(NpgsqlDataReader reader)
+        private static Service GetService(NpgsqlDataReader reader)
         {
             return new Service(
                     reader.GetFieldValue<int>("id"),

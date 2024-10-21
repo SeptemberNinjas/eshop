@@ -16,9 +16,7 @@ namespace eshop.DAL.Database
         /// <inheritdoc/>
         public IReadOnlyCollection<Product> GetAll()
         {
-            using var connection = GetConnection();
-
-            using var command = GetCommand(connection,
+            using var command = GetCommand(
                 @"select c.*, s.amount 
                     from catalog c
                         left join stock s on c.Id = s.Id
@@ -39,9 +37,7 @@ namespace eshop.DAL.Database
         /// <inheritdoc/>
         public Product? GetById(int id)
         {
-            using var connection = GetConnection();
-
-            using var command = GetCommand(connection,
+            using var command = GetCommand(
                 $@"select c.*, s.amount 
                     from catalog c
                         left join stock s on c.Id = s.Id
@@ -58,9 +54,7 @@ namespace eshop.DAL.Database
         /// <inheritdoc/>
         public int GetCount()
         {
-            using var connection = GetConnection();
-
-            using var command = GetCommand(connection,
+            using var command = GetCommand(
                 "select count(*) from catalog where type = 1");
 
             var result = command.ExecuteScalar();
@@ -81,7 +75,7 @@ namespace eshop.DAL.Database
             throw new NotImplementedException();
         }
 
-        private Product GetProduct(NpgsqlDataReader reader)
+        private static Product GetProduct(NpgsqlDataReader reader)
         {
             return new Product(
                     reader.GetFieldValue<int>("id"),
