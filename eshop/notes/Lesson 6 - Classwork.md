@@ -290,3 +290,48 @@
     ```csharp
         _repositoryFactory = new DatabaseRepositoryFactory(configuration["ConnectionString"] ?? "");
     ```
+
+13. Устанавливаем пакет `Microsoft.Extensions.DependencyInjection` для внедрения DI-контейнера в консольное приложение
+
+14. Описываем DI-контейнер:
+
+    ```csharp
+        private readonly IServiceProvider _serviceProvider;
+
+        public ApplicationContext(IConfiguration configuration)
+        {
+            var services = new ServiceCollection()
+                .AddScoped<RepositoryFactory>((sp) =>
+                {
+                    return new DatabaseRepositoryFactory(configuration["ConnectionString"] ?? "");
+                });
+
+            _serviceProvider = services.BuildServiceProvider();
+        }
+    ```
+
+15. Внедряем использование DI-контейнера в метод создания команд:
+
+    ```csharp
+        using var scope = _serviceProvider.CreateScope();
+        var repositoryFactory = scope.ServiceProvider.GetRequiredService<RepositoryFactory>();
+
+        return commandType switch
+        {
+            CommandType.Exit => new ExitCommand(),
+            CommandType.Back => new BackCommand(),
+            CommandType.GoToRoot => new GoToRootPageCommand(),
+            CommandType.DisplaySaleItems => new DisplaySaleItemsCommand(),
+            CommandType.DisplayProducts => new DisplayProductsCommand(repositoryFactory.CreateProductRepository()),
+            CommandType.DisplayServices => new DisplayServicesCommand(repositoryFactory.CreateServiceRepository()),
+            CommandType.DisplayBasket => new DisplayBasketCommand(repositoryFactory.CreateBasketRepository()),
+            CommandType.AddProductToBasket => new AddBasketLineCommand(repositoryFactory.CreateBasketRepository(), (repositoryFactory.CreateProductRepository() as IRepository<SaleItem>)!),
+            CommandType.AddServiceToBasket => new AddBasketLineCommand(repositoryFactory.CreateBasketRepository(), (repositoryFactory.CreateServiceRepository() as IReadOnlyRepository<SaleItem>)!),
+            CommandType.CreateOrder => new CreateOrderCommand(repositoryFactory.CreateBasketRepository(), repositoryFactory.CreateOrdersRepository()),
+            CommandType.DisplayOrders => new DisplayOrdersCommand(repositoryFactory.CreateOrdersRepository()),
+            CommandType.StartOrderPayment => new StartOrderPaymentCommand(repositoryFactory.CreateOrdersRepository()),
+            CommandType.SelectPaymentType => new SelectPaymentTypeCommand(),
+            CommandType.TransferMoney => new TransferMoneyCommand(repositoryFactory.CreateOrdersRepository()),
+            _ => throw new NotSupportedException()
+        };
+    ```

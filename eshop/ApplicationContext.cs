@@ -8,6 +8,7 @@ using eshop.DAL;
 using eshop.DAL.Database;
 
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace eshop;
 
@@ -21,34 +22,40 @@ public class ApplicationContext
     /// </summary>
     public const string Title = "Программа: 'Интернет магазин'";
 
-    /// <summary>
-    /// Фабрика, для создания репозиторией
-    /// </summary>
-    private readonly RepositoryFactory _repositoryFactory;
+    private readonly IServiceProvider _serviceProvider;
 
     public ApplicationContext(IConfiguration configuration)
     {
-        _repositoryFactory = new DatabaseRepositoryFactory(configuration["ConnectionString"] ?? "");
+        var services = new ServiceCollection()
+            .AddScoped<RepositoryFactory>((sp) =>
+            {
+                return new DatabaseRepositoryFactory(configuration["ConnectionString"] ?? "");
+            });
+
+        _serviceProvider = services.BuildServiceProvider();
     }
 
     public IEshopCommand CreateCommand(CommandType commandType)
     {
+        using var scope = _serviceProvider.CreateScope();
+        var repositoryFactory = scope.ServiceProvider.GetRequiredService<RepositoryFactory>();
+
         return commandType switch
         {
             CommandType.Exit => new ExitCommand(),
             CommandType.Back => new BackCommand(),
             CommandType.GoToRoot => new GoToRootPageCommand(),
             CommandType.DisplaySaleItems => new DisplaySaleItemsCommand(),
-            CommandType.DisplayProducts => new DisplayProductsCommand(_repositoryFactory.CreateProductRepository()),
-            CommandType.DisplayServices => new DisplayServicesCommand(_repositoryFactory.CreateServiceRepository()),
-            CommandType.DisplayBasket => new DisplayBasketCommand(_repositoryFactory.CreateBasketRepository()),
-            CommandType.AddProductToBasket => new AddBasketLineCommand(_repositoryFactory.CreateBasketRepository(), (_repositoryFactory.CreateProductRepository() as IRepository<SaleItem>)!),
-            CommandType.AddServiceToBasket => new AddBasketLineCommand(_repositoryFactory.CreateBasketRepository(), (_repositoryFactory.CreateServiceRepository() as IReadOnlyRepository<SaleItem>)!),
-            CommandType.CreateOrder => new CreateOrderCommand(_repositoryFactory.CreateBasketRepository(), _repositoryFactory.CreateOrdersRepository()),
-            CommandType.DisplayOrders => new DisplayOrdersCommand(_repositoryFactory.CreateOrdersRepository()),
-            CommandType.StartOrderPayment => new StartOrderPaymentCommand(_repositoryFactory.CreateOrdersRepository()),
+            CommandType.DisplayProducts => new DisplayProductsCommand(repositoryFactory.CreateProductRepository()),
+            CommandType.DisplayServices => new DisplayServicesCommand(repositoryFactory.CreateServiceRepository()),
+            CommandType.DisplayBasket => new DisplayBasketCommand(repositoryFactory.CreateBasketRepository()),
+            CommandType.AddProductToBasket => new AddBasketLineCommand(repositoryFactory.CreateBasketRepository(), (repositoryFactory.CreateProductRepository() as IRepository<SaleItem>)!),
+            CommandType.AddServiceToBasket => new AddBasketLineCommand(repositoryFactory.CreateBasketRepository(), (repositoryFactory.CreateServiceRepository() as IReadOnlyRepository<SaleItem>)!),
+            CommandType.CreateOrder => new CreateOrderCommand(repositoryFactory.CreateBasketRepository(), repositoryFactory.CreateOrdersRepository()),
+            CommandType.DisplayOrders => new DisplayOrdersCommand(repositoryFactory.CreateOrdersRepository()),
+            CommandType.StartOrderPayment => new StartOrderPaymentCommand(repositoryFactory.CreateOrdersRepository()),
             CommandType.SelectPaymentType => new SelectPaymentTypeCommand(),
-            CommandType.TransferMoney => new TransferMoneyCommand(_repositoryFactory.CreateOrdersRepository()),
+            CommandType.TransferMoney => new TransferMoneyCommand(repositoryFactory.CreateOrdersRepository()),
             _ => throw new NotSupportedException()
         };
     }
