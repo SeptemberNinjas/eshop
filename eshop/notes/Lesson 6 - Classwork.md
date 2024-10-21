@@ -107,4 +107,186 @@
 
 7. Подключаем пакет `Npgsql` в прокет `eshop.DAL`
 
-8. 
+8. Пишем контекст подключения к СУБД `DatabaseContext`:
+
+    ```csharp
+        /// <summary>
+        /// Контекст подключения к СУБД
+        /// </summary>
+        internal class DatabaseContext : IDisposable
+        {
+            private readonly string _connectionString;
+
+            private NpgsqlConnection? _connection;
+
+            public DatabaseContext(string connectionString)
+            {
+                _connectionString = connectionString;
+            }
+
+            /// <inheritdoc/>
+            public void Dispose()
+            {
+                _connection?.Dispose();
+            }
+
+            /// <summary>
+            /// Получить соединение с БД
+            /// </summary>
+            /// <returns></returns>
+            public NpgsqlConnection GetConnection()
+            {
+                if (_connection != null && _connection.State == ConnectionState.Open)
+                    return _connection;
+
+                _connection = new NpgsqlConnection(_connectionString);
+
+                _connection.Open();
+
+                return _connection;
+            }
+
+            /// <summary>
+            /// Получить команду для СУБД
+            /// </summary>
+            /// <param name="connection"></param>
+            /// <param name="text"></param>
+            /// <returns></returns>
+            public NpgsqlCommand GetCommand(string text)
+            {
+                return new NpgsqlCommand
+                {
+                    Connection = GetConnection(),
+                    CommandType = CommandType.Text,
+                    CommandText = text
+                };
+            }
+        }
+    ```
+
+9. Пишем реализацию репозитория для работы со списком товаров:
+
+    ```csharp
+        /// <summary>
+        /// Реализация репозитория для хранения товаров в БД
+        /// </summary>
+        internal class ProductDatabaseRepository : DatabaseContext, IRepository<Product>
+        {
+            public ProductDatabaseRepository(string connectionString) : base(connectionString) { }
+            
+            /// <inheritdoc/>
+            public IReadOnlyCollection<Product> GetAll()
+            {
+                using var command = GetCommand(
+                    @"select c.*, s.amount 
+                        from catalog c
+                            left join stock s on c.Id = s.Id
+                        where type = 1");
+
+                using var reader = command.ExecuteReader();
+
+                var result = new List<Product>();
+
+                while (reader.Read())
+                {
+                    result.Add(GetProduct(reader));
+                }
+
+                return result;
+            }
+
+            /// <inheritdoc/>
+            public Product? GetById(int id)
+            {
+                using var command = GetCommand(
+                    $@"select c.*, s.amount 
+                        from catalog c
+                            left join stock s on c.Id = s.Id
+                        where type = 1 and c.id = {id}");
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                    return GetProduct(reader);
+
+                return null;
+            }
+
+            /// <inheritdoc/>
+            public int GetCount()
+            {
+                using var command = GetCommand(
+                    "select count(*) from catalog where type = 1");
+
+                var result = command.ExecuteScalar();
+
+                if (int.TryParse(result?.ToString(), out int count))
+                    return count;
+                else
+                    return 0;
+            }
+
+            public int Insert(Product item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Update(Product item)
+            {
+                throw new NotImplementedException();
+            }
+
+            private static Product GetProduct(NpgsqlDataReader reader)
+            {
+                return new Product(
+                        reader.GetFieldValue<int>("id"),
+                        reader.GetFieldValue<string>("name"),
+                        reader.GetFieldValue<decimal>("price"),
+                        reader.GetFieldValue<int>("amount"));
+            }
+        }
+    ```
+
+10. Пишем реализацию работы с услугами аналогичным образом
+
+11. Пишем фабрику для создания новых репозиториев:
+
+    ```csharp
+        public class DatabaseRepositoryFactory : RepositoryFactory
+        {
+            private readonly string _connectionString;
+
+            public DatabaseRepositoryFactory(string connectionString)
+            {
+                _connectionString = connectionString;
+            }
+
+            public override IRepository<Basket> CreateBasketRepository()
+            {
+                throw new NotImplementedException();
+            }
+
+            public override IRepository<Order> CreateOrdersRepository()
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc/>
+            public override IRepository<Product> CreateProductRepository()
+            {
+                return new ProductDatabaseRepository(_connectionString);
+            }
+
+            /// <inheritdoc/>
+            public override IRepository<Service> CreateServiceRepository()
+            {
+                return new ServiceDatabaseRepository(_connectionString);
+            }
+        }
+    ```
+
+12. Меняем реализацию фабрики в `ApplicationContext`:
+
+    ```csharp
+        _repositoryFactory = new DatabaseRepositoryFactory(configuration["ConnectionString"] ?? "");
+    ```
