@@ -40,11 +40,15 @@ public class Basket
         if (requestedCount < 1)
             return "Запрашиваемое количество товара должно быть больше 0";
 
-        if (product.Stock < requestedCount)
-            return
-                $"Нельзя добавить товар в корзину, недостаточно остатков. Имеется {product.Stock}, Требуется {requestedCount}";
-
-        product.Stock -= requestedCount;
+        // Вычисляем доступные остатки с учетом корзины
+        var productsInBasket = _lines
+            .Where(p => p.ItemType is ItemTypes.Product && p.ItemId == product.Id)
+            .Sum(p => p.Count);
+        var remainsWithCurrentBasket = product.Stock - productsInBasket;
+        
+        if (remainsWithCurrentBasket < requestedCount)
+            return $"Нельзя добавить товар в корзину, недостаточно остатков.{Environment.NewLine}" +
+                   $"Имеется {product.Stock} из них в корзине {productsInBasket}, требуется {requestedCount}";
 
         if (IsLineExists(product, out var line))
             line.Count += requestedCount;
@@ -122,5 +126,10 @@ public class Basket
 
         line = null!;
         return false;
+    }
+
+    public void Clear()
+    {
+        _lines.Clear();
     }
 }

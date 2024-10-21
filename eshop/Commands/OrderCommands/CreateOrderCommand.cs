@@ -1,4 +1,5 @@
 ﻿using eshop.Core;
+using eshop.DAL;
 
 namespace eshop.Commands.OrderCommands;
 
@@ -9,12 +10,14 @@ public class CreateOrderCommand : IEshopCommand
 {
     private readonly IRepository<Basket> _basket;
     private readonly IRepository<Order> _orders;
+    private readonly IRepository<Product> _products;
 
     /// <inheritdoc cref="CreateOrderCommand"/>
-    public CreateOrderCommand(IRepository<Basket> basket, IRepository<Order> orders)
+    public CreateOrderCommand(RepositoryFactory repositoryFactory)
     {
-        _basket = basket;
-        _orders = orders;
+        _basket = repositoryFactory.CreateBasketRepository();
+        _orders = repositoryFactory.CreateOrdersRepository();
+        _products = repositoryFactory.CreateProductRepository();
     }
    
     public const string Info = "Создать заказ из текущей корзины";
@@ -34,9 +37,24 @@ public class CreateOrderCommand : IEshopCommand
             Result = "Ошибка при создании заказа. Корзина пуста";
             return;
         }
+        
+        var orderedProductsWithCount = order.Lines
+            .Where(l => l.ItemType is ItemTypes.Product)
+            .Join(_products.GetAll(),
+                orderLine => orderLine.ItemId, 
+                repoProduct => repoProduct.Id,
+                (orderLine, repoProduct) => (repoProduct, orderLine.Count));
                 
         var id = _orders.Insert(order);
         _basket.Update(currentBasket!);
+        foreach (var (product, count) in orderedProductsWithCount)
+        {
+            if (product.Stock - count < 0)
+                throw new ApplicationException("Недостаточно товара");
+
+            product.Stock -= count;
+            _products.Update(product);
+        }
 
         Result = $"Создан заказ {id}";
     }

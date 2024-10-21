@@ -40,13 +40,14 @@ public class ApplicationContext
             CommandType.DisplayProducts => new DisplayProductsCommand(_repositoryFactory.CreateProductRepository()),
             CommandType.DisplayServices => new DisplayServicesCommand(_repositoryFactory.CreateServiceRepository()),
             CommandType.DisplayBasket => new DisplayBasketCommand(_repositoryFactory.CreateBasketRepository()),
-            CommandType.AddProductToBasket => new AddBasketLineCommand(_repositoryFactory.CreateBasketRepository(), (_repositoryFactory.CreateProductRepository() as IRepository<SaleItem>)!),
+            CommandType.AddProductToBasket => new AddBasketLineCommand(_repositoryFactory.CreateBasketRepository(), (_repositoryFactory.CreateProductRepository() as IReadOnlyRepository<SaleItem>)!),
             CommandType.AddServiceToBasket => new AddBasketLineCommand(_repositoryFactory.CreateBasketRepository(), (_repositoryFactory.CreateServiceRepository() as IReadOnlyRepository<SaleItem>)!),
-            CommandType.CreateOrder => new CreateOrderCommand(_repositoryFactory.CreateBasketRepository(), _repositoryFactory.CreateOrdersRepository()),
+            CommandType.CreateOrder => new CreateOrderCommand(_repositoryFactory),
             CommandType.DisplayOrders => new DisplayOrdersCommand(_repositoryFactory.CreateOrdersRepository()),
             CommandType.StartOrderPayment => new StartOrderPaymentCommand(_repositoryFactory.CreateOrdersRepository()),
             CommandType.SelectPaymentType => new SelectPaymentTypeCommand(),
             CommandType.TransferMoney => new TransferMoneyCommand(_repositoryFactory.CreateOrdersRepository()),
+            CommandType.ClearBasket => new ClearBasketCommand(_repositoryFactory.CreateBasketRepository()),
             _ => throw new NotSupportedException()
         };
     }

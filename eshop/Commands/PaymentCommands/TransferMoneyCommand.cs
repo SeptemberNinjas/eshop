@@ -29,7 +29,7 @@ public class TransferMoneyCommand : IEshopCommand, ICommandWithContext
             return;
         }
         
-        if (payment.PaymentType is not PaymentType.Cash and PaymentType.Сashless)
+        if (payment.PaymentType is not PaymentType.Cash and not PaymentType.Сashless)
         {
             Result = "Не задан способ оплаты";
             return;

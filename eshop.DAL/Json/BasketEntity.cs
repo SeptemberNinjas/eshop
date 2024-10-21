@@ -12,7 +12,7 @@ public class BasketEntity
             .Select(l => (ItemsListLine)l));
     }
     
-    public static explicit operator BasketEntity (Basket basket)
+    public static implicit operator BasketEntity (Basket basket)
     {
         return new BasketEntity
         {
