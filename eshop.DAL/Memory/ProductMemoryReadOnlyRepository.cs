@@ -5,11 +5,11 @@ namespace eshop.DAL.Memory
     /// <summary>
     /// Реализация репозитория для хранения товаров в памяти
     /// </summary>
-    internal class ProductMemoryRepository : IRepository<Product>
+    internal class ProductMemoryReadOnlyRepository : IRepository<Product>
     {
         private readonly List<Product> _products;
 
-        public ProductMemoryRepository()
+        public ProductMemoryReadOnlyRepository()
         {
             _products =
             [
@@ -34,6 +34,16 @@ namespace eshop.DAL.Memory
         public Product? GetById(int id)
         {
             return _products.FirstOrDefault(item => item.Id == id);
+        }
+
+        public void Update(Product item)
+        {
+            throw new NotSupportedException("Запись товаров в памяти не поддерживается");
+        }
+
+        public int Insert(Product item)
+        {
+            throw new NotSupportedException("Запись товаров в памяти не поддерживается");
         }
     }
 }

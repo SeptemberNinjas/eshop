@@ -35,7 +35,6 @@
         /// <summary>
         /// Текстовое описание продажной единицы
         /// </summary>
-        /// <returns></returns>
         public abstract string GetDisplayText();
 
         /// <summary>

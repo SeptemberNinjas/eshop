@@ -8,13 +8,13 @@ public class Payment
     /// <summary>
     /// Идентификатор заказа в оплате.
     /// </summary>
-    public Guid OrderId { get; }
+    public int OrderId { get; }
 
     public PaymentType PaymentType { get; set; }
     
     public bool IsComplete { get; private set; }
 
-    public Payment(Guid orderId)
+    public Payment(int orderId)
     {
         OrderId = orderId;
     }
@@ -23,9 +23,8 @@ public class Payment
     {
         if (!ValidateAmount(order, amount, out message))
             return;
-        
-        order!.Status = OrderStatus.Paid;
-        IsComplete = true;
+
+        IsComplete = order!.SetPaidStatus();
     }
 
     private bool ValidateAmount(Order? order, decimal amount, out string message)

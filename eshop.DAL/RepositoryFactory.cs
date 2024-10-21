@@ -5,18 +5,26 @@ namespace eshop.DAL
     /// <summary>
     /// Абстрактная фабрика для создания репозиториев
     /// </summary>    
-    public abstract class RepositoyFactory
+    public abstract class RepositoryFactory
     {
         /// <summary>
         /// Создать репозиторий для работы с товарами
         /// </summary>
-        /// <returns></returns>
         public abstract IRepository<Product> CreateProductRepository();
 
         /// <summary>
         /// Создать репозиторий для работы с услугами
         /// </summary>
-        /// <returns></returns>
-        public abstract IRepository<Service> CreateServiceRepository();
+        public abstract IReadOnlyRepository<Service> CreateServiceRepository();
+
+        /// <summary>
+        /// Создать репозиторий для работы с корзиной
+        /// </summary>
+        public abstract IRepository<Basket> CreateBasketRepository();
+
+        /// <summary>
+        /// Создать репозиторий для работы с заказами
+        /// </summary>
+        public abstract IRepository<Order> CreateOrdersRepository();
     }
 }

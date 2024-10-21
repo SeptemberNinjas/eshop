@@ -1,4 +1,5 @@
 ﻿using eshop.Commands.SystemCommands;
+using eshop.Core;
 
 namespace eshop.Commands.OrderCommands;
 
@@ -7,16 +8,16 @@ namespace eshop.Commands.OrderCommands;
 /// </summary>
 public class DisplayBasketCommand : ICommandWithCommandsList
 {
-    private readonly Core.Basket _basket;
+    private readonly IReadOnlyRepository<Basket> _basket;
 
     /// <inheritdoc cref="DisplayBasketCommand"/>
-    public DisplayBasketCommand(Core.Basket basket)
+    public DisplayBasketCommand(IReadOnlyRepository<Basket> basket)
     {
         _basket = basket;
     }
 
     public string? Result { get; private set; }
-    public bool ExecutionSuccess => true;
+    public bool ExecutionSuccess { get; private set; }
 
     /// <inheritdoc />
     public IReadOnlyDictionary<CommandType, string> AvailableCommands { get; } = new Dictionary<CommandType, string>
@@ -34,6 +35,15 @@ public class DisplayBasketCommand : ICommandWithCommandsList
     /// <inheritdoc />
     public void Execute(string[]? args)
     {
-        Result = _basket.ToString();
+        var currentBasket = _basket.GetAll().FirstOrDefault();
+        if (currentBasket is null)
+        {
+            ExecutionSuccess = false;
+            Result = "Корзина не найдена";
+            return;
+        }
+        
+        ExecutionSuccess = true;
+        Result = currentBasket.ToString();
     }
 }

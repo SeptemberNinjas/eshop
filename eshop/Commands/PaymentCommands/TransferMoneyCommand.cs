@@ -5,9 +5,9 @@ namespace eshop.Commands.PaymentCommands;
 
 public class TransferMoneyCommand : IEshopCommand, ICommandWithContext
 {
-    private readonly List<Order> _orders;
+    private readonly IRepository<Order> _orders;
 
-    public TransferMoneyCommand(List<Order> orders)
+    public TransferMoneyCommand(IRepository<Order> orders)
     {
         _orders = orders;
     }
@@ -29,7 +29,7 @@ public class TransferMoneyCommand : IEshopCommand, ICommandWithContext
             return;
         }
         
-        if (payment.PaymentType is not PaymentType.Cash or PaymentType.Сashless)
+        if (payment.PaymentType is not PaymentType.Cash and PaymentType.Сashless)
         {
             Result = "Не задан способ оплаты";
             return;
@@ -41,8 +41,10 @@ public class TransferMoneyCommand : IEshopCommand, ICommandWithContext
             return;
         }
         
-        var order = _orders.FirstOrDefault(o => o.Id == payment.OrderId);
+        var order = _orders.GetById(payment.OrderId);
         payment.CompletePayment(order, amount, out var message);
+        if (order?.HasChanges ?? false)
+            _orders.Update(order);
         ExecutionSuccess = payment.IsComplete;
         Result = message;
     }

@@ -69,6 +69,16 @@ namespace eshop.DAL.Database
                 return 0;
         }
 
+        public int Insert(Service item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(Service item)
+        {
+            throw new NotImplementedException();
+        }
+
         private Service GetService(NpgsqlDataReader reader)
         {
             return new Service(
