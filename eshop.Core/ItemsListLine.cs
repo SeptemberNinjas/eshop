@@ -5,22 +5,25 @@
 /// </summary>
 public class ItemsListLine
 {
-    private readonly SaleItem _lineItem;
+    /// <summary>
+    /// Продажная единица
+    /// </summary>
+    public SaleItem SaleItem { get; }
 
     /// <summary>
     /// Идентификатор элемента
     /// </summary>
-    public int ItemId => _lineItem.Id;
+    public int ItemId => SaleItem.Id;
 
     /// <summary>
     /// Тип элемента
     /// </summary>
-    public ItemTypes ItemType => _lineItem.ItemType;
+    public ItemTypes ItemType => SaleItem.ItemType;
 
     /// <summary>
     /// Текст, отображаемый в списке элементов
     /// </summary>
-    public string Text => $"{ItemType}: {_lineItem?.Name} | Цена: {_lineItem?.Price:F2} | Кол-во: {Count}";
+    public string Text => $"{ItemType}: {SaleItem?.Name} | Цена: {SaleItem?.Price:F2} | Кол-во: {Count}";
 
     /// <summary>
     /// Количество элементов в линии
@@ -30,19 +33,26 @@ public class ItemsListLine
     /// <summary>
     /// Суммарная стоимость по линии
     /// </summary>
-    public decimal LineSum => (_lineItem?.Price ?? 0) * Count;
+    public decimal LineSum => (SaleItem?.Price ?? 0) * Count;
 
     /// <inheritdoc cref="ItemsListLine"/>
     public ItemsListLine(Product product, int requestedCount)
     {
-        _lineItem = product;
+        SaleItem = product;
         Count = requestedCount;
     }
     
     /// <inheritdoc cref="ItemsListLine"/>
     public ItemsListLine(Service service)
     {
-        _lineItem = service;
+        SaleItem = service;
         Count = 1;
+    }
+    
+    /// <inheritdoc cref="ItemsListLine"/>
+    public ItemsListLine(SaleItem saleItem, int count)
+    {
+        SaleItem = saleItem;
+        Count = count;
     }
 }

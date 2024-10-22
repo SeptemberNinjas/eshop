@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using eshop.Commands.PaymentCommands;
 using eshop.Commands.SystemCommands;
+using eshop.Core;
 
 namespace eshop.Commands.OrderCommands;
 
@@ -9,10 +10,10 @@ namespace eshop.Commands.OrderCommands;
 /// </summary>
 public class DisplayOrdersCommand : ICommandWithCommandsList
 {
-    private readonly List<Core.Order> _orders;
+    private readonly IRepository<Order> _orders;
     
     /// <inheritdoc cref="DisplayOrdersCommand"/>
-    public DisplayOrdersCommand(List<Core.Order> orders)
+    public DisplayOrdersCommand(IRepository<Order> orders)
     {
         _orders = orders;
     }
@@ -36,14 +37,15 @@ public class DisplayOrdersCommand : ICommandWithCommandsList
     /// <inheritdoc />
     public void Execute(string[]? args)
     {
-        if (_orders.Count == 0)
+        var ordersList = _orders.GetAll();
+        if (ordersList.Count == 0)
         {
             Result = "Список заказов пуст";
             return;
         }
         
         var result = new StringBuilder();
-        foreach (var order in _orders)
+        foreach (var order in ordersList)
         {
             result.AppendLine(order.ToString());
         }

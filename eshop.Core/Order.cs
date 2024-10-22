@@ -7,46 +7,88 @@ namespace eshop.Core;
 /// </summary>
 public class Order
 {
-    private readonly List<ItemsListLine> _lines;
+    /// <summary>
+    /// Линии заказа
+    /// </summary>
+    public IReadOnlyCollection<ItemsListLine> Lines { get; }
     
     /// <summary>
     /// Идентификатор заказа
     /// </summary>
-    public Guid Id { get; }
+    public int Id { get; private set; }
     
     /// <summary>
     /// Статус заказа.
     /// </summary>
-    public OrderStatus Status { get; set; }
+    public OrderStatus Status { get; private set; }
 
-    public decimal Sum => _lines.Sum(l => l.LineSum);
+    public decimal Sum => Lines.Sum(l => l.LineSum);
+    
+    /// <summary>
+    /// Признак наличия изменений
+    /// </summary>
+    public bool HasChanges { get; private set; }
 
     /// <inheritdoc cref="Order"/>
-    public Order(List<ItemsListLine> lines)
+    public Order(IEnumerable<ItemsListLine> lines)
     {
         Status = OrderStatus.New;
-        Id = Guid.NewGuid();
-        _lines = lines;
+        Lines = lines.ToArray();
+    }
+    
+    /// <inheritdoc cref="Order"/>
+    public Order(int id, OrderStatus status, IEnumerable<ItemsListLine> lines)
+    {
+        Id = id;
+        Status = status;
+        Lines = lines.ToArray();
     }
 
     /// <inheritdoc />
     public override string ToString()
     {
-        if (_lines.Count == 0)
+        if (Lines.Count == 0)
             return $"Заказ {Id} пуст";
         
         var result = new StringBuilder();
         result.AppendLine($"Заказ {Id}:");
         result.AppendLine($"Статус заказа: {Status}");
         
-        for (var i = 0; i < _lines.Count; i++)
+        for (var i = 0; i < Lines.Count; i++)
         {
-            var line = _lines[i];
+            var line = Lines.ElementAt(i);
             result.AppendLine($"{i+1}. {line.Text}");
         }
 
         result.AppendLine($"Итого: {Sum:F2}");
 
         return result.ToString();
+    }
+
+    /// <summary>
+    /// Присвоение идентификатора новому заказу
+    /// </summary>
+    public void SetNewOrderId(int id)
+    {
+        if (Status is not OrderStatus.New)
+            throw new ApplicationException("Идентификатор можно присвоить только новому заказу");
+        
+        if (Id != default)
+            return;
+
+        Id = id;
+    }
+    
+    /// <summary>
+    /// Пометить заказ как оплаченный
+    /// </summary>
+    public bool SetPaidStatus()
+    {
+        if (Status is not OrderStatus.New)
+            return false;
+
+        HasChanges = true;
+        Status = OrderStatus.Paid;
+        return true;
     }
 }

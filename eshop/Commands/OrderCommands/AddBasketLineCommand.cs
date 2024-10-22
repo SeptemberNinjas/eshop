@@ -9,15 +9,16 @@ public class AddBasketLineCommand : IEshopCommand
 {
     private const string ArgsErrorMessage = "Для добавления в корзину необходимо указать идентификатор и количество (для товара)";
     
-    private readonly Basket _basket;
-    private readonly SaleItem[] _list;
+    private readonly IRepository<Basket> _basketRepository;
+    private readonly IReadOnlyRepository<SaleItem> _itemsRepository;
     
     /// <inheritdoc cref="AddBasketLineCommand"/>
-    public AddBasketLineCommand(Basket basket, SaleItem[] list)
+    public AddBasketLineCommand(IRepository<Basket> basketRepository, IReadOnlyRepository<SaleItem> itemsRepository)
     {
-        _basket = basket;
-        _list = list;
+        _basketRepository = basketRepository;
+        _itemsRepository = itemsRepository;
     }
+
 
     public const string Info = "Добавить позицию в корзину";
     
@@ -29,6 +30,9 @@ public class AddBasketLineCommand : IEshopCommand
     /// <inheritdoc />
     public void Execute(string[]? args)
     {
+        var basket = _basketRepository.GetAll().FirstOrDefault() ?? new Basket();
+        var list = _itemsRepository.GetAll();
+
         if (args is null 
             || args.Length < 1 
             || !int.TryParse(args[0], out var id))
@@ -38,7 +42,7 @@ public class AddBasketLineCommand : IEshopCommand
         }
 
         var count = 0;
-        var type = _list.FirstOrDefault()?.ItemType;
+        var type = list.FirstOrDefault()?.ItemType;
         if (type is null || (type is ItemTypes.Product && (args.Length < 2 || !int.TryParse(args[1], out count))))
         {
             Result = ArgsErrorMessage;
@@ -47,16 +51,19 @@ public class AddBasketLineCommand : IEshopCommand
 
         if (type == ItemTypes.Product)
         {
-            if (!TryGetItem(id, _list, out var product))
+            if (!TryGetItem(id, list, out var product))
                 Result = $"Не найден товар с идентификатором {id}";
-            Result = _basket.AddLine(product as Product, count);
+            Result = basket.AddLine(product as Product, count);
         }
         else if (type == ItemTypes.Service)
         {
-            if (!TryGetItem(id, _list, out var service))
+            if (!TryGetItem(id, list, out var service))
                 Result = $"Не найдена услуга с идентификатором {id}";
-            Result = _basket.AddLine(service as Service);
+            Result = basket.AddLine(service as Service);
         }
+
+        if (basket.HasChanges)
+            _basketRepository.Update(basket);
     }
 
     private static bool TryGetItem<T>(int id, IEnumerable<T> items, out T item)
