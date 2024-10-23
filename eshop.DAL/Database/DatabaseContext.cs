@@ -7,7 +7,7 @@ namespace eshop.DAL.Database
     /// <summary>
     /// Контекст подключения к СУБД
     /// </summary>
-    internal class DatabaseContext : IDisposable
+    public class DatabaseContext : IDisposable
     {
         private readonly string _connectionString;
 
@@ -27,8 +27,7 @@ namespace eshop.DAL.Database
         /// <summary>
         /// Получить соединение с БД
         /// </summary>
-        /// <returns></returns>
-        public NpgsqlConnection GetConnection()
+        private NpgsqlConnection GetConnection()
         {
             if (_connection != null && _connection.State == ConnectionState.Open)
                 return _connection;
@@ -43,10 +42,7 @@ namespace eshop.DAL.Database
         /// <summary>
         /// Получить команду для СУБД
         /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        public NpgsqlCommand GetCommand(string text)
+        private protected NpgsqlCommand GetCommand(string text)
         {
             return new NpgsqlCommand
             {

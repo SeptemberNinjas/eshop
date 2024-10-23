@@ -1,18 +1,18 @@
-﻿using eshop.Core;
-
+﻿using System.Data;
+using eshop.Core;
 using Npgsql;
-
-using System.Data;
 
 namespace eshop.DAL.Database
 {
     /// <summary>
     /// Реализация репозитория для хранения товаров в БД
     /// </summary>
-    internal class ProductDatabaseRepository : DatabaseContext, IRepository<Product>
+    internal class ProductDatabaseRepository : DatabaseContext, IRepository<Product>, IRepository<SaleItem>
     {
-        public ProductDatabaseRepository(string connectionString) : base(connectionString) { }
-        
+        public ProductDatabaseRepository(string connectionString) : base(connectionString)
+        {
+        }
+
         /// <inheritdoc/>
         public IReadOnlyCollection<Product> GetAll()
         {
@@ -51,6 +51,11 @@ namespace eshop.DAL.Database
             return null;
         }
 
+        IReadOnlyCollection<SaleItem> IReadOnlyRepository<SaleItem>.GetAll()
+        {
+            return GetAll();
+        }
+
         /// <inheritdoc/>
         public int GetCount()
         {
@@ -59,10 +64,12 @@ namespace eshop.DAL.Database
 
             var result = command.ExecuteScalar();
 
-            if (int.TryParse(result?.ToString(), out int count))
-                return count;
-            else
-                return 0;
+            return int.TryParse(result?.ToString(), out var count) ? count : 0;
+        }
+
+        SaleItem? IReadOnlyRepository<SaleItem>.GetById(int id)
+        {
+            return GetById(id);
         }
 
         public int Insert(Product item)
@@ -72,16 +79,38 @@ namespace eshop.DAL.Database
 
         public void Update(Product item)
         {
-            throw new NotImplementedException();
+            // Обновляем только остатки
+            using var command = GetCommand(
+                $"""
+                 update stock set
+                    amount = {item.Stock}
+                    where id = {item.Id}
+                 """);
+
+            command.ExecuteNonQuery();
         }
 
         private static Product GetProduct(NpgsqlDataReader reader)
         {
             return new Product(
-                    reader.GetFieldValue<int>("id"),
-                    reader.GetFieldValue<string>("name"),
-                    reader.GetFieldValue<decimal>("price"),
-                    reader.GetFieldValue<int>("amount"));
+                reader.GetFieldValue<int>("id"),
+                reader.GetFieldValue<string>("name"),
+                reader.GetFieldValue<decimal>("price"),
+                reader.GetFieldValue<int>("amount"));
+        }
+
+        public void Update(SaleItem item)
+        {
+            if (item is Product product)
+                Update(product);
+        }
+
+        public int Insert(SaleItem item)
+        {
+            if (item is Product product)
+                return Insert(product);
+            
+            throw new ApplicationException("Неверный репозиторий");
         }
     }
 }

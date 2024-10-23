@@ -56,6 +56,7 @@ public class ApplicationContext
             CommandType.StartOrderPayment => new StartOrderPaymentCommand(repositoryFactory.CreateOrdersRepository()),
             CommandType.SelectPaymentType => new SelectPaymentTypeCommand(),
             CommandType.TransferMoney => new TransferMoneyCommand(repositoryFactory.CreateOrdersRepository()),
+            CommandType.ClearBasket => new ClearBasketCommand(repositoryFactory.CreateBasketRepository()),
             _ => throw new NotSupportedException()
         };
     }

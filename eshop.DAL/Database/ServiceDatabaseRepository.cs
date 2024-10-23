@@ -1,15 +1,13 @@
-﻿using eshop.Core;
-
+﻿using System.Data;
+using eshop.Core;
 using Npgsql;
-
-using System.Data;
 
 namespace eshop.DAL.Database
 {
     /// <summary>
     /// Реализация репозитория для хранения услуг в БД
     /// </summary>
-    internal class ServiceDatabaseRepository : DatabaseContext, IRepository<Service>
+    internal class ServiceDatabaseRepository : DatabaseContext, IReadOnlyRepository<Service>, IReadOnlyRepository<SaleItem>
     {
         public ServiceDatabaseRepository(string connectionString) : base(connectionString) { }
 
@@ -49,6 +47,11 @@ namespace eshop.DAL.Database
             return null;
         }
 
+        IReadOnlyCollection<SaleItem> IReadOnlyRepository<SaleItem>.GetAll()
+        {
+            return GetAll();
+        }
+
         /// <inheritdoc/>
         public int GetCount()
         {
@@ -63,14 +66,9 @@ namespace eshop.DAL.Database
                 return 0;
         }
 
-        public int Insert(Service item)
+        SaleItem? IReadOnlyRepository<SaleItem>.GetById(int id)
         {
-            throw new NotImplementedException();
-        }
-
-        public void Update(Service item)
-        {
-            throw new NotImplementedException();
+            return GetById(id);
         }
 
         private static Service GetService(NpgsqlDataReader reader)

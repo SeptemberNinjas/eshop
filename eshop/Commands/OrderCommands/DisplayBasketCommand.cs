@@ -36,7 +36,7 @@ public class DisplayBasketCommand : ICommandWithCommandsList
     /// <inheritdoc />
     public void Execute(string[]? args)
     {
-        var currentBasket = _basket.GetAll().FirstOrDefault();
+        var currentBasket = _basket.GetById(default);
         if (currentBasket is null)
         {
             ExecutionSuccess = false;

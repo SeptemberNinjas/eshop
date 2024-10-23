@@ -1,11 +1,5 @@
 ﻿using eshop.Core;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace eshop.DAL.Database
 {
     /// <summary>
@@ -22,12 +16,12 @@ namespace eshop.DAL.Database
 
         public override IRepository<Basket> CreateBasketRepository()
         {
-            throw new NotImplementedException();
+            return new BasketDatabaseRepository(_connectionString);
         }
 
         public override IRepository<Order> CreateOrdersRepository()
         {
-            throw new NotImplementedException();
+            return new OrderDatabaseRepository(_connectionString);
         }
 
         /// <inheritdoc/>
@@ -37,7 +31,7 @@ namespace eshop.DAL.Database
         }
 
         /// <inheritdoc/>
-        public override IRepository<Service> CreateServiceRepository()
+        public override IReadOnlyRepository<Service> CreateServiceRepository()
         {
             return new ServiceDatabaseRepository(_connectionString);
         }
