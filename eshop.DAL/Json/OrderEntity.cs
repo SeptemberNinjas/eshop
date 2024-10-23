@@ -14,7 +14,7 @@ public class OrderEntity
             .Select(l => (ItemsListLine)l));
     }
     
-    public static explicit operator OrderEntity (Order order)
+    public static implicit operator OrderEntity (Order order)
     {
         return new OrderEntity
         {

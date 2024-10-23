@@ -22,6 +22,7 @@ public class DisplayBasketCommand : ICommandWithCommandsList
     /// <inheritdoc />
     public IReadOnlyDictionary<CommandType, string> AvailableCommands { get; } = new Dictionary<CommandType, string>
     {
+        { CommandType.ClearBasket, ClearBasketCommand.Info },
         { CommandType.CreateOrder, CreateOrderCommand.Info },
         { CommandType.Back, BackCommand.Info },
         { CommandType.Exit, ExitCommand.Info }

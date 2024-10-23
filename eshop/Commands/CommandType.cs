@@ -15,5 +15,6 @@ public enum CommandType
     TransferMoney,
     GoToRoot,
     Back,
-    Exit
+    Exit,
+    ClearBasket
 }

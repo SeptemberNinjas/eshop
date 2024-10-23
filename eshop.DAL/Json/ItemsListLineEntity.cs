@@ -16,7 +16,7 @@ public class ItemsListLineEntity
             : new ItemsListLine(entity.Service!);
     }
     
-    public static explicit operator ItemsListLineEntity (ItemsListLine line)
+    public static implicit operator ItemsListLineEntity (ItemsListLine line)
     {
         return new ItemsListLineEntity
         {

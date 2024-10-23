@@ -51,7 +51,7 @@ public class ApplicationContext
             CommandType.DisplayBasket => new DisplayBasketCommand(repositoryFactory.CreateBasketRepository()),
             CommandType.AddProductToBasket => new AddBasketLineCommand(repositoryFactory.CreateBasketRepository(), (repositoryFactory.CreateProductRepository() as IRepository<SaleItem>)!),
             CommandType.AddServiceToBasket => new AddBasketLineCommand(repositoryFactory.CreateBasketRepository(), (repositoryFactory.CreateServiceRepository() as IReadOnlyRepository<SaleItem>)!),
-            CommandType.CreateOrder => new CreateOrderCommand(repositoryFactory.CreateBasketRepository(), repositoryFactory.CreateOrdersRepository()),
+            CommandType.CreateOrder => new CreateOrderCommand(repositoryFactory),
             CommandType.DisplayOrders => new DisplayOrdersCommand(repositoryFactory.CreateOrdersRepository()),
             CommandType.StartOrderPayment => new StartOrderPaymentCommand(repositoryFactory.CreateOrdersRepository()),
             CommandType.SelectPaymentType => new SelectPaymentTypeCommand(),

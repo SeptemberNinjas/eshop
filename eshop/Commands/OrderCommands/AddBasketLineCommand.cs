@@ -13,13 +13,6 @@ public class AddBasketLineCommand : IEshopCommand
     private readonly IReadOnlyRepository<SaleItem> _itemsRepository;
     
     /// <inheritdoc cref="AddBasketLineCommand"/>
-    public AddBasketLineCommand(IRepository<Basket> basketRepository, IRepository<SaleItem> itemsRepository)
-    {
-        _basketRepository = basketRepository;
-        _itemsRepository = itemsRepository;
-    }
-    
-    /// <inheritdoc cref="AddBasketLineCommand"/>
     public AddBasketLineCommand(IRepository<Basket> basketRepository, IReadOnlyRepository<SaleItem> itemsRepository)
     {
         _basketRepository = basketRepository;
@@ -61,8 +54,6 @@ public class AddBasketLineCommand : IEshopCommand
             if (!TryGetItem(id, list, out var product))
                 Result = $"Не найден товар с идентификатором {id}";
             Result = basket.AddLine(product as Product, count);
-            if (_itemsRepository is IRepository<SaleItem> updatableRepository)
-                updatableRepository.Update(product);
         }
         else if (type == ItemTypes.Service)
         {
