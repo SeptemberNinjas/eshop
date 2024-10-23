@@ -4,7 +4,7 @@ using Npgsql;
 
 namespace eshop.DAL.Database;
 
-public class BasketDatabaseRepository : DatabaseContext, IRepository<Basket>
+internal class BasketDatabaseRepository : DatabaseContext, IRepository<Basket>
 {
     public BasketDatabaseRepository(string connectionString) : base(connectionString)
     {

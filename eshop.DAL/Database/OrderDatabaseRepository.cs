@@ -4,7 +4,7 @@ using Npgsql;
 
 namespace eshop.DAL.Database;
 
-public class OrderDatabaseRepository : DatabaseContext, IRepository<Order>
+internal class OrderDatabaseRepository : DatabaseContext, IRepository<Order>
 {
     public OrderDatabaseRepository(string connectionString) : base(connectionString)
     {

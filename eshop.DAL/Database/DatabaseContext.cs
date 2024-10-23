@@ -7,7 +7,7 @@ namespace eshop.DAL.Database
     /// <summary>
     /// Контекст подключения к СУБД
     /// </summary>
-    public class DatabaseContext : IDisposable
+    internal class DatabaseContext : IDisposable
     {
         private readonly string _connectionString;
 
