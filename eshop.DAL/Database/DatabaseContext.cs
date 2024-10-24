@@ -1,6 +1,7 @@
 ﻿using Npgsql;
 
 using System.Data;
+using System.Data.Common;
 
 namespace eshop.DAL.Database
 {
@@ -39,10 +40,22 @@ namespace eshop.DAL.Database
             return _connection;
         }
 
+        private async Task<NpgsqlConnection> GetConnectionAsync()
+        {
+            if (_connection != null && _connection.State == ConnectionState.Open)
+                return _connection;
+
+            _connection = new NpgsqlConnection(_connectionString);
+
+            await _connection.OpenAsync();
+
+            return _connection;
+        } 
+
         /// <summary>
         /// Получить команду для СУБД
         /// </summary>
-        private protected NpgsqlCommand GetCommand(string text)
+        protected NpgsqlCommand GetCommand(string text)
         {
             return new NpgsqlCommand
             {
@@ -50,6 +63,39 @@ namespace eshop.DAL.Database
                 CommandType = CommandType.Text,
                 CommandText = text
             };
+        }
+
+        protected async Task<List<T>> ExecuteReaderListAsync<T>(string commandText, CancellationToken cancellationToken, Func<DbDataReader, T> binging)
+        {
+            using var connection = await GetConnectionAsync();
+
+            var command = GetCommand(commandText);
+
+            using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+            var result = new List<T>();
+
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                result.Add(binging(reader));
+            }
+
+            return result;
+        }
+
+        protected async Task<T?> ExecuteReaderAsync<T>(string commandText, CancellationToken cancellationToken, Func<DbDataReader, T> binding)
+        {
+            using var connection = await GetConnectionAsync();
+
+            var command = GetCommand(commandText);
+
+            using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+            if (await reader.ReadAsync(cancellationToken))
+                return binding(reader);
+
+
+            return default;
         }
     }
 }

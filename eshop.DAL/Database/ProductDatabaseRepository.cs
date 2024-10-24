@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Data.Common;
 using eshop.Core;
 using Npgsql;
 
@@ -18,20 +19,13 @@ namespace eshop.DAL.Database
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<Product>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            using var command = GetCommand(
+            var commandText = 
                 @"select c.*, s.amount 
                     from catalog c
                         left join stock s on c.Id = s.Id
-                    where type = 1");
+                    where type = 1";
 
-            using var reader = await command.ExecuteReaderAsync(cancellationToken);
-
-            var result = new List<Product>();
-
-            while (await reader.ReadAsync(cancellationToken))
-            {
-                result.Add(GetProduct(reader));
-            }
+            var result = await ExecuteReaderListAsync(commandText, cancellationToken, GetProduct);
 
             return result;
         }
@@ -39,29 +33,29 @@ namespace eshop.DAL.Database
         /// <inheritdoc/>
         public async Task<Product?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            using var command = GetCommand(
+            var commandText =
                 $@"select c.*, s.amount 
                     from catalog c
                         left join stock s on c.Id = s.Id
-                    where type = 1 and c.id = {id}");
+                    where type = 1 and c.id = {id}";
 
-            using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            var result = await ExecuteReaderAsync(commandText, cancellationToken, GetProduct);
 
-            if (await reader.ReadAsync(cancellationToken))
-                return GetProduct(reader);
-
-            return null;
+            return result;
         }
 
         /// <inheritdoc/>
         public async Task<int> GetCountAsync(CancellationToken cancellationToken = default)
         {
-            using var command = GetCommand(
-                "select count(*) from catalog where type = 1");
+            var commandText=
+                "select count(*) from catalog where type = 1";
 
-            var result = await command.ExecuteScalarAsync(cancellationToken);
+            var result = await ExecuteReaderAsync(commandText, cancellationToken, (reader) =>
+            {
+                return int.TryParse(reader[0]?.ToString(), out var count) ? count : 0;
+            });
 
-            return int.TryParse(result?.ToString(), out var count) ? count : 0;
+            return result;
         }
 
         public Task UpdateAsync(Product item)
@@ -94,7 +88,7 @@ namespace eshop.DAL.Database
             command.ExecuteNonQuery();
         }
 
-        private static Product GetProduct(NpgsqlDataReader reader)
+        private static Product GetProduct(DbDataReader reader)
         {
             return new Product(
                 reader.GetFieldValue<int>("id"),
