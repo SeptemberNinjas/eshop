@@ -19,7 +19,7 @@ public class DisplayProductsCommand : ICommandWithCommandsList
     }
 
     public string? Result { get; private set; }
-    public bool ExecutionSuccess => true;
+    public bool ExecutionSuccess { get; private set; } = true;
 
     /// <inheritdoc />
     public IReadOnlyDictionary<CommandType, string> AvailableCommands { get; } = new Dictionary<CommandType, string>
@@ -61,10 +61,8 @@ public class DisplayProductsCommand : ICommandWithCommandsList
         }
         catch (Exception ex)
         {
-            Result = $"""
-                Ошибка выполнения команды:
-                {ex.Message}
-                """;
+            ExecutionSuccess = false;
+            Result = ex.Message;
         }
     }
 }
