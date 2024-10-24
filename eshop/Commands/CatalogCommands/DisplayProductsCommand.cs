@@ -39,22 +39,32 @@ public class DisplayProductsCommand : ICommandWithCommandsList
     /// <inheritdoc />
     public void Execute(string[]? args)
     {
-        Task.Run(async () =>
+        try
         {
-            if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
+            Task.Run(async () =>
             {
-                count = await _products.GetCountAsync();
-            }
+                if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
+                {
+                    count = await _products.GetCountAsync();
+                }
 
-            var allItems = _products.GetAllAsync().Result;
+                var allItems = _products.GetAllAsync().Result;
 
-            var message = new StringBuilder("Товары:").AppendLine();
-            for (var i = 0; i < Math.Min(await _products.GetCountAsync(), count); i++)
-            {
-                message.AppendLine(allItems.ElementAt(i).GetDisplayText());
-            }
+                var message = new StringBuilder("Товары:").AppendLine();
+                for (var i = 0; i < Math.Min(await _products.GetCountAsync(), count); i++)
+                {
+                    message.AppendLine(allItems.ElementAt(i).GetDisplayText());
+                }
 
-            Result = message.ToString();
-        }).Wait();
+                Result = message.ToString();
+            }).Wait();
+        }
+        catch (Exception ex)
+        {
+            Result = $"""
+                Ошибка выполнения команды:
+                {ex.Message}
+                """;
+        }
     }
 }
