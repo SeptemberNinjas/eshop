@@ -23,7 +23,7 @@ public class ItemsListLine
     /// <summary>
     /// Текст, отображаемый в списке элементов
     /// </summary>
-    public string Text => $"{ItemType}: {SaleItem?.Name} | Цена: {SaleItem?.Price:F2} | Кол-во: {Count}";
+    public string Text => $"{ItemType.GetDisplayText()}: {SaleItem?.Name} | Цена: {SaleItem?.Price:F2} | Кол-во: {Count}";
 
     /// <summary>
     /// Количество элементов в линии
