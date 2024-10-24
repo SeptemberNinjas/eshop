@@ -52,7 +52,7 @@ public class ConsolePage
                     if (!commandWithContext.ExecutionSuccess)
                     {
                         DisplayInitial();
-                        Console.WriteLine(commandWithContext.Result);
+                        Console.WriteLine($"Ошибка: {commandWithContext.Result}");
                         continue;
                     }
                     var nextPage = new ConsolePage(_context, commandWithContext, nextCommand.args, this);
