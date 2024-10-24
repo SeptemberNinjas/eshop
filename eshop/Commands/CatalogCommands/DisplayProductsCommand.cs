@@ -30,28 +30,34 @@ public class DisplayProductsCommand : ICommandWithCommandsList
         { CommandType.Back, BackCommand.Info },
         { CommandType.Exit, ExitCommand.Info }
     };
-    
+
     public const string Info = "Вывести список товаров";
-    
+
     /// <inheritdoc />
     public override string ToString() => Info;
 
     /// <inheritdoc />
-    public void Execute(string[]? args)
+    public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
         if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
         {
-            count = _products.GetCount();
+            count = await _products.GetCountAsync();
         }
 
-        var allItems = _products.GetAll();
+        var allItems = await _products.GetAllAsync();
 
         var message = new StringBuilder("Товары:").AppendLine();
-        for (var i = 0; i < Math.Min(_products.GetCount(), count); i++)
+        for (var i = 0; i < Math.Min(await _products.GetCountAsync(), count); i++)
         {
             message.AppendLine(allItems.ElementAt(i).GetDisplayText());
         }
 
         Result = message.ToString();
+
+    }
+
+    public void Execute(string[]? args)
+    {
+        ExecuteAsync(args, CancellationToken.None).Wait();
     }
 }

@@ -10,10 +10,10 @@ public class AddBasketLineCommand : IEshopCommand
     private const string ArgsErrorMessage = "Для добавления в корзину необходимо указать идентификатор и количество (для товара)";
     
     private readonly IRepository<Basket> _basketRepository;
-    private readonly IReadOnlyRepository<SaleItem> _itemsRepository;
+    private readonly IReadOnlyRepository<Product> _itemsRepository;
     
     /// <inheritdoc cref="AddBasketLineCommand"/>
-    public AddBasketLineCommand(IRepository<Basket> basketRepository, IReadOnlyRepository<SaleItem> itemsRepository)
+    public AddBasketLineCommand(IRepository<Basket> basketRepository, IReadOnlyRepository<Product> itemsRepository)
     {
         _basketRepository = basketRepository;
         _itemsRepository = itemsRepository;
@@ -59,7 +59,7 @@ public class AddBasketLineCommand : IEshopCommand
         {
             if (!TryGetItem(id, list, out var service))
                 Result = $"Не найдена услуга с идентификатором {id}";
-            Result = basket.AddLine(service as Service);
+            //Result = basket.AddLine(service as Service);
         }
 
         if (basket.HasChanges)

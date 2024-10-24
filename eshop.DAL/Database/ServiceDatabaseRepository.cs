@@ -7,7 +7,7 @@ namespace eshop.DAL.Database
     /// <summary>
     /// Реализация репозитория для хранения услуг в БД
     /// </summary>
-    internal class ServiceDatabaseRepository : DatabaseContext, IReadOnlyRepository<Service>, IReadOnlyRepository<SaleItem>
+    internal class ServiceDatabaseRepository : DatabaseContext, IReadOnlyRepository<Service>
     {
         public ServiceDatabaseRepository(string connectionString) : base(connectionString) { }
 
@@ -47,10 +47,6 @@ namespace eshop.DAL.Database
             return null;
         }
 
-        IReadOnlyCollection<SaleItem> IReadOnlyRepository<SaleItem>.GetAll()
-        {
-            return GetAll();
-        }
 
         /// <inheritdoc/>
         public int GetCount()
@@ -66,17 +62,27 @@ namespace eshop.DAL.Database
                 return 0;
         }
 
-        SaleItem? IReadOnlyRepository<SaleItem>.GetById(int id)
-        {
-            return GetById(id);
-        }
-
-        private static Service GetService(NpgsqlDataReader reader)
+          private static Service GetService(NpgsqlDataReader reader)
         {
             return new Service(
                     reader.GetFieldValue<int>("id"),
                     reader.GetFieldValue<string>("name"),
                     reader.GetFieldValue<decimal>("price"));
+        }
+
+        public Task<IReadOnlyCollection<Service>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> GetCountAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Service?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
     }
 }

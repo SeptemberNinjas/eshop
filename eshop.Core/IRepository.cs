@@ -1,3 +1,5 @@
+using System.Data;
+
 namespace eshop.Core;
 
 /// <summary>
@@ -15,4 +17,8 @@ public interface IRepository<T> : IReadOnlyRepository<T>
     /// </summary>
     /// <returns>Идентификатор созданного объекта</returns>
     int Insert(T item);
+
+    Task UpdateAsync(T item);
+
+    Task<int> InsertAsync(T item);
 }

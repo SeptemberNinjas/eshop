@@ -45,5 +45,30 @@ namespace eshop.DAL.Memory
         {
             throw new NotSupportedException("Запись товаров в памяти не поддерживается");
         }
+
+        public Task UpdateAsync(Product item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> InsertAsync(Product item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IReadOnlyCollection<Product>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(GetAll());
+        }
+
+        public Task<int> GetCountAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(GetCount());
+        }
+
+        public Task<Product?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(GetById(id));
+        }
     }
 }

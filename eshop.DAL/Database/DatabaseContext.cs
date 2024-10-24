@@ -1,6 +1,7 @@
 ﻿using Npgsql;
 
 using System.Data;
+using System.Data.Common;
 
 namespace eshop.DAL.Database
 {
@@ -33,7 +34,7 @@ namespace eshop.DAL.Database
                 return _connection;
 
             _connection = new NpgsqlConnection(_connectionString);
-
+            
             _connection.Open();
 
             return _connection;
@@ -50,6 +51,37 @@ namespace eshop.DAL.Database
                 CommandType = CommandType.Text,
                 CommandText = text
             };
+        }
+
+        private async Task<NpgsqlConnection> GetConnectionAsync()
+        {
+            if (_connection != null && _connection.State == ConnectionState.Open)
+                return _connection;
+
+            _connection = new NpgsqlConnection(_connectionString);
+
+            await _connection.OpenAsync();
+
+            return _connection;
+        }
+
+        protected async Task<IReadOnlyCollection<T>> ExecuteReaderListAsync<T>(string commandText,
+            CancellationToken cancellationToken, Func<DbDataReader, T> binding)
+        {
+            using var connection = await GetConnectionAsync();
+
+            var command = GetCommand(commandText);
+
+            using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+            var result = new List<T>();
+
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                result.Add(binding(reader));
+            }
+
+            return result;
         }
     }
 }

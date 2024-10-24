@@ -31,5 +31,20 @@ namespace eshop.DAL.Memory
         {
             return _services.FirstOrDefault(item => item.Id == id);
         }
+
+        public Task<IReadOnlyCollection<Service>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> GetCountAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Service?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -53,5 +53,50 @@ namespace eshop.DAL.Json
                 ? Insert(product)
                 : throw new ArgumentException("Неверный тип репозитория");
         }
+
+        public Task UpdateAsync(Product item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> InsertAsync(Product item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IReadOnlyCollection<Product>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> GetCountAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Product?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateAsync(SaleItem item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> InsertAsync(SaleItem item)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<IReadOnlyCollection<SaleItem>> IReadOnlyRepository<SaleItem>.GetAllAsync(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<SaleItem?> IReadOnlyRepository<SaleItem>.GetByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -27,5 +27,30 @@ namespace eshop.DAL.Json
         {
             return GetById(id);
         }
+
+        public Task<IReadOnlyCollection<Service>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> GetCountAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Service?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<IReadOnlyCollection<SaleItem>> IReadOnlyRepository<SaleItem>.GetAllAsync(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<SaleItem?> IReadOnlyRepository<SaleItem>.GetByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -4,7 +4,7 @@ namespace eshop;
 
 public static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var confBuilder = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: false)
@@ -19,7 +19,7 @@ public static class Program
         page.DisplayInitial();
         while (true)
         {
-            page.WaitForInput();
+            await page.WaitForInput(CancellationToken.None);
         }
     }
 }

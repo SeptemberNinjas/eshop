@@ -108,4 +108,29 @@ internal class OrderDatabaseRepository : DatabaseContext, IRepository<Order>
             reader.GetFieldValue<int>("id"), 
             (OrderStatus)reader.GetFieldValue<int>("status"));
     }
+
+    public Task UpdateAsync(Order item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<int> InsertAsync(Order item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IReadOnlyCollection<Order>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<int> GetCountAsync(CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Order?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }
