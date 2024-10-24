@@ -16,10 +16,20 @@ public static class Program
         var initialCommand = app.GetInitialCommand();
         initialCommand.Execute(null);
         var page = new ConsolePage(app, initialCommand, null);
-        page.DisplayInitial();
+        
         while (true)
         {
-            page.WaitForInput();
+            try
+            {
+                page.DisplayInitial();
+                page.WaitForInput();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Произошила ошибка при выполнении команды: {ex.Message}");
+                Console.WriteLine("Нажмите Enter для продолжения...");
+                Console.ReadLine();
+            }
         }
     }
 }
