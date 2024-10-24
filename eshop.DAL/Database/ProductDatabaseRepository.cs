@@ -7,14 +7,16 @@ namespace eshop.DAL.Database
     /// <summary>
     /// Реализация репозитория для хранения товаров в БД
     /// </summary>
-    internal class ProductDatabaseRepository : DatabaseContext, IRepository<Product>, IRepository<SaleItem>
+    internal class ProductDatabaseRepository : DatabaseContext, IRepositoryAsync<Product>, IRepository<Product>, IRepository<SaleItem>
     {
         public ProductDatabaseRepository(string connectionString) : base(connectionString)
         {
         }
 
+        #region Async
+
         /// <inheritdoc/>
-        public IReadOnlyCollection<Product> GetAll()
+        public async Task<IReadOnlyCollection<Product>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             using var command = GetCommand(
                 @"select c.*, s.amount 
@@ -22,11 +24,11 @@ namespace eshop.DAL.Database
                         left join stock s on c.Id = s.Id
                     where type = 1");
 
-            using var reader = command.ExecuteReader();
+            using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
             var result = new List<Product>();
 
-            while (reader.Read())
+            while (await reader.ReadAsync(cancellationToken))
             {
                 result.Add(GetProduct(reader));
             }
@@ -35,7 +37,7 @@ namespace eshop.DAL.Database
         }
 
         /// <inheritdoc/>
-        public Product? GetById(int id)
+        public async Task<Product?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             using var command = GetCommand(
                 $@"select c.*, s.amount 
@@ -43,34 +45,36 @@ namespace eshop.DAL.Database
                         left join stock s on c.Id = s.Id
                     where type = 1 and c.id = {id}");
 
-            using var reader = command.ExecuteReader();
+            using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
-            if (reader.Read())
+            if (await reader.ReadAsync(cancellationToken))
                 return GetProduct(reader);
 
             return null;
         }
 
-        IReadOnlyCollection<SaleItem> IReadOnlyRepository<SaleItem>.GetAll()
-        {
-            return GetAll();
-        }
-
         /// <inheritdoc/>
-        public int GetCount()
+        public async Task<int> GetCountAsync(CancellationToken cancellationToken = default)
         {
             using var command = GetCommand(
                 "select count(*) from catalog where type = 1");
 
-            var result = command.ExecuteScalar();
+            var result = await command.ExecuteScalarAsync(cancellationToken);
 
             return int.TryParse(result?.ToString(), out var count) ? count : 0;
         }
 
-        SaleItem? IReadOnlyRepository<SaleItem>.GetById(int id)
+        public Task UpdateAsync(Product item)
         {
-            return GetById(id);
+            throw new NotImplementedException();
         }
+
+        public Task<int> InsertAsync(Product item)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
 
         public int Insert(Product item)
         {
@@ -111,6 +115,40 @@ namespace eshop.DAL.Database
                 return Insert(product);
             
             throw new ApplicationException("Неверный репозиторий");
+        }
+
+        public IReadOnlyCollection<Product> GetAll()
+        {
+            return Task.Run(async () =>
+            {
+                return await GetAllAsync();
+            }).Result;
+        }
+
+        public int GetCount()
+        {
+            return Task.Run(async () =>
+            {
+                return await GetCountAsync();
+            }).Result;
+        }
+
+        public Product? GetById(int id)
+        {
+            return Task.Run(async () =>
+            {
+                return await GetByIdAsync(id);
+            }).Result;
+        }
+
+        IReadOnlyCollection<SaleItem> IReadOnlyRepository<SaleItem>.GetAll()
+        {
+            return GetAll();
+        }
+
+        SaleItem? IReadOnlyRepository<SaleItem>.GetById(int id)
+        {
+            return GetById(id);
         }
     }
 }

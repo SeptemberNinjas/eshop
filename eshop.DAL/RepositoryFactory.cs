@@ -12,6 +12,8 @@ namespace eshop.DAL
         /// </summary>
         public abstract IRepository<Product> CreateProductRepository();
 
+        public abstract IRepositoryAsync<Product> CreateProductAsyncRepositoy();
+
         /// <summary>
         /// Создать репозиторий для работы с услугами
         /// </summary>

@@ -10,10 +10,10 @@ namespace eshop.Commands.CatalogCommands;
 /// </summary>
 public class DisplayProductsCommand : ICommandWithCommandsList
 {
-    private readonly IReadOnlyRepository<Product> _products;
+    private readonly IReadOnlyRepositoryAsync<Product> _products;
 
     /// <inheritdoc cref="DisplayProductsCommand"/>
-    public DisplayProductsCommand(IReadOnlyRepository<Product> products)
+    public DisplayProductsCommand(IReadOnlyRepositoryAsync<Product> products)
     {
         _products = products;
     }
@@ -39,19 +39,22 @@ public class DisplayProductsCommand : ICommandWithCommandsList
     /// <inheritdoc />
     public void Execute(string[]? args)
     {
-        if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
+        Task.Run(async () =>
         {
-            count = _products.GetCount();
-        }
+            if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
+            {
+                count = await _products.GetCountAsync();
+            }
 
-        var allItems = _products.GetAll();
+            var allItems = _products.GetAllAsync().Result;
 
-        var message = new StringBuilder("Товары:").AppendLine();
-        for (var i = 0; i < Math.Min(_products.GetCount(), count); i++)
-        {
-            message.AppendLine(allItems.ElementAt(i).GetDisplayText());
-        }
+            var message = new StringBuilder("Товары:").AppendLine();
+            for (var i = 0; i < Math.Min(await _products.GetCountAsync(), count); i++)
+            {
+                message.AppendLine(allItems.ElementAt(i).GetDisplayText());
+            }
 
-        Result = message.ToString();
+            Result = message.ToString();
+        }).Wait();
     }
 }

@@ -46,7 +46,7 @@ public class ApplicationContext
             CommandType.Back => new BackCommand(),
             CommandType.GoToRoot => new GoToRootPageCommand(),
             CommandType.DisplaySaleItems => new DisplaySaleItemsCommand(),
-            CommandType.DisplayProducts => new DisplayProductsCommand(repositoryFactory.CreateProductRepository()),
+            CommandType.DisplayProducts => new DisplayProductsCommand(repositoryFactory.CreateProductAsyncRepositoy()),
             CommandType.DisplayServices => new DisplayServicesCommand(repositoryFactory.CreateServiceRepository()),
             CommandType.DisplayBasket => new DisplayBasketCommand(repositoryFactory.CreateBasketRepository()),
             CommandType.AddProductToBasket => new AddBasketLineCommand(repositoryFactory.CreateBasketRepository(), (repositoryFactory.CreateProductRepository() as IRepository<SaleItem>)!),
