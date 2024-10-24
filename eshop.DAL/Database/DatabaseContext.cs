@@ -65,7 +65,7 @@ namespace eshop.DAL.Database
             };
         }
 
-        protected async Task<List<T>> ExecuteReaderListAsync<T>(string commandText, CancellationToken cancellationToken, Func<DbDataReader, T> binging)
+        protected async Task<List<T>> ExecuteReaderListAsync<T>(string commandText, Func<DbDataReader, T> binging, CancellationToken cancellationToken)
         {
             using var connection = await GetConnectionAsync();
 
@@ -83,7 +83,7 @@ namespace eshop.DAL.Database
             return result;
         }
 
-        protected async Task<T?> ExecuteReaderAsync<T>(string commandText, CancellationToken cancellationToken, Func<DbDataReader, T> binding)
+        protected async Task<T?> ExecuteReaderAsync<T>(string commandText, Func<DbDataReader, T> binding, CancellationToken cancellationToken)
         {
             using var connection = await GetConnectionAsync();
 

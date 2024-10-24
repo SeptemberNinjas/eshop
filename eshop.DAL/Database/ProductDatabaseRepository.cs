@@ -1,7 +1,6 @@
 ﻿using System.Data;
 using System.Data.Common;
 using eshop.Core;
-using Npgsql;
 
 namespace eshop.DAL.Database
 {
@@ -25,7 +24,7 @@ namespace eshop.DAL.Database
                         left join stock s on c.Id = s.Id
                     where type = 1";
 
-            var result = await ExecuteReaderListAsync(commandText, cancellationToken, GetProduct);
+            var result = await ExecuteReaderListAsync(commandText, GetProduct, cancellationToken);
 
             return result;
         }
@@ -39,7 +38,7 @@ namespace eshop.DAL.Database
                         left join stock s on c.Id = s.Id
                     where type = 1 and c.id = {id}";
 
-            var result = await ExecuteReaderAsync(commandText, cancellationToken, GetProduct);
+            var result = await ExecuteReaderAsync(commandText, GetProduct, cancellationToken);
 
             return result;
         }
@@ -50,10 +49,10 @@ namespace eshop.DAL.Database
             var commandText=
                 "select count(*) from catalog where type = 1";
 
-            var result = await ExecuteReaderAsync(commandText, cancellationToken, (reader) =>
+            var result = await ExecuteReaderAsync(commandText, (reader) =>
             {
                 return int.TryParse(reader[0]?.ToString(), out var count) ? count : 0;
-            });
+            }, cancellationToken);
 
             return result;
         }
