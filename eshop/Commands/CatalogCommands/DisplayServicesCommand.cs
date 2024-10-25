@@ -10,7 +10,7 @@ namespace eshop.Commands.CatalogCommands;
 /// </summary>
 public class DisplayServicesCommand : ICommandWithCommandsList
 {
-    private readonly IReadOnlyRepository<Service> _services;
+    private readonly IReadOnlyRepository<SaleItem> _saleItems;
 
     public string? Result { get; private set; }
     public bool ExecutionSuccess => true;
@@ -31,25 +31,27 @@ public class DisplayServicesCommand : ICommandWithCommandsList
     public override string ToString() => Info;
 
     /// <inheritdoc cref="DisplayServicesCommand"/>
-    public DisplayServicesCommand(IReadOnlyRepository<Service> services)
+    public DisplayServicesCommand(IReadOnlyRepository<SaleItem> saleItems)
     {
-        _services = services;
+        _saleItems = saleItems;
     }
 
     /// <inheritdoc />
     public void Execute(string[]? args)
     {
+        var allItems = _saleItems.GetAll()
+            .Where(i => i.ItemType is ItemTypes.Service)
+            .ToArray();
+        
         if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
         {
-            count = _services.GetCount();
+            count = allItems.Length;
         }
-
-        var allItems = _services.GetAll();
             
         var message = new StringBuilder("Услуги:").AppendLine();
-        for (var i = 0; i < Math.Min(_services.GetCount(), count); i++)
+        for (var i = 0; i < Math.Min(allItems.Length, count); i++)
         {
-            message.AppendLine(allItems.ElementAt(i).GetDisplayText());
+            message.AppendLine(allItems[i].GetDisplayText());
         }
 
         Result = message.ToString();
