@@ -14,20 +14,15 @@ public class GetSaleItemHandler
 
     public async Task<IEnumerable<SaleItemDto>> GetItemsAsync(ItemTypes itemType, int? count)
     {
-        switch (itemType)
-        {
-            case ItemTypes.Product:
-                var productsRepo = _repositoryFactory.CreateProductRepository();
-                var products = productsRepo.GetAll();
-                return products.Select(i => new SaleItemDto(i.ItemType, i.Id, i.Name, i.Price, i.Stock));
-            case ItemTypes.Service:
-                var servicesRepo = _repositoryFactory.CreateServiceRepository();
-                var services = servicesRepo.GetAll();
-                return services.Select(i => new SaleItemDto(i.ItemType, i.Id, i.Name, i.Price));
-            default:
-                throw new ArgumentOutOfRangeException(nameof(itemType), itemType, null);
-        }
-        // После подтягивания 6-7 урока надо подтянуть от туда репозитории
+        var repository = _repositoryFactory.CreateSaleItemRepository();
+        var items = repository
+            .GetAll()
+            .Where(i => i.ItemType == itemType);
+        var requestedItems = count is null or <= 0
+            ? items
+            : items.Take(count.Value);
         
+        return requestedItems
+            .Select(i => new SaleItemDto(i.ItemType, i.Id, i.Name, i.Price, (i as Product)?.Stock));
     }
 }
