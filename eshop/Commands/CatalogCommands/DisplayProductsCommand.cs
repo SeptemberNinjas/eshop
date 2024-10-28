@@ -10,12 +10,12 @@ namespace eshop.Commands.CatalogCommands;
 /// </summary>
 public class DisplayProductsCommand : ICommandWithCommandsList
 {
-    private readonly IReadOnlyRepository<Product> _products;
+    private readonly IReadOnlyRepository<SaleItem> _saleItems;
 
     /// <inheritdoc cref="DisplayProductsCommand"/>
-    public DisplayProductsCommand(IReadOnlyRepository<Product> products)
+    public DisplayProductsCommand(IReadOnlyRepository<SaleItem> saleItems)
     {
-        _products = products;
+        _saleItems = saleItems;
     }
 
     public string? Result { get; private set; }
@@ -38,18 +38,19 @@ public class DisplayProductsCommand : ICommandWithCommandsList
 
     /// <inheritdoc />
     public void Execute(string[]? args)
-    {
+    {        
+        var allItems = _saleItems.GetAll()
+            .Where(i => i.ItemType is ItemTypes.Product)
+            .ToArray();
         if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
         {
-            count = _products.GetCount();
+            count = allItems.Length;
         }
 
-        var allItems = _products.GetAll();
-
         var message = new StringBuilder("Товары:").AppendLine();
-        for (var i = 0; i < Math.Min(_products.GetCount(), count); i++)
+        for (var i = 0; i < Math.Min(allItems.Length, count); i++)
         {
-            message.AppendLine(allItems.ElementAt(i).GetDisplayText());
+            message.AppendLine(allItems[i].GetDisplayText());
         }
 
         Result = message.ToString();

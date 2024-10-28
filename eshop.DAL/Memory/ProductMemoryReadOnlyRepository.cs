@@ -5,7 +5,7 @@ namespace eshop.DAL.Memory
     /// <summary>
     /// Реализация репозитория для хранения товаров в памяти
     /// </summary>
-    internal class ProductMemoryReadOnlyRepository : IRepository<Product>
+    internal class ProductMemoryReadOnlyRepository : IReadOnlyRepository<SaleItem>
     {
         private readonly List<Product> _products;
 
@@ -19,7 +19,7 @@ namespace eshop.DAL.Memory
         }
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<Product> GetAll()
+        public IReadOnlyCollection<SaleItem> GetAll()
         {
             return _products.AsReadOnly();
         }
@@ -31,17 +31,17 @@ namespace eshop.DAL.Memory
         }
 
         /// <inheritdoc/>
-        public Product? GetById(int id)
+        public SaleItem? GetById(int id)
         {
             return _products.FirstOrDefault(item => item.Id == id);
         }
 
-        public void Update(Product item)
+        public void Update(SaleItem item)
         {
             throw new NotSupportedException("Запись товаров в памяти не поддерживается");
         }
 
-        public int Insert(Product item)
+        public int Insert(SaleItem item)
         {
             throw new NotSupportedException("Запись товаров в памяти не поддерживается");
         }

@@ -10,6 +10,22 @@ create table "stock"(
     "amount" int not null
 );
 
+create table basket_line (
+    item_id int not null,
+    count int not null
+);
+
+create table "order" (
+     id serial primary key,
+     status int not null
+);
+
+create table order_line (
+     order_id int not null,
+     item_id int not null,
+     count int not null
+);
+
 insert into "catalog"("id", "name", "price", "type")
 values 
     (1, 'Лопата', 9.99, 1),

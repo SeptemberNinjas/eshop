@@ -8,10 +8,10 @@ public enum ItemTypes
     /// <summary>
     /// Товар
     /// </summary>
-    Product,
+    Product = 1,
     
     /// <summary>
     /// Услуга
     /// </summary>
-    Service
+    Service = 2
 }
