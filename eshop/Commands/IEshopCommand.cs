@@ -8,4 +8,10 @@ public interface IEshopCommand
     /// Выполнить команду
     /// </summary>
     void Execute(string[]? args);
+
+    Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
+    {
+        Execute(args);
+        return Task.CompletedTask;
+    }
 }

@@ -37,25 +37,27 @@ public class DisplayProductsCommand : ICommandWithCommandsList
     public override string ToString() => Info;
 
     /// <inheritdoc />
+    public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
+    {
+        var allItems = (await _saleItems.GetAllAsync(cancellationToken))
+            .Where(i => i.ItemType is ItemTypes.Product)
+            .ToArray();
+        if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
+        {
+            count = allItems.Length;
+        }
+
+        var message = new StringBuilder("Товары:").AppendLine();
+        for (var i = 0; i < Math.Min(allItems.Length, count); i++)
+        {
+            message.AppendLine(allItems[i].GetDisplayText());
+        }
+
+        Result = message.ToString();
+    }
+
     public void Execute(string[]? args)
     {
-        Task.Run(async () =>
-        {
-            var allItems = (await _saleItems.GetAllAsync())
-                .Where(i => i.ItemType is ItemTypes.Product)
-                .ToArray();
-            if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
-            {
-                count = allItems.Length;
-            }
-
-            var message = new StringBuilder("Товары:").AppendLine();
-            for (var i = 0; i < Math.Min(allItems.Length, count); i++)
-            {
-                message.AppendLine(allItems[i].GetDisplayText());
-            }
-
-            Result = message.ToString();
-        }).Wait();
+        ExecuteAsync(args, CancellationToken.None).Wait();
     }
 }
