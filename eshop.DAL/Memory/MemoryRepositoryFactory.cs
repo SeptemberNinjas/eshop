@@ -8,7 +8,7 @@ namespace eshop.DAL.Memory
     public class MemoryRepositoryFactory : RepositoryFactory
     {
         /// <inheritdoc/>
-        public override IRepository<Product> CreateProductRepository()
+        public override IReadOnlyRepository<SaleItem> CreateSaleItemRepository()
         {
             return new ProductMemoryReadOnlyRepository();
         }
@@ -19,9 +19,9 @@ namespace eshop.DAL.Memory
         }
 
         /// <inheritdoc/>
-        public override IReadOnlyRepository<Service> CreateServiceRepository()
+        public override IRepository<Stock> CreateStockRepository()
         {
-            return new ServiceMemoryReadOnlyRepository();
+            throw new NotSupportedException("Не реализуем устаревшие репозитории, т.к. в ближайшем ДЗ они будут удалены");
         }
 
         /// <inheritdoc/>

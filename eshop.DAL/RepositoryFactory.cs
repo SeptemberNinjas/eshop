@@ -8,16 +8,16 @@ namespace eshop.DAL
     public abstract class RepositoryFactory
     {
         /// <summary>
-        /// Создать репозиторий для работы с товарами
+        /// Создать репозиторий для работы с товарными единицами
         /// </summary>
-        public abstract IRepository<Product> CreateProductRepository();
+        public abstract IReadOnlyRepository<SaleItem> CreateSaleItemRepository();
 
         public abstract IRepositoryAsync<Product> CreateProductAsyncRepositoy();
 
         /// <summary>
-        /// Создать репозиторий для работы с услугами
+        /// Создать репозиторий для работы с остатками
         /// </summary>
-        public abstract IReadOnlyRepository<Service> CreateServiceRepository();
+        public abstract IRepository<Stock> CreateStockRepository();
 
         /// <summary>
         /// Создать репозиторий для работы с корзиной

@@ -10,12 +10,12 @@ namespace eshop.Commands.CatalogCommands;
 /// </summary>
 public class DisplayProductsCommand : ICommandWithCommandsList
 {
-    private readonly IReadOnlyRepositoryAsync<Product> _products;
+    private readonly IReadOnlyRepository<SaleItem> _saleItems;
 
     /// <inheritdoc cref="DisplayProductsCommand"/>
-    public DisplayProductsCommand(IReadOnlyRepositoryAsync<Product> products)
+    public DisplayProductsCommand(IReadOnlyRepository<SaleItem> saleItems)
     {
-        _products = products;
+        _saleItems = saleItems;
     }
 
     public string? Result { get; private set; }
@@ -38,31 +38,19 @@ public class DisplayProductsCommand : ICommandWithCommandsList
 
     /// <inheritdoc />
     public void Execute(string[]? args)
-    {
-        try
+    {        
+        var allItems = _saleItems.GetAll()
+            .Where(i => i.ItemType is ItemTypes.Product)
+            .ToArray();
+        if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
         {
-            Task.Run(async () =>
-            {
-                if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
-                {
-                    count = await _products.GetCountAsync();
-                }
-
-                var allItems = _products.GetAllAsync().Result;
-
-                var message = new StringBuilder("Товары:").AppendLine();
-                for (var i = 0; i < Math.Min(await _products.GetCountAsync(), count); i++)
-                {
-                    message.AppendLine(allItems.ElementAt(i).GetDisplayText());
-                }
-
-                Result = message.ToString();
-            }).Wait();
+            count = allItems.Length;
         }
-        catch (Exception ex)
+
+        var message = new StringBuilder("Товары:").AppendLine();
+        for (var i = 0; i < Math.Min(allItems.Length, count); i++)
         {
-            ExecutionSuccess = false;
-            Result = ex.Message;
+            message.AppendLine(allItems[i].GetDisplayText());
         }
     }
 }

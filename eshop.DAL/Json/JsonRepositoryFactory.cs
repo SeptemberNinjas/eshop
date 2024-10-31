@@ -8,7 +8,7 @@ namespace eshop.DAL.Json
     public class JsonRepositoryFactory : RepositoryFactory
     {
         /// <inheritdoc/>
-        public override IRepository<Product> CreateProductRepository() => new ProductJsonReadOnlyRepository();
+        public override IReadOnlyRepository<SaleItem> CreateSaleItemRepository() => new ProductJsonReadOnlyRepository();
 
         public override IRepositoryAsync<Product> CreateProductAsyncRepositoy()
         {
@@ -16,7 +16,7 @@ namespace eshop.DAL.Json
         }
 
         /// <inheritdoc/>
-        public override IReadOnlyRepository<Service> CreateServiceRepository() => new ServiceJsonReadOnlyRepository();
+        public override IRepository<Stock> CreateStockRepository() => throw new NotSupportedException("Не реализуем устаревшие репозитории, т.к. в ближайшем ДЗ они будут удалены");
 
         /// <inheritdoc/>
         public override IRepository<Basket> CreateBasketRepository() => new BasketJsonRepository();
