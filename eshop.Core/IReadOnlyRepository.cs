@@ -8,22 +8,6 @@ public interface IReadOnlyRepository<T>
     /// <summary>
     /// Вернуть список всех элементов
     /// </summary>
-    IReadOnlyCollection<T> GetAll();
-
-    /// <summary>
-    /// Получить количество элементов
-    /// </summary>
-    int GetCount();
-
-    /// <summary>
-    /// Найти элемент по идентификатору
-    /// </summary>
-    /// <param name="id">Идентификатор</param>
-    T? GetById(int id);
-
-    /// <summary>
-    /// Вернуть список всех элементов
-    /// </summary>
     Task<IReadOnlyCollection<T>> GetAllAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
