@@ -7,7 +7,7 @@ namespace eshop.DAL.Database
     /// <summary>
     /// Реализация репозитория для хранения товаров в БД
     /// </summary>
-    internal class SaleItemDatabaseRepository : DatabaseContext, IReadOnlyRepository<SaleItem>
+    internal class SaleItemDatabaseRepository : DatabaseContext, IReadOnlyRepository<SaleItem>, IReadOnlyRepositoryAsync<SaleItem>
     {
         public SaleItemDatabaseRepository(string connectionString) : base(connectionString)
         {
@@ -75,6 +75,47 @@ namespace eshop.DAL.Database
                 ItemTypes.Service => new Service(id, name, price),
                 _ => throw new ArgumentOutOfRangeException()
             };
+        }
+
+        /// <inheritdoc/>
+        public async Task<IReadOnlyCollection<SaleItem>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            var commandText =
+                @"select c.*, s.amount 
+                    from catalog c
+                        left join stock s on c.Id = s.Id";
+
+            var result = await ExecuteReaderListAsync(commandText, GetSaleItem, cancellationToken);
+
+            return result;
+        }
+
+        /// <inheritdoc/>
+        public async Task<int> GetCountAsync(CancellationToken cancellationToken = default)
+        {
+            var commandText = 
+                "select count(*) from catalog";
+
+            var result = await ExecuteReaderAsync(commandText, (reader) =>
+            {
+                return int.TryParse(reader[0]?.ToString(), out var count) ? count : 0;
+            }, cancellationToken);
+
+            return result;
+        }
+
+        /// <inheritdoc/>
+        public async Task<SaleItem?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var commandText =
+                $@"select c.*, s.amount 
+                    from catalog c
+                        left join stock s on c.Id = s.Id
+                    where type = 1 and c.id = {id}";
+
+            var result = await ExecuteReaderAsync(commandText, GetSaleItem, cancellationToken);
+
+            return result;
         }
     }
 }

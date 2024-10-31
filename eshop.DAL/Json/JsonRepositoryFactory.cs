@@ -10,7 +10,7 @@ namespace eshop.DAL.Json
         /// <inheritdoc/>
         public override IReadOnlyRepository<SaleItem> CreateSaleItemRepository() => new ProductJsonReadOnlyRepository();
 
-        public override IRepositoryAsync<Product> CreateProductAsyncRepositoy()
+        public override IReadOnlyRepositoryAsync<SaleItem> CreateSaleItemAsyncRepository()
         {
             throw new NotImplementedException();
         }

@@ -30,9 +30,10 @@ namespace eshop.DAL.Database
             return new SaleItemDatabaseRepository(_connectionString);
         }
 
-        public override IRepositoryAsync<Product> CreateProductAsyncRepositoy()
+        /// <inheritdoc/>
+        public override IReadOnlyRepositoryAsync<SaleItem> CreateSaleItemAsyncRepository()
         {
-            return new ProductDatabaseRepository(_connectionString);
+            return new SaleItemDatabaseRepository(_connectionString);
         }
 
         /// <inheritdoc/>

@@ -12,7 +12,10 @@ namespace eshop.DAL
         /// </summary>
         public abstract IReadOnlyRepository<SaleItem> CreateSaleItemRepository();
 
-        public abstract IRepositoryAsync<Product> CreateProductAsyncRepositoy();
+        /// <summary>
+        /// Создать асинхронный репозиторий для работы с товарными единицами
+        /// </summary>
+        public abstract IReadOnlyRepositoryAsync<SaleItem> CreateSaleItemAsyncRepository();
 
         /// <summary>
         /// Создать репозиторий для работы с остатками

@@ -10,7 +10,7 @@ namespace eshop.Commands.CatalogCommands;
 /// </summary>
 public class DisplayServicesCommand : ICommandWithCommandsList
 {
-    private readonly IReadOnlyRepository<SaleItem> _saleItems;
+    private readonly IReadOnlyRepositoryAsync<SaleItem> _saleItems;
 
     public string? Result { get; private set; }
     public bool ExecutionSuccess => true;
@@ -31,7 +31,7 @@ public class DisplayServicesCommand : ICommandWithCommandsList
     public override string ToString() => Info;
 
     /// <inheritdoc cref="DisplayServicesCommand"/>
-    public DisplayServicesCommand(IReadOnlyRepository<SaleItem> saleItems)
+    public DisplayServicesCommand(IReadOnlyRepositoryAsync<SaleItem> saleItems)
     {
         _saleItems = saleItems;
     }
@@ -39,21 +39,24 @@ public class DisplayServicesCommand : ICommandWithCommandsList
     /// <inheritdoc />
     public void Execute(string[]? args)
     {
-        var allItems = _saleItems.GetAll()
-            .Where(i => i.ItemType is ItemTypes.Service)
-            .ToArray();
-        
-        if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
+        Task.Run(async () =>
         {
-            count = allItems.Length;
-        }
-            
-        var message = new StringBuilder("Услуги:").AppendLine();
-        for (var i = 0; i < Math.Min(allItems.Length, count); i++)
-        {
-            message.AppendLine(allItems[i].GetDisplayText());
-        }
+            var allItems = (await _saleItems.GetAllAsync())
+                .Where(i => i.ItemType is ItemTypes.Service)
+                .ToArray();
 
-        Result = message.ToString();
+            if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
+            {
+                count = allItems.Length;
+            }
+
+            var message = new StringBuilder("Услуги:").AppendLine();
+            for (var i = 0; i < Math.Min(allItems.Length, count); i++)
+            {
+                message.AppendLine(allItems[i].GetDisplayText());
+            }
+
+            Result = message.ToString();
+        }).Wait();
     }
 }

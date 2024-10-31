@@ -13,7 +13,7 @@ namespace eshop.DAL.Memory
             return new ProductMemoryReadOnlyRepository();
         }
 
-        public override IRepositoryAsync<Product> CreateProductAsyncRepositoy()
+        public override IReadOnlyRepositoryAsync<SaleItem> CreateSaleItemAsyncRepository()
         {
             throw new NotImplementedException();
         }
