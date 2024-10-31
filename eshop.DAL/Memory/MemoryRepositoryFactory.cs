@@ -13,11 +13,6 @@ namespace eshop.DAL.Memory
             return new ProductMemoryReadOnlyRepository();
         }
 
-        public override IReadOnlyRepositoryAsync<SaleItem> CreateSaleItemAsyncRepository()
-        {
-            throw new NotImplementedException();
-        }
-
         /// <inheritdoc/>
         public override IRepository<Stock> CreateStockRepository()
         {

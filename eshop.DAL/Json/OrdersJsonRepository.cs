@@ -41,4 +41,29 @@ internal class OrdersJsonRepository : JsonRepository<OrderEntity>, IRepository<O
 
         return lastId;
     }
+
+    public Task UpdateAsync(Order item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<int> InsertAsync(Order item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IReadOnlyCollection<Order>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<int> GetCountAsync(CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Order?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }

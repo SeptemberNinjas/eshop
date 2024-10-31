@@ -10,11 +10,6 @@ namespace eshop.DAL.Json
         /// <inheritdoc/>
         public override IReadOnlyRepository<SaleItem> CreateSaleItemRepository() => new ProductJsonReadOnlyRepository();
 
-        public override IReadOnlyRepositoryAsync<SaleItem> CreateSaleItemAsyncRepository()
-        {
-            throw new NotImplementedException();
-        }
-
         /// <inheritdoc/>
         public override IRepository<Stock> CreateStockRepository() => throw new NotSupportedException("Не реализуем устаревшие репозитории, т.к. в ближайшем ДЗ они будут удалены");
 

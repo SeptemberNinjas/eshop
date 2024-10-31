@@ -10,10 +10,10 @@ namespace eshop.Commands.CatalogCommands;
 /// </summary>
 public class DisplayProductsCommand : ICommandWithCommandsList
 {
-    private readonly IReadOnlyRepositoryAsync<SaleItem> _saleItems;
+    private readonly IReadOnlyRepository<SaleItem> _saleItems;
 
     /// <inheritdoc cref="DisplayProductsCommand"/>
-    public DisplayProductsCommand(IReadOnlyRepositoryAsync<SaleItem> saleItems)
+    public DisplayProductsCommand(IReadOnlyRepository<SaleItem> saleItems)
     {
         _saleItems = saleItems;
     }

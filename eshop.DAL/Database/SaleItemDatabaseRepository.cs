@@ -7,7 +7,7 @@ namespace eshop.DAL.Database
     /// <summary>
     /// Реализация репозитория для хранения товаров в БД
     /// </summary>
-    internal class SaleItemDatabaseRepository : DatabaseContext, IReadOnlyRepository<SaleItem>, IReadOnlyRepositoryAsync<SaleItem>
+    internal class SaleItemDatabaseRepository : DatabaseContext, IReadOnlyRepository<SaleItem>
     {
         public SaleItemDatabaseRepository(string connectionString) : base(connectionString)
         {

@@ -85,5 +85,30 @@ namespace eshop.DAL.Database
 
             return int.TryParse(result?.ToString(), out var count) ? count : 0;
         }
+
+        public Task UpdateAsync(Stock item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> InsertAsync(Stock item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IReadOnlyCollection<Stock>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> GetCountAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Stock?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

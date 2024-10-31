@@ -10,7 +10,7 @@ namespace eshop.Commands.CatalogCommands;
 /// </summary>
 public class DisplayServicesCommand : ICommandWithCommandsList
 {
-    private readonly IReadOnlyRepositoryAsync<SaleItem> _saleItems;
+    private readonly IReadOnlyRepository<SaleItem> _saleItems;
 
     public string? Result { get; private set; }
     public bool ExecutionSuccess => true;
@@ -31,7 +31,7 @@ public class DisplayServicesCommand : ICommandWithCommandsList
     public override string ToString() => Info;
 
     /// <inheritdoc cref="DisplayServicesCommand"/>
-    public DisplayServicesCommand(IReadOnlyRepositoryAsync<SaleItem> saleItems)
+    public DisplayServicesCommand(IReadOnlyRepository<SaleItem> saleItems)
     {
         _saleItems = saleItems;
     }
