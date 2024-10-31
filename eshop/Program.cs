@@ -19,17 +19,8 @@ public static class Program
         
         while (true)
         {
-            try
-            {
-                page.DisplayInitial();
-                page.WaitForInput();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Произошила ошибка при выполнении команды: {ex.Message}");
-                Console.WriteLine("Нажмите Enter для продолжения...");
-                Console.ReadLine();
-            }
+            page.DisplayInitial();
+            page.WaitForInput();
         }
     }
 }
