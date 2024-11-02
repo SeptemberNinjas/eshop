@@ -19,7 +19,6 @@ public class AddBasketLineCommand : IEshopCommand
         _itemsRepository = itemsRepository;
     }
 
-
     public const string Info = "Добавить позицию в корзину";
     
     /// <inheritdoc />
