@@ -49,7 +49,7 @@ public class ApplicationContext
             CommandType.DisplayProducts => new DisplayProductsCommand(repositoryFactory.CreateSaleItemRepository()),
             CommandType.DisplayServices => new DisplayServicesCommand(repositoryFactory.CreateSaleItemRepository()),
             CommandType.DisplayBasket => new DisplayBasketCommand(repositoryFactory.CreateBasketRepository()),
-            CommandType.AddProductToBasket => new AddBasketLineCommand(repositoryFactory.CreateBasketRepository(), (repositoryFactory.CreateSaleItemRepository() as IRepository<SaleItem>)!),
+            CommandType.AddProductToBasket => new AddBasketLineCommand(repositoryFactory.CreateBasketRepository(), repositoryFactory.CreateSaleItemRepository()),
             CommandType.AddServiceToBasket => new AddBasketLineCommand(repositoryFactory.CreateBasketRepository(), (repositoryFactory.CreateStockRepository() as IReadOnlyRepository<SaleItem>)!),
             CommandType.CreateOrder => new CreateOrderCommand(repositoryFactory),
             CommandType.DisplayOrders => new DisplayOrdersCommand(repositoryFactory.CreateOrdersRepository()),
