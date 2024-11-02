@@ -25,7 +25,7 @@ public class ConsolePage
     public async Task WaitForInput(CancellationToken ct)
     {
         while (true)
-        {
+        {    
             (IEshopCommand command, string[]? args) nextCommand = default;
             while (nextCommand == default)
             {
@@ -44,37 +44,50 @@ public class ConsolePage
             if (nextCommand.command is BackCommand && _prev is not null)
                 break;
 
-            if (nextCommand.command is ICommandWithCommandsList commandWithContext)
+            try
             {
-                if (nextCommand.command.GetType() != _initialCommand?.GetType())
+                if (nextCommand.command is ICommandWithCommandsList commandWithContext)
                 {
-                    await commandWithContext.ExecuteAsync(nextCommand.args, CancellationToken.None);
-                    if (!commandWithContext.ExecutionSuccess)
+                    if (nextCommand.command.GetType() != _initialCommand?.GetType())
                     {
+                        await commandWithContext.ExecuteAsync(nextCommand.args, CancellationToken.None);
+                        if (!commandWithContext.ExecutionSuccess)
+                        {
+                            DisplayInitial();
+                            Console.WriteLine($"Ошибка: {commandWithContext.Result}");
+                            continue;
+                        }
+                        var nextPage = new ConsolePage(_context, commandWithContext, nextCommand.args, this);
+                        nextPage.DisplayInitial();
+                        await nextPage.WaitForInput(ct);
                         DisplayInitial();
-                        Console.WriteLine($"Ошибка: {commandWithContext.Result}");
+                        if (_prev is null || nextPage._lastCommandIsGoToRoot)
+                            break;
+
                         continue;
                     }
-                    var nextPage = new ConsolePage(_context, commandWithContext, nextCommand.args, this);
-                    nextPage.DisplayInitial();
-                    await nextPage.WaitForInput(ct);
-                    DisplayInitial();
-                    if (_prev is null || nextPage._lastCommandIsGoToRoot)
-                        break;
-         
-                    continue;
-                }
 
-                _initialCommand = commandWithContext;
-                _args = nextCommand.args;
-                await _initialCommand.ExecuteAsync(_args, CancellationToken.None);
-                DisplayInitial();
+                    _initialCommand = commandWithContext;
+                    _args = nextCommand.args;
+                    await _initialCommand.ExecuteAsync(_args, CancellationToken.None);
+                    DisplayInitial();
+                }
+                else
+                {
+                    DisplayInitial();
+
+                    if (nextCommand.command != null)
+                    {
+                        await nextCommand.command.ExecuteAsync(nextCommand.args, CancellationToken.None);
+                        Console.WriteLine(nextCommand.command.Result);
+                    }
+                }
             }
-            else
+            catch (Exception ex)
             {
-                DisplayInitial();
-                nextCommand.command?.ExecuteAsync(nextCommand.args, CancellationToken.None);
-                Console.WriteLine(nextCommand.command?.Result);
+                Console.WriteLine($"Произошила ошибка при выполнении команды: {ex.Message}");
+                Console.WriteLine("Нажмите Enter для продолжения...");
+                Console.ReadLine();
             }
         }
     }
