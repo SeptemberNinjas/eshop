@@ -27,10 +27,10 @@ public class AddBasketLineCommand : IEshopCommand
     public string? Result { get; private set; }
 
     /// <inheritdoc />
-    public void Execute(string[]? args)
+    public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var basket = _basketRepository.GetAll().FirstOrDefault() ?? new Basket();
-        var list = _itemsRepository.GetAll();
+        var basket = (await _basketRepository.GetAllAsync(cancellationToken)).FirstOrDefault() ?? new Basket();
+        var list = await _itemsRepository.GetAllAsync(cancellationToken);
 
         if (args is null 
             || args.Length < 1 
@@ -62,7 +62,7 @@ public class AddBasketLineCommand : IEshopCommand
         }
 
         if (basket.HasChanges)
-            _basketRepository.Update(basket);
+            await _basketRepository.UpdateAsync(basket, cancellationToken);
     }
 
     private static bool TryGetItem<T>(int id, IEnumerable<T> items, out T item)

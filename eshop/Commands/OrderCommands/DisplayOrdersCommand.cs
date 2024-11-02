@@ -35,9 +35,9 @@ public class DisplayOrdersCommand : ICommandWithCommandsList
     public override string ToString() => Info;
 
     /// <inheritdoc />
-    public void Execute(string[]? args)
+    public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var ordersList = _orders.GetAll();
+        var ordersList = await _orders.GetAllAsync();
         if (ordersList.Count == 0)
         {
             Result = "Список заказов пуст";

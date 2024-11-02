@@ -25,8 +25,10 @@ public class DisplaySaleItemsCommand : ICommandWithCommandsList
     public override string ToString() => Info;
 
     /// <inheritdoc />
-    public void Execute(string[]? args)
+    public Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
         Result = "Выберите необходимый список, опционально можно указать требуемое количество элементов";
+
+        return Task.CompletedTask;
     }
 }

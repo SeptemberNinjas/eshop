@@ -56,9 +56,4 @@ public class DisplayServicesCommand : ICommandWithCommandsList
 
         Result = message.ToString();
     }
-
-    public void Execute(string[]? args)
-    {
-        ExecuteAsync(args, CancellationToken.None).Wait();
-    }
 }

@@ -28,9 +28,9 @@ public class CreateOrderCommand : IEshopCommand
     public string? Result { get; private set; }
 
     /// <inheritdoc />
-    public void Execute(string[]? args)
+    public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var currentBasket = _basket.GetById(default);
+        var currentBasket = await _basket.GetByIdAsync(default);
         var order = currentBasket?.CreateOrderFromBasket();
         if (order is null)
         {
@@ -40,20 +40,20 @@ public class CreateOrderCommand : IEshopCommand
         
         var orderedProductsWithCount = order.Lines
             .Where(l => l.ItemType is ItemTypes.Product)
-            .Join(_stock.GetAll(),
+            .Join(await _stock.GetAllAsync(),
                 orderLine => orderLine.ItemId, 
                 stock => stock.ItemId,
                 (orderLine, stock) => (stock, orderLine.Count));
                 
-        var id = _orders.Insert(order);
-        _basket.Update(currentBasket!);
+        var id = await _orders.InsertAsync(order);
+        await _basket.UpdateAsync(currentBasket!);
         foreach (var (stock, count) in orderedProductsWithCount)
         {
             if (stock.Amount - count < 0)
                 throw new ApplicationException("Недостаточно товара");
 
             stock.Amount -= count;
-            _stock.Update(stock);
+            await _stock.UpdateAsync(stock);
         }
 
         Result = $"Создан заказ {id}";

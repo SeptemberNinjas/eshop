@@ -29,8 +29,10 @@ public class InitialCommand : ICommandWithCommandsList
     };
 
     /// <inheritdoc />
-    public void Execute(string[]? args)
+    public Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
         Result = $"{_title}{Environment.NewLine}{Environment.NewLine}Используйте команды для навигации по страницам";
+
+        return Task.CompletedTask;
     }
 }

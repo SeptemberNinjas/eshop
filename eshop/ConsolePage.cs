@@ -73,7 +73,7 @@ public class ConsolePage
             else
             {
                 DisplayInitial();
-                nextCommand.command?.Execute(nextCommand.args);
+                nextCommand.command?.ExecuteAsync(nextCommand.args, CancellationToken.None);
                 Console.WriteLine(nextCommand.command?.Result);
             }
         }
