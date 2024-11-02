@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Data.Common;
 using eshop.Core;
 using Npgsql;
 
@@ -57,7 +58,7 @@ internal class OrderDatabaseRepository : DatabaseContext, IRepository<Order>
         if (!reader.HasRows)
             return [];
 
-        var infos = new List<(ItemsListLine Line, int OrderId, OrderStatus OrderStatus)>();
+        var infos = new List<OrderInfo>();
         
         while (reader.Read())
         {
@@ -92,7 +93,7 @@ internal class OrderDatabaseRepository : DatabaseContext, IRepository<Order>
         return command.ExecuteNonQuery();
     }
 
-    private static (ItemsListLine Line, int OrderId, OrderStatus OrderStatus) GetOrderInfo(NpgsqlDataReader reader)
+    private static OrderInfo GetOrderInfo(DbDataReader reader)
     {
         var itemType = (ItemTypes)reader.GetFieldValue<int>("type");
         SaleItem item = itemType == ItemTypes.Product
@@ -104,33 +105,105 @@ internal class OrderDatabaseRepository : DatabaseContext, IRepository<Order>
                 reader.GetFieldValue<string>("name"),
                 reader.GetFieldValue<decimal>("price"));
 
-        return (new ItemsListLine(item, reader.GetFieldValue<int>("count")), 
-            reader.GetFieldValue<int>("id"), 
-            (OrderStatus)reader.GetFieldValue<int>("status"));
+        return new OrderInfo
+        {
+            Line = new ItemsListLine(item, reader.GetFieldValue<int>("count")),
+            OrderId = reader.GetFieldValue<int>("id"),
+            OrderStatus = (OrderStatus)reader.GetFieldValue<int>("status")
+        };
     }
 
-    public Task UpdateAsync(Order item)
+    private static IEnumerable<Order> GetOrders(IEnumerable<OrderInfo> infos)
     {
-        throw new NotImplementedException();
+        return infos.GroupBy(i => i.OrderId)
+            .Select(g =>
+                new Order(g.Key, g.First().OrderStatus, g.Select(gg => gg.Line)));
     }
 
-    public Task<int> InsertAsync(Order item)
+    public async Task UpdateAsync(Order item, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        using var command = GetCommand(
+            $"""
+             delete from order_line where order_id = {item.Id};
+             update "order" set status = {(int)item.Status} where id = {item.Id};
+             insert into order_line(order_id, item_id, count) values 
+             {string.Join(',', item.Lines.Select(l => $"({item.Id},{l.ItemId},{l.Count})"))}
+             """);
+
+        await command.ExecuteNonQueryAsync();
     }
 
-    public Task<IReadOnlyCollection<Order>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<int> InsertAsync(Order item, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var commandText =
+            $"""
+             with inserted_id as (insert into "order"(status) values ({(int)item.Status}) returning id)
+             insert into order_line(order_id, item_id, count) values 
+             {string.Join(',', item.Lines.Select(l => $"((select id from inserted_id),{l.ItemId},{l.Count})"))}
+             """;
+
+        var result = await ExecuteReaderAsync(commandText, (reader) =>
+        {
+            return int.TryParse(reader[0]?.ToString(), out var count) ? count : 0;
+        }, cancellationToken);
+
+        return result;
     }
 
-    public Task<int> GetCountAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<Order>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var commandText = 
+            $"""
+             select o.*, ol.*, c.type, c.name, c.price, s.amount
+                 from "order" o 
+                 join order_line ol on o.id = ol.order_id
+                 join catalog c on ol.item_id = c.id
+                     left join stock s on c.id = s.id
+             """;
+
+        var infos = await ExecuteReaderListAsync(commandText, GetOrderInfo, cancellationToken);
+
+        return GetOrders(infos).ToArray();
     }
 
-    public Task<Order?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<int> GetCountAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var commandText = 
+            $"""
+             select count(*) from "order"
+             """;
+
+        var result = await ExecuteReaderAsync(commandText, (reader) =>
+        {
+            return int.TryParse(reader[0]?.ToString(), out var count) ? count : 0;
+        }, cancellationToken);
+
+        return result;
+    }
+
+    public async Task<Order?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var commandText = 
+            $"""
+             select o.*, ol.*, c.type, c.name, c.price, s.amount
+                 from "order" o 
+                 join order_line ol on o.id = ol.order_id
+                 join catalog c on ol.item_id = c.id
+                     left join stock s on c.id = s.id
+                 where o.id = {id}
+             """;
+
+        var infos = await ExecuteReaderListAsync(commandText, GetOrderInfo, cancellationToken);
+
+        return GetOrders(infos).SingleOrDefault();
+    }
+
+    readonly struct OrderInfo
+    {
+        public ItemsListLine Line { get; init; }
+
+        public int OrderId { get; init; }
+
+        public OrderStatus OrderStatus { get; init; }
     }
 }

@@ -81,34 +81,73 @@ namespace eshop.DAL.Database
                  insert into stock(id, amount) values 
                  ({item.ItemId}, {item.Amount})
                  """);
+
             var result = command.ExecuteScalar();
 
             return int.TryParse(result?.ToString(), out var count) ? count : 0;
         }
 
-        public Task UpdateAsync(Stock item)
+        public async Task UpdateAsync(Stock item, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            using var command = GetCommand(
+                $"""
+                 update stock set
+                 amount = {item.Amount}
+                 where id = {item.ItemId}
+                 """);
+
+            await command.ExecuteNonQueryAsync(cancellationToken);
         }
 
-        public Task<int> InsertAsync(Stock item)
+        public async Task<int> InsertAsync(Stock item, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var commandText = 
+                $"""
+                 insert into stock(id, amount) values 
+                 ({item.ItemId}, {item.Amount})
+                 """;
+
+            var result = await ExecuteReaderAsync(commandText, (reader) =>
+            {
+                return int.TryParse(reader[0]?.ToString(), out var count) ? count : 0;
+            }, cancellationToken);
+
+            return result;
         }
 
-        public Task<IReadOnlyCollection<Stock>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyCollection<Stock>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var commandText =
+                @"select * from stock";
+
+            var result = await ExecuteReaderListAsync(commandText, GetStock, cancellationToken);
+
+            return result;
         }
 
-        public Task<int> GetCountAsync(CancellationToken cancellationToken = default)
+        public async Task<int> GetCountAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var commandText =
+                "select count(*) from stock";
+
+            var result = await ExecuteReaderAsync(commandText, (reader) =>
+            {
+                return int.TryParse(reader[0]?.ToString(), out var count) ? count : 0;
+            }, cancellationToken);
+
+            return result;
         }
 
-        public Task<Stock?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<Stock?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var commandText =
+                $@"select s.*
+                    from stock s
+                    where s.id = {id}";
+
+            var result = await ExecuteReaderAsync(commandText, GetStock, cancellationToken);
+
+            return result;
         }
     }
 }
