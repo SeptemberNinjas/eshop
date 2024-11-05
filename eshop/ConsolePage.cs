@@ -48,7 +48,7 @@ public class ConsolePage
             {
                 if (nextCommand.command.GetType() != _initialCommand?.GetType())
                 {
-                    await commandWithContext.ExecuteAsync(nextCommand.args, CancellationToken.None);
+                    await commandWithContext.ExecuteAsync(nextCommand.args, ct);
                     if (!commandWithContext.ExecutionSuccess)
                     {
                         DisplayInitial();
@@ -67,14 +67,19 @@ public class ConsolePage
 
                 _initialCommand = commandWithContext;
                 _args = nextCommand.args;
-                await _initialCommand.ExecuteAsync(_args, CancellationToken.None);
+                await _initialCommand.ExecuteAsync(_args, ct);
                 DisplayInitial();
             }
             else
             {
                 DisplayInitial();
-                nextCommand.command?.ExecuteAsync(nextCommand.args, CancellationToken.None);
-                Console.WriteLine(nextCommand.command?.Result);
+
+                if (nextCommand.command != null)
+                {
+                    await nextCommand.command.ExecuteAsync(nextCommand.args, ct);
+
+                    Console.WriteLine(nextCommand.command?.Result);
+                }
             }
         }
     }
