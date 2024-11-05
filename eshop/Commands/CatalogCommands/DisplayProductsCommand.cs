@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using eshop.Application.SaleItems;
 using eshop.Commands.OrderCommands;
 using eshop.Commands.SystemCommands;
 using eshop.Core;
@@ -10,12 +11,12 @@ namespace eshop.Commands.CatalogCommands;
 /// </summary>
 public class DisplayProductsCommand : ICommandWithCommandsList
 {
-    private readonly IReadOnlyRepository<SaleItem> _saleItems;
+    private readonly GetSaleItemHandler _getSaleItemHandler;
 
     /// <inheritdoc cref="DisplayProductsCommand"/>
-    public DisplayProductsCommand(IReadOnlyRepository<SaleItem> saleItems)
+    public DisplayProductsCommand(GetSaleItemHandler getSaleItemHandler)
     {
-        _saleItems = saleItems;
+        _getSaleItemHandler = getSaleItemHandler;
     }
 
     public string? Result { get; private set; }
@@ -39,25 +40,26 @@ public class DisplayProductsCommand : ICommandWithCommandsList
     /// <inheritdoc />
     public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var allItems = (await _saleItems.GetAllAsync(cancellationToken))
-            .Where(i => i.ItemType is ItemTypes.Product)
-            .ToArray();
-        if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
+        _ = int.TryParse(args?.FirstOrDefault(), out var count);
+
+        var items = await _getSaleItemHandler.GetItemsAsync(ItemTypes.Product, count);
+
+        if (items.IsFailed)
         {
-            count = allItems.Length;
+            Result = "Не удалось получить список товаров";
+            return;
         }
 
         var message = new StringBuilder("Товары:").AppendLine();
-        for (var i = 0; i < Math.Min(allItems.Length, count); i++)
+
+        for (var i = 0; i < items.Value.Count(); i++)
         {
-            message.AppendLine(allItems[i].GetDisplayText());
+            var item = items.Value.ElementAt(i);
+            message
+                .Append($"{item.Id}. {item.Name}. Цена: {item.Price:F2}. Остатки: {item.Stock}")
+                .AppendLine();
         }
 
         Result = message.ToString();
-    }
-
-    public void Execute(string[]? args)
-    {
-        ExecuteAsync(args, CancellationToken.None).Wait();
     }
 }

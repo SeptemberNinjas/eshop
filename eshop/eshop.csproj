@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\eshop.Application\eshop.Application.csproj" />
     <ProjectReference Include="..\eshop.Core\eshop.Core.csproj" />
     <ProjectReference Include="..\eshop.DAL\eshop.DAL.csproj" />
   </ItemGroup>

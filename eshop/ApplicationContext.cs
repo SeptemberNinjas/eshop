@@ -1,4 +1,5 @@
-﻿using eshop.Commands;
+﻿using eshop.Application.SaleItems;
+using eshop.Commands;
 using eshop.Commands.CatalogCommands;
 using eshop.Commands.OrderCommands;
 using eshop.Commands.PaymentCommands;
@@ -30,7 +31,8 @@ public class ApplicationContext
             .AddScoped<RepositoryFactory>((sp) =>
             {
                 return new DatabaseRepositoryFactory(configuration["ConnectionString"] ?? "");
-            });
+            })
+            .AddScoped<GetSaleItemHandler>();
 
         _serviceProvider = services.BuildServiceProvider();
     }
@@ -39,6 +41,7 @@ public class ApplicationContext
     {
         using var scope = _serviceProvider.CreateScope();
         var repositoryFactory = scope.ServiceProvider.GetRequiredService<RepositoryFactory>();
+        var getSaleItemHandler = scope.ServiceProvider.GetRequiredService<GetSaleItemHandler>();
 
         return commandType switch
         {
@@ -46,8 +49,8 @@ public class ApplicationContext
             CommandType.Back => new BackCommand(),
             CommandType.GoToRoot => new GoToRootPageCommand(),
             CommandType.DisplaySaleItems => new DisplaySaleItemsCommand(),
-            CommandType.DisplayProducts => new DisplayProductsCommand(repositoryFactory.CreateSaleItemRepository()),
-            CommandType.DisplayServices => new DisplayServicesCommand(repositoryFactory.CreateSaleItemRepository()),
+            CommandType.DisplayProducts => new DisplayProductsCommand(getSaleItemHandler),
+            CommandType.DisplayServices => new DisplayServicesCommand(getSaleItemHandler),
             CommandType.DisplayBasket => new DisplayBasketCommand(repositoryFactory.CreateBasketRepository()),
             CommandType.AddProductToBasket => new AddBasketLineCommand(repositoryFactory.CreateBasketRepository(), (repositoryFactory.CreateSaleItemRepository() as IRepository<SaleItem>)!),
             CommandType.AddServiceToBasket => new AddBasketLineCommand(repositoryFactory.CreateBasketRepository(), (repositoryFactory.CreateStockRepository() as IReadOnlyRepository<SaleItem>)!),
