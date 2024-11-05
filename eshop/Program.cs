@@ -14,7 +14,7 @@ public static class Program
 
         Console.WriteLine(ApplicationContext.Title);
         var initialCommand = app.GetInitialCommand();
-        initialCommand.Execute(null);
+        await initialCommand.ExecuteAsync(null, CancellationToken.None);
         var page = new ConsolePage(app, initialCommand, null);
         
         while (true)
