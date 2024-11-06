@@ -15,4 +15,15 @@ public interface IRepository<T> : IReadOnlyRepository<T>
     /// </summary>
     /// <returns>Идентификатор созданного объекта</returns>
     int Insert(T item);
+
+    /// <summary>
+    /// Обновить объект
+    /// </summary>
+    Task UpdateAsync(T item);
+
+    /// <summary>
+    /// Добавить новый объект
+    /// </summary>
+    /// <returns>Идентификатор созданного объекта</returns>
+    Task<int> InsertAsync(T item);
 }

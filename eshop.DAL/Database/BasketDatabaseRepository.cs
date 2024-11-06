@@ -83,4 +83,29 @@ internal class BasketDatabaseRepository : DatabaseContext, IRepository<Basket>
 
         return new ItemsListLine(item, reader.GetFieldValue<int>("count"));
     }
+
+    public Task UpdateAsync(Basket item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<int> InsertAsync(Basket item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IReadOnlyCollection<Basket>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<int> GetCountAsync(CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Basket?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -22,7 +22,7 @@ public class ConsolePage
         _prev = prev;
     }
 
-    public void WaitForInput()
+    public async Task WaitForInput(CancellationToken ct)
     {
         while (true)
         {
@@ -48,16 +48,16 @@ public class ConsolePage
             {
                 if (nextCommand.command.GetType() != _initialCommand?.GetType())
                 {
-                    commandWithContext.Execute(nextCommand.args);
+                    await commandWithContext.ExecuteAsync(nextCommand.args, ct);
                     if (!commandWithContext.ExecutionSuccess)
                     {
                         DisplayInitial();
-                        Console.WriteLine(commandWithContext.Result);
+                        Console.WriteLine($"Ошибка: {commandWithContext.Result}");
                         continue;
                     }
                     var nextPage = new ConsolePage(_context, commandWithContext, nextCommand.args, this);
                     nextPage.DisplayInitial();
-                    nextPage.WaitForInput();
+                    await nextPage.WaitForInput(ct);
                     DisplayInitial();
                     if (_prev is null || nextPage._lastCommandIsGoToRoot)
                         break;
@@ -67,14 +67,19 @@ public class ConsolePage
 
                 _initialCommand = commandWithContext;
                 _args = nextCommand.args;
-                _initialCommand.Execute(_args);
+                await _initialCommand.ExecuteAsync(_args, ct);
                 DisplayInitial();
             }
             else
             {
                 DisplayInitial();
-                nextCommand.command?.Execute(nextCommand.args);
-                Console.WriteLine(nextCommand.command?.Result);
+
+                if (nextCommand.command != null)
+                {
+                    await nextCommand.command.ExecuteAsync(nextCommand.args, ct);
+
+                    Console.WriteLine(nextCommand.command?.Result);
+                }
             }
         }
     }

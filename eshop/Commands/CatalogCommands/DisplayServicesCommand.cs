@@ -37,17 +37,17 @@ public class DisplayServicesCommand : ICommandWithCommandsList
     }
 
     /// <inheritdoc />
-    public void Execute(string[]? args)
+    public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var allItems = _saleItems.GetAll()
+        var allItems = (await _saleItems.GetAllAsync(cancellationToken))
             .Where(i => i.ItemType is ItemTypes.Service)
             .ToArray();
-        
+
         if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
         {
             count = allItems.Length;
         }
-            
+
         var message = new StringBuilder("Услуги:").AppendLine();
         for (var i = 0; i < Math.Min(allItems.Length, count); i++)
         {
@@ -55,5 +55,10 @@ public class DisplayServicesCommand : ICommandWithCommandsList
         }
 
         Result = message.ToString();
+    }
+
+    public void Execute(string[]? args)
+    {
+        ExecuteAsync(args, CancellationToken.None).Wait();
     }
 }

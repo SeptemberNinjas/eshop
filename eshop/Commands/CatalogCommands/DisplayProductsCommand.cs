@@ -19,7 +19,7 @@ public class DisplayProductsCommand : ICommandWithCommandsList
     }
 
     public string? Result { get; private set; }
-    public bool ExecutionSuccess => true;
+    public bool ExecutionSuccess { get; private set; } = true;
 
     /// <inheritdoc />
     public IReadOnlyDictionary<CommandType, string> AvailableCommands { get; } = new Dictionary<CommandType, string>
@@ -37,9 +37,9 @@ public class DisplayProductsCommand : ICommandWithCommandsList
     public override string ToString() => Info;
 
     /// <inheritdoc />
-    public void Execute(string[]? args)
-    {        
-        var allItems = _saleItems.GetAll()
+    public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
+    {
+        var allItems = (await _saleItems.GetAllAsync(cancellationToken))
             .Where(i => i.ItemType is ItemTypes.Product)
             .ToArray();
         if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
@@ -54,5 +54,10 @@ public class DisplayProductsCommand : ICommandWithCommandsList
         }
 
         Result = message.ToString();
+    }
+
+    public void Execute(string[]? args)
+    {
+        ExecuteAsync(args, CancellationToken.None).Wait();
     }
 }
