@@ -20,16 +20,16 @@ public class ClearBasketCommand : IEshopCommand
     public string? Result { get; private set; }
 
     /// <inheritdoc />
-    public void Execute(string[]? args)
+    public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var currentBasket = _basket.GetById(default);
+        var currentBasket = await _basket.GetByIdAsync(default);
         if (currentBasket is null)
         {
             Result = "Корзина не найдена";
             return;
         }
         currentBasket.Clear();
-        _basket.Update(currentBasket);
+        await _basket.UpdateAsync(currentBasket);
 
         Result = "Корзина очищена";
     }

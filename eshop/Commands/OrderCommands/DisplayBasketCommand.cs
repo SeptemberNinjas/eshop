@@ -34,9 +34,9 @@ public class DisplayBasketCommand : ICommandWithCommandsList
     public override string ToString() => Info;
 
     /// <inheritdoc />
-    public void Execute(string[]? args)
+    public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var currentBasket = _basket.GetById(default);
+        var currentBasket = await _basket.GetByIdAsync(default);
         if (currentBasket is null)
         {
             ExecutionSuccess = false;

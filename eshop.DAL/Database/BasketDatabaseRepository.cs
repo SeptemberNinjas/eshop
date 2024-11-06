@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Data.Common;
 using eshop.Core;
 using Npgsql;
 
@@ -69,7 +70,7 @@ internal class BasketDatabaseRepository : DatabaseContext, IRepository<Basket>
         return command.ExecuteNonQuery();
     }
 
-    private static ItemsListLine GetBasketLine(NpgsqlDataReader reader)
+    private static ItemsListLine GetBasketLine(DbDataReader reader)
     {
         var itemType = (ItemTypes)reader.GetFieldValue<int>("type");
         SaleItem item = itemType == ItemTypes.Product
@@ -84,19 +85,32 @@ internal class BasketDatabaseRepository : DatabaseContext, IRepository<Basket>
         return new ItemsListLine(item, reader.GetFieldValue<int>("count"));
     }
 
-    public Task UpdateAsync(Basket item)
+    public async Task UpdateAsync(Basket item, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        await InsertAsync(item, cancellationToken);
     }
 
-    public Task<int> InsertAsync(Basket item)
+    public async Task<int> InsertAsync(Basket item, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        using var command = item.Lines.Count > 0
+            ? GetCommand(
+                $"""
+                 truncate basket_line;
+                 insert into basket_line(item_id, count) values 
+                 {string.Join(',', item.Lines.Select(l => $"({l.ItemId},{l.Count})"))}
+                 """)
+            : GetCommand(
+                $"""
+                 truncate basket_line;
+                 """);
+
+        return await command.ExecuteNonQueryAsync();
     }
 
-    public Task<IReadOnlyCollection<Basket>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<Basket>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var basket = await GetByIdAsync(default, cancellationToken);
+        return basket is null ? [] : [basket];
     }
 
     public Task<int> GetCountAsync(CancellationToken cancellationToken = default)
@@ -104,8 +118,21 @@ internal class BasketDatabaseRepository : DatabaseContext, IRepository<Basket>
         throw new NotImplementedException();
     }
 
-    public Task<Basket?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<Basket?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var commandText = 
+            $"""
+             select c.*, s.*, bl.count 
+                 from basket_line bl
+                 join catalog c on bl.item_id = c.id
+                     left join stock s on c.id = s.id
+             """;
+
+        var result = await ExecuteReaderListAsync(commandText, GetBasketLine, cancellationToken);
+
+        if (result.Count != 0)
+            return new Basket(result);
+
+        return null;
     }
 }

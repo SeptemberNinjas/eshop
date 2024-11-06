@@ -15,7 +15,7 @@ public class TransferMoneyCommand : IEshopCommand, ICommandWithContext
     public object? Context { get; set; }
     
     /// <inheritdoc />
-    public void Execute(string[]? args)
+    public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
         if (Context is not Payment payment)
         {
@@ -41,10 +41,10 @@ public class TransferMoneyCommand : IEshopCommand, ICommandWithContext
             return;
         }
         
-        var order = _orders.GetById(payment.OrderId);
+        var order = await _orders.GetByIdAsync(payment.OrderId);
         payment.CompletePayment(order, amount, out var message);
         if (order?.HasChanges ?? false)
-            _orders.Update(order);
+            await _orders.UpdateAsync(order);
         ExecutionSuccess = payment.IsComplete;
         Result = message;
     }
