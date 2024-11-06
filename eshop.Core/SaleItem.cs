@@ -33,11 +33,6 @@
         }
 
         /// <summary>
-        /// Текстовое описание продажной единицы
-        /// </summary>
-        public abstract string GetDisplayText();
-
-        /// <summary>
         /// Флаг, обозначающий, что может быть только одна товарная единица 
         /// </summary>
         public virtual bool OnlyOneItem => false;

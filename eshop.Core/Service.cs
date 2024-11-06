@@ -12,11 +12,5 @@ public class Service : SaleItem
     public Service(int id, string name, decimal price) : base(id, name, price) { }
 
     /// <inheritdoc/>
-    public override string GetDisplayText()
-    {
-        return $"{Id}. {Name}. Цена: {Price:F2}";
-    }
-
-    /// <inheritdoc/>
     public override bool OnlyOneItem => true;
 }
