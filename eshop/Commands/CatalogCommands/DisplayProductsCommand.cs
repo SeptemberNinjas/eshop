@@ -42,7 +42,7 @@ public class DisplayProductsCommand : ICommandWithCommandsList
     {
         _ = int.TryParse(args?.FirstOrDefault(), out var count);
 
-        var items = await _getSaleItemHandler.GetItemsAsync(ItemTypes.Product, count);
+        var items = await _getSaleItemHandler.GetItemsAsync(ItemTypes.Product, count, cancellationToken);
 
         if (items.IsFailed)
         {

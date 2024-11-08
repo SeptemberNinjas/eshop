@@ -16,14 +16,27 @@ public class CatalogController : ControllerBase
     }
 
     [HttpGet("products")]
-    public async Task<IEnumerable<SaleItemDto>> GetProductsAsync([FromQuery]int? count)
+    public async Task<ActionResult<IEnumerable<SaleItemDto>>> GetProductsAsync([FromQuery]int? count, CancellationToken cancellationToken)
     {
-        return await _handler.GetItemsAsync(ItemTypes.Product, count);
+        var result = await _handler.GetItemsAsync(ItemTypes.Product, count, cancellationToken);
+        if (result.IsFailed)
+            return BadRequest(result.ToString());
+        if (!result.Value.Any())
+            return NotFound();
+
+        return Ok(result.Value);
     }
     
     [HttpGet("services")]
-    public async Task<IEnumerable<SaleItemDto>> GetServicesAsync([FromQuery]int? count)
+    public async Task<ActionResult<IEnumerable<SaleItemDto>>> GetServicesAsync([FromQuery]int? count, CancellationToken cancellationToken)
     {
-        return await _handler.GetItemsAsync(ItemTypes.Service, count);
+        
+        var result = await _handler.GetItemsAsync(ItemTypes.Service, count, cancellationToken);
+        if (result.IsFailed)
+            return BadRequest(result.ToString());
+        if (!result.Value.Any())
+            return NotFound();
+
+        return Ok(result.Value);
     }
 }
