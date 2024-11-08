@@ -12,8 +12,9 @@ public class GoToRootPageCommand : IEshopCommand
 
     public string? Result => string.Empty;
     /// <inheritdoc />
-    public void Execute(string[]? args)
+    public Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
         // Специальная команда
+        return Task.CompletedTask;
     }
 }

@@ -1,12 +1,12 @@
-﻿using eshop.Commands;
+﻿using eshop.Application.Order;
+using eshop.Application.SaleItems;
+using eshop.Commands;
 using eshop.Commands.CatalogCommands;
 using eshop.Commands.OrderCommands;
 using eshop.Commands.PaymentCommands;
 using eshop.Commands.SystemCommands;
-using eshop.Core;
 using eshop.DAL;
 using eshop.DAL.Database;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,10 +27,17 @@ public class ApplicationContext
     public ApplicationContext(IConfiguration configuration)
     {
         var services = new ServiceCollection()
-            .AddScoped<RepositoryFactory>((sp) =>
-            {
-                return new DatabaseRepositoryFactory(configuration["ConnectionString"] ?? "");
-            });
+            .AddScoped<RepositoryFactory>((sp) => new DatabaseRepositoryFactory(configuration["ConnectionString"] ?? ""))
+            // Регистрация команд
+            .AddScoped<DisplayBasketCommand>()
+            .AddScoped<AddBasketLineCommand>()
+            .AddScoped<DisplayProductsCommand>()
+            .AddScoped<CreateOrderCommand>()
+            // Регистрация обработчиков
+            .AddScoped<GetSaleItemHandler>()
+            .AddScoped<GetBasketHandler>()
+            .AddScoped<CreateOrderHandler>()
+            .AddScoped<AddBasketLineHandler>();
 
         _serviceProvider = services.BuildServiceProvider();
     }
@@ -39,6 +46,7 @@ public class ApplicationContext
     {
         using var scope = _serviceProvider.CreateScope();
         var repositoryFactory = scope.ServiceProvider.GetRequiredService<RepositoryFactory>();
+        var getSaleItemHandler = scope.ServiceProvider.GetRequiredService<GetSaleItemHandler>();
 
         return commandType switch
         {
@@ -46,12 +54,12 @@ public class ApplicationContext
             CommandType.Back => new BackCommand(),
             CommandType.GoToRoot => new GoToRootPageCommand(),
             CommandType.DisplaySaleItems => new DisplaySaleItemsCommand(),
-            CommandType.DisplayProducts => new DisplayProductsCommand(repositoryFactory.CreateSaleItemRepository()),
-            CommandType.DisplayServices => new DisplayServicesCommand(repositoryFactory.CreateSaleItemRepository()),
-            CommandType.DisplayBasket => new DisplayBasketCommand(repositoryFactory.CreateBasketRepository()),
-            CommandType.AddProductToBasket => new AddBasketLineCommand(repositoryFactory.CreateBasketRepository(), (repositoryFactory.CreateSaleItemRepository() as IRepository<SaleItem>)!),
-            CommandType.AddServiceToBasket => new AddBasketLineCommand(repositoryFactory.CreateBasketRepository(), (repositoryFactory.CreateStockRepository() as IReadOnlyRepository<SaleItem>)!),
-            CommandType.CreateOrder => new CreateOrderCommand(repositoryFactory),
+            CommandType.DisplayProducts => scope.ServiceProvider.GetRequiredService<DisplayProductsCommand>(),
+            CommandType.DisplayServices => scope.ServiceProvider.GetRequiredService<DisplayServicesCommand>(),
+            CommandType.DisplayBasket => scope.ServiceProvider.GetRequiredService<DisplayBasketCommand>(),
+            CommandType.AddProductToBasket or 
+            CommandType.AddServiceToBasket => scope.ServiceProvider.GetRequiredService<AddBasketLineCommand>(),
+            CommandType.CreateOrder => scope.ServiceProvider.GetRequiredService<CreateOrderCommand>(),
             CommandType.DisplayOrders => new DisplayOrdersCommand(repositoryFactory.CreateOrdersRepository()),
             CommandType.StartOrderPayment => new StartOrderPaymentCommand(repositoryFactory.CreateOrdersRepository()),
             CommandType.SelectPaymentType => new SelectPaymentTypeCommand(),

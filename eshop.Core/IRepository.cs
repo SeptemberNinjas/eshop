@@ -8,11 +8,11 @@ public interface IRepository<T> : IReadOnlyRepository<T>
     /// <summary>
     /// Обновить объект
     /// </summary>
-    void Update(T item);
+    Task UpdateAsync(T item, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Добавить новый объект
     /// </summary>
     /// <returns>Идентификатор созданного объекта</returns>
-    int Insert(T item);
+    Task<int> InsertAsync(T item, CancellationToken cancellationToken = default);
 }

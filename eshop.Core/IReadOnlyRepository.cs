@@ -8,16 +8,16 @@ public interface IReadOnlyRepository<T>
     /// <summary>
     /// Вернуть список всех элементов
     /// </summary>
-    IReadOnlyCollection<T> GetAll();
+    Task<IReadOnlyCollection<T>> GetAllAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Получить количество элементов
     /// </summary>
-    int GetCount();
+    Task<int> GetCountAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Найти элемент по идентификатору
     /// </summary>
     /// <param name="id">Идентификатор</param>
-    T? GetById(int id);
+    Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 }

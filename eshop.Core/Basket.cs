@@ -9,71 +9,32 @@ public class Basket
 {
     private readonly List<ItemsListLine> _lines;
 
+    public int Id { get; }
+
     /// <summary>
     /// Линии корзины
     /// </summary>
     public IReadOnlyCollection<ItemsListLine> Lines => _lines;
 
-    /// <summary>
-    /// Признак наличия изменений в корзине
-    /// </summary>
-    public bool HasChanges { get; private set; }
-    
     public Basket()
     {
         _lines = [];
     }
-    
-    public Basket(IEnumerable<ItemsListLine> lines)
+
+    public Basket(int id, IEnumerable<ItemsListLine> lines)
     {
+        Id = id;
         _lines = lines.ToList();
     }
 
-    /// <summary>
-    /// Добавить товар в корзину
-    /// </summary>
-    public string AddLine(Product? product, int requestedCount)
+    public void AddLine(Service service)
     {
-        if (product is null)
-            return "Товар не найден";
-
-        if (requestedCount < 1)
-            return "Запрашиваемое количество товара должно быть больше 0";
-
-        // Вычисляем доступные остатки с учетом корзины
-        var productsInBasket = _lines
-            .Where(p => p.ItemType is ItemTypes.Product && p.ItemId == product.Id)
-            .Sum(p => p.Count);
-        var remainsWithCurrentBasket = product.Stock - productsInBasket;
-        
-        if (remainsWithCurrentBasket < requestedCount)
-            return $"Нельзя добавить товар в корзину, недостаточно остатков.{Environment.NewLine}" +
-                   $"Имеется {product.Stock} из них в корзине {productsInBasket}, требуется {requestedCount}";
-
-        if (IsLineExists(product, out var line))
-            line.Count += requestedCount;
-        else
-            _lines.Add(new ItemsListLine(product, requestedCount));
-
-        HasChanges = true;
-
-        return $"В корзину добавлено {requestedCount} единиц товара \'{product.Name}\'";
+        _lines.Add(new ItemsListLine(service));
     }
 
-    /// <summary>
-    /// Добавить услугу в корзину
-    /// </summary>
-    public string AddLine(Service? service)
+    public void AddLine(Product product, int count)
     {
-        if (service is null)
-            return "Услуга не найдена";
-
-        if (IsLineExists(service, out _) && service.OnlyOneItem)
-            return $"Ошибка при добавлении услуги. Услуга \'{service.Name}\' уже добавлена в корзину";
-
-        _lines.Add(new ItemsListLine(service));
-        HasChanges = true;
-        return $"В корзину добавлена услуга \'{service.Name}\'";
+        _lines.Add(new ItemsListLine(product, count));
     }
 
     /// <summary>
@@ -87,7 +48,6 @@ public class Basket
         // Создаём копию списка, иначе список линий очистится и в заказе.
         var order = new Order(_lines.ToArray());
         _lines.Clear();
-        HasChanges = true;
 
         return order;
     }
@@ -112,20 +72,6 @@ public class Basket
         result.AppendLine($"Итого: {total:F2}");
 
         return result.ToString();
-    }
-
-    private bool IsLineExists(SaleItem saleItem, out ItemsListLine line)
-    {
-        foreach (var ln in Lines)
-        {
-            if (ln.ItemType != saleItem.ItemType || ln.ItemId != saleItem.Id)
-                continue;
-            line = ln;
-            return true;
-        }
-
-        line = null!;
-        return false;
     }
 
     public void Clear()

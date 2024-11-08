@@ -7,5 +7,5 @@ public interface IEshopCommand
     /// <summary>
     /// Выполнить команду
     /// </summary>
-    void Execute(string[]? args);
+    Task ExecuteAsync(string[]? args, CancellationToken cancellationToken);
 }

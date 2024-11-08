@@ -24,10 +24,4 @@ public class Product : SaleItem
     {
         Stock = stock;
     }
-
-    /// <inheritdoc/>
-    public override string GetDisplayText()
-    {
-        return $"{Id}. {Name}. Цена: {Price:F2}. Остаток: {Stock}";
-    }
 }

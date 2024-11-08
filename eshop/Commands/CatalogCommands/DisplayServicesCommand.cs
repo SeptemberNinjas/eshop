@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using eshop.Application.SaleItems;
 using eshop.Commands.OrderCommands;
 using eshop.Commands.SystemCommands;
 using eshop.Core;
@@ -10,7 +11,7 @@ namespace eshop.Commands.CatalogCommands;
 /// </summary>
 public class DisplayServicesCommand : ICommandWithCommandsList
 {
-    private readonly IReadOnlyRepository<SaleItem> _saleItems;
+    private readonly GetSaleItemHandler _getSaleItemHandler;
 
     public string? Result { get; private set; }
     public bool ExecutionSuccess => true;
@@ -31,27 +32,32 @@ public class DisplayServicesCommand : ICommandWithCommandsList
     public override string ToString() => Info;
 
     /// <inheritdoc cref="DisplayServicesCommand"/>
-    public DisplayServicesCommand(IReadOnlyRepository<SaleItem> saleItems)
+    public DisplayServicesCommand(GetSaleItemHandler getSaleItemHandler)
     {
-        _saleItems = saleItems;
+        _getSaleItemHandler = getSaleItemHandler;
     }
 
     /// <inheritdoc />
-    public void Execute(string[]? args)
+    public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var allItems = _saleItems.GetAll()
-            .Where(i => i.ItemType is ItemTypes.Service)
-            .ToArray();
-        
-        if (args is null || args.Length == 0 || !int.TryParse(args[0], out var count) || count < 1)
+        _ = int.TryParse(args?.FirstOrDefault(), out var count);
+
+        var items = await _getSaleItemHandler.GetItemsAsync(ItemTypes.Service, count);
+
+        if (items.IsFailed)
         {
-            count = allItems.Length;
+            Result = "Не удалось получить список услуг";
+            return;
         }
-            
+
         var message = new StringBuilder("Услуги:").AppendLine();
-        for (var i = 0; i < Math.Min(allItems.Length, count); i++)
+
+        for (var i = 0; i < items.Value.Count(); i++)
         {
-            message.AppendLine(allItems[i].GetDisplayText());
+            var item = items.Value.ElementAt(i);
+            message
+                .Append($"{item.Id}. {item.Name}. Цена: {item.Price:F2}")
+                .AppendLine();
         }
 
         Result = message.ToString();

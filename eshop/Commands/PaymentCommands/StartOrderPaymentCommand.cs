@@ -18,7 +18,7 @@ public class StartOrderPaymentCommand : ICommandWithCommandsList, ICommandWithCo
     }
 
     /// <inheritdoc />
-    public void Execute(string[]? args)
+    public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
         if (args is null || args.Length == 0 || !int.TryParse(args[0], out var id))
         {
@@ -26,7 +26,7 @@ public class StartOrderPaymentCommand : ICommandWithCommandsList, ICommandWithCo
             return;
         }
 
-        var order = _orders.GetById(id);
+        var order = await _orders.GetByIdAsync(id);
 
         if (order is null)
         {

@@ -13,8 +13,9 @@ public class ExitCommand : IEshopCommand
     public string? Result => string.Empty;
 
     /// <inheritdoc />
-    public void Execute(string[]? args)
+    public Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
         Environment.Exit(0);
+        return Task.CompletedTask;
     }
 }
