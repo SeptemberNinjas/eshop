@@ -22,14 +22,14 @@ public class ClearBasketCommand : IEshopCommand
     /// <inheritdoc />
     public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var currentBasket = await _basket.GetByIdAsync(default);
+        var currentBasket = (await _basket.GetAllAsync(cancellationToken)).FirstOrDefault();
         if (currentBasket is null)
         {
             Result = "Корзина не найдена";
             return;
         }
         currentBasket.Clear();
-        await _basket.UpdateAsync(currentBasket);
+        await _basket.UpdateAsync(currentBasket, cancellationToken);
 
         Result = "Корзина очищена";
     }

@@ -11,7 +11,7 @@ namespace eshop.Commands.CatalogCommands;
 /// </summary>
 public class DisplayServicesCommand : ICommandWithCommandsList
 {
-    private GetSaleItemHandler _getSaleItemHandler;
+    private readonly GetSaleItemHandler _getSaleItemHandler;
 
     public string? Result { get; private set; }
     public bool ExecutionSuccess => true;

@@ -28,7 +28,7 @@ public static class Program
         catch (Exception ex)
         {
             Console.WriteLine($"""
-                Произошила ошибка в работе приложения: {ex.Message}
+                Произошла ошибка в работе приложения: {ex.Message}
                 { ex.StackTrace}
                 """);
             Console.WriteLine("Нажмите Enter чтобы закрыть приложение ...");
