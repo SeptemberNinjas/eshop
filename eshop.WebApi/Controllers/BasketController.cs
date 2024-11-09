@@ -11,11 +11,16 @@ public class BasketController : ControllerBase
 {
     private readonly GetBasketHandler _getHandler;
     private readonly AddBasketLineHandler _addBasketLineHandler;
+    private readonly ClearBasketHandler _clearBasketHandler;
 
-    public BasketController(GetBasketHandler getHandler, AddBasketLineHandler addBasketLineHandler)
+    public BasketController(
+        GetBasketHandler getHandler, 
+        AddBasketLineHandler addBasketLineHandler, 
+        ClearBasketHandler clearBasketHandler)
     {
         _getHandler = getHandler;
         _addBasketLineHandler = addBasketLineHandler;
+        _clearBasketHandler = clearBasketHandler;
     }
 
     [HttpGet]
@@ -26,6 +31,16 @@ public class BasketController : ControllerBase
             return NotFound();
 
         return Ok(result.Value);
+    }
+    
+    [HttpDelete]
+    public async Task<ActionResult<Basket>> ClearBasketAsync(CancellationToken cancellationToken)
+    {
+        var result = await _clearBasketHandler.ClearBasketAsync(cancellationToken);
+        if (result.IsFailed)
+            return BadRequest(result.ToString());
+
+        return Ok(result.ToString());
     }
     
     [HttpPatch("line")]

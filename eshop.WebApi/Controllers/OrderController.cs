@@ -1,4 +1,5 @@
 ﻿using eshop.Application.Order;
+using eshop.Core;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eshop.WebApi.Controllers;
@@ -8,10 +9,22 @@ namespace eshop.WebApi.Controllers;
 public class OrderController : ControllerBase
 {
     private readonly CreateOrderHandler _createOrderHandler;
+    private readonly GetOrdersHandler _getOrdersHandler;
 
-    public OrderController(CreateOrderHandler createOrderHandler)
+    public OrderController(CreateOrderHandler createOrderHandler, GetOrdersHandler getOrdersHandler)
     {
         _createOrderHandler = createOrderHandler;
+        _getOrdersHandler = getOrdersHandler;
+    }
+    
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Order>>> GetOrdersAsync(CancellationToken cancellationToken)
+    {
+        var result = await _getOrdersHandler.GetOrdersAsync(cancellationToken);
+        if (result.IsFailed)
+            return NotFound();
+
+        return Ok(result.Value);
     }
     
     [HttpPost]

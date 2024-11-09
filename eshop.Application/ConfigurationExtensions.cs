@@ -13,6 +13,8 @@ public static class ConfigurationExtensions
     {
         services.AddScoped<RepositoryFactory>(_ => new DatabaseRepositoryFactory(configuration["ConnectionString"] ?? ""))
             // Регистрация обработчиков
+            .AddScoped<ClearBasketHandler>()
+            .AddScoped<GetOrdersHandler>()
             .AddScoped<GetSaleItemHandler>()
             .AddScoped<GetBasketHandler>()
             .AddScoped<CreateOrderHandler>()

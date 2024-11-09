@@ -1,7 +1,7 @@
 ﻿using System.Text;
+using eshop.Application.Order;
 using eshop.Commands.PaymentCommands;
 using eshop.Commands.SystemCommands;
-using eshop.Core;
 
 namespace eshop.Commands.OrderCommands;
 
@@ -10,16 +10,16 @@ namespace eshop.Commands.OrderCommands;
 /// </summary>
 public class DisplayOrdersCommand : ICommandWithCommandsList
 {
-    private readonly IRepository<Order> _orders;
+    private readonly GetOrdersHandler _handler;
     
     /// <inheritdoc cref="DisplayOrdersCommand"/>
-    public DisplayOrdersCommand(IRepository<Order> orders)
+    public DisplayOrdersCommand(GetOrdersHandler handler)
     {
-        _orders = orders;
+        _handler = handler;
     }
 
     public string? Result { get; private set; }
-    public bool ExecutionSuccess => true;
+    public bool ExecutionSuccess { get; private set; }
 
     /// <inheritdoc />
     public IReadOnlyDictionary<CommandType, string> AvailableCommands { get; } = new Dictionary<CommandType, string>
@@ -37,15 +37,22 @@ public class DisplayOrdersCommand : ICommandWithCommandsList
     /// <inheritdoc />
     public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var ordersList = await _orders.GetAllAsync();
-        if (ordersList.Count == 0)
+        var ordersListResult = await _handler.GetOrdersAsync(cancellationToken);
+        ExecutionSuccess = ordersListResult.IsSuccess;
+        if (ordersListResult.IsFailed)
+        {
+            Result = ordersListResult.ToString();
+            return;
+        }
+            
+        if (!ordersListResult.Value.Any())
         {
             Result = "Список заказов пуст";
             return;
         }
         
         var result = new StringBuilder();
-        foreach (var order in ordersList)
+        foreach (var order in ordersListResult.Value)
         {
             result.AppendLine(order.ToString());
         }

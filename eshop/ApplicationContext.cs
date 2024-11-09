@@ -1,13 +1,10 @@
 ﻿using eshop.Application;
-using eshop.Application.Order;
-using eshop.Application.SaleItems;
 using eshop.Commands;
 using eshop.Commands.CatalogCommands;
 using eshop.Commands.OrderCommands;
 using eshop.Commands.PaymentCommands;
 using eshop.Commands.SystemCommands;
 using eshop.DAL;
-using eshop.DAL.Database;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -30,6 +27,8 @@ public class ApplicationContext
         var services = new ServiceCollection()
             .RegisterApplicationDependencies(configuration)
             // Регистрация команд
+            .AddScoped<ClearBasketCommand>()
+            .AddScoped<DisplayOrdersCommand>()
             .AddScoped<DisplayBasketCommand>()
             .AddScoped<AddBasketLineCommand>()
             .AddScoped<DisplayProductsCommand>()
@@ -42,7 +41,6 @@ public class ApplicationContext
     {
         using var scope = _serviceProvider.CreateScope();
         var repositoryFactory = scope.ServiceProvider.GetRequiredService<RepositoryFactory>();
-        var getSaleItemHandler = scope.ServiceProvider.GetRequiredService<GetSaleItemHandler>();
 
         return commandType switch
         {
@@ -56,11 +54,11 @@ public class ApplicationContext
             CommandType.AddProductToBasket or 
             CommandType.AddServiceToBasket => scope.ServiceProvider.GetRequiredService<AddBasketLineCommand>(),
             CommandType.CreateOrder => scope.ServiceProvider.GetRequiredService<CreateOrderCommand>(),
-            CommandType.DisplayOrders => new DisplayOrdersCommand(repositoryFactory.CreateOrdersRepository()),
+            CommandType.DisplayOrders => scope.ServiceProvider.GetRequiredService<DisplayOrdersCommand>(),
             CommandType.StartOrderPayment => new StartOrderPaymentCommand(repositoryFactory.CreateOrdersRepository()),
             CommandType.SelectPaymentType => new SelectPaymentTypeCommand(),
             CommandType.TransferMoney => new TransferMoneyCommand(repositoryFactory.CreateOrdersRepository()),
-            CommandType.ClearBasket => new ClearBasketCommand(repositoryFactory.CreateBasketRepository()),
+            CommandType.ClearBasket => scope.ServiceProvider.GetRequiredService<ClearBasketCommand>(),
             _ => throw new NotSupportedException()
         };
     }

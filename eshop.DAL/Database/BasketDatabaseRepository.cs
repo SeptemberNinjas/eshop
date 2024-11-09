@@ -101,7 +101,7 @@ internal class BasketDatabaseRepository : DatabaseContext, IRepository<Basket>
                 reader.GetFieldValue<string>("name"),
                 reader.GetFieldValue<decimal>("price"),
                 reader.GetFieldValue<int>("amount"))
-            : new Service(reader.GetFieldValue<int>("id"),
+            : new Service(reader.GetFieldValue<int>("item_id"),
                 reader.GetFieldValue<string>("name"),
                 reader.GetFieldValue<decimal>("price"));
 
