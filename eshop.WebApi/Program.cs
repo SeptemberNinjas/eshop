@@ -1,11 +1,16 @@
 using eshop.Application;
+using eshop.WebApi;
 using FluentResults;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.RegisterApplicationDependencies(builder.Configuration);
-builder.Services.AddControllers()
+builder.Services
+    .AddControllers(options =>
+    {
+        options.Filters.Add<IncomingRequestFilter>();
+    })
     .ConfigureApiBehaviorOptions(options =>
     {
         options.InvalidModelStateResponseFactory = context =>
