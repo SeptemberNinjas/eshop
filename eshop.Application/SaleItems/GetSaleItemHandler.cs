@@ -13,14 +13,14 @@ namespace eshop.Application.SaleItems
             _repositoryFactory = repositoryFactory;
         }
 
-        public async Task<Result<IEnumerable<SaleItemDto>>> GetItemsAsync(ItemTypes itemType, int? count)
+        public async Task<Result<IEnumerable<SaleItemDto>>> GetItemsAsync(ItemTypes itemType, int? count, CancellationToken cancellationToken)
         {
             var repository = _repositoryFactory.CreateSaleItemRepository();
 
             try
             {
                 var items = (await repository
-                    .GetAllAsync())
+                    .GetAllAsync(cancellationToken))
                     .Where(i => i.ItemType == itemType);
 
                 var requestedItems = count is null or <= 0

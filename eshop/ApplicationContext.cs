@@ -1,4 +1,5 @@
-﻿using eshop.Application.Order;
+﻿using eshop.Application;
+using eshop.Application.Order;
 using eshop.Application.SaleItems;
 using eshop.Commands;
 using eshop.Commands.CatalogCommands;
@@ -27,17 +28,12 @@ public class ApplicationContext
     public ApplicationContext(IConfiguration configuration)
     {
         var services = new ServiceCollection()
-            .AddScoped<RepositoryFactory>((sp) => new DatabaseRepositoryFactory(configuration["ConnectionString"] ?? ""))
+            .RegisterApplicationDependencies(configuration)
             // Регистрация команд
             .AddScoped<DisplayBasketCommand>()
             .AddScoped<AddBasketLineCommand>()
             .AddScoped<DisplayProductsCommand>()
-            .AddScoped<CreateOrderCommand>()
-            // Регистрация обработчиков
-            .AddScoped<GetSaleItemHandler>()
-            .AddScoped<GetBasketHandler>()
-            .AddScoped<CreateOrderHandler>()
-            .AddScoped<AddBasketLineHandler>();
+            .AddScoped<CreateOrderCommand>();
 
         _serviceProvider = services.BuildServiceProvider();
     }
