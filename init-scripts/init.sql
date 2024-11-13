@@ -10,7 +10,12 @@ create table "stock"(
     "amount" int not null
 );
 
+create table basket (
+    id serial primary key
+);
+
 create table basket_line (
+    basket_id int not null,
     item_id int not null,
     count int not null
 );

@@ -1,5 +1,5 @@
-﻿using eshop.Commands.SystemCommands;
-using eshop.Core;
+﻿using eshop.Application.Order;
+using eshop.Commands.SystemCommands;
 
 namespace eshop.Commands.OrderCommands;
 
@@ -8,12 +8,12 @@ namespace eshop.Commands.OrderCommands;
 /// </summary>
 public class DisplayBasketCommand : ICommandWithCommandsList
 {
-    private readonly IReadOnlyRepository<Basket> _basket;
+    private readonly GetBasketHandler _handler;
 
     /// <inheritdoc cref="DisplayBasketCommand"/>
-    public DisplayBasketCommand(IReadOnlyRepository<Basket> basket)
+    public DisplayBasketCommand(GetBasketHandler handler)
     {
-        _basket = basket;
+        _handler = handler;
     }
 
     public string? Result { get; private set; }
@@ -36,15 +36,8 @@ public class DisplayBasketCommand : ICommandWithCommandsList
     /// <inheritdoc />
     public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var currentBasket = await _basket.GetByIdAsync(default);
-        if (currentBasket is null)
-        {
-            ExecutionSuccess = false;
-            Result = "Корзина не найдена";
-            return;
-        }
-        
-        ExecutionSuccess = true;
-        Result = currentBasket.ToString();
+        var result = await _handler.GetBasketAsync(cancellationToken);
+        ExecutionSuccess = result.IsSuccess;
+        Result = result.Value.ToString();
     }
 }

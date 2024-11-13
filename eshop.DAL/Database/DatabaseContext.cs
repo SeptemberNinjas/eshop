@@ -70,7 +70,6 @@ namespace eshop.DAL.Database
             using var connection = await GetConnectionAsync();
 
             var command = GetCommand(commandText);
-
             using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
             var result = new List<T>();
@@ -96,6 +95,15 @@ namespace eshop.DAL.Database
 
 
             return default;
+        }
+
+        protected async Task<string?> ExecuteScalarAsync(string commandText, CancellationToken cancellationToken)
+        {
+            await using var connection = await GetConnectionAsync();
+            var command = GetCommand(commandText);
+
+            var reader = await command.ExecuteScalarAsync(cancellationToken);
+            return reader?.ToString();
         }
     }
 }
