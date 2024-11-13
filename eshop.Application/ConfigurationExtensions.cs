@@ -1,4 +1,5 @@
 ﻿using eshop.Application.Order;
+using eshop.Application.Payment;
 using eshop.Application.SaleItems;
 using eshop.DAL;
 using eshop.DAL.Database;
@@ -18,7 +19,9 @@ public static class ConfigurationExtensions
             .AddScoped<GetSaleItemHandler>()
             .AddScoped<GetBasketHandler>()
             .AddScoped<CreateOrderHandler>()
-            .AddScoped<AddBasketLineHandler>();
+            .AddScoped<AddBasketLineHandler>()
+            .AddScoped<PayOrderByCashHandler>()
+            .AddScoped<PayOrderByCashlessHandler>();
         
         return services;
     } 
