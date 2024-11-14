@@ -13,54 +13,6 @@ namespace eshop.DAL.Database
         {
         }
 
-        /// <inheritdoc/>
-        public IReadOnlyCollection<SaleItem> GetAll()
-        {
-            using var command = GetCommand(
-                @"select c.*, s.amount 
-                    from catalog c
-                        left join stock s on c.Id = s.Id");
-
-            using var reader = command.ExecuteReader();
-
-            var result = new List<SaleItem>();
-
-            while (reader.Read())
-            {
-                result.Add(GetSaleItem(reader));
-            }
-
-            return result;
-        }
-
-        /// <inheritdoc/>
-        public SaleItem? GetById(int id)
-        {
-            using var command = GetCommand(
-                $@"select c.*, s.amount 
-                    from catalog c
-                        left join stock s on c.Id = s.Id
-                    where type = 1 and c.id = {id}");
-
-            using var reader = command.ExecuteReader();
-
-            if (reader.Read())
-                return GetSaleItem(reader);
-
-            return null;
-        }
-
-        /// <inheritdoc/>
-        public int GetCount()
-        {
-            using var command = GetCommand(
-                "select count(*) from catalog");
-
-            var result = command.ExecuteScalar();
-
-            return int.TryParse(result?.ToString(), out var count) ? count : 0;
-        }
-
         private static SaleItem GetSaleItem(DbDataReader reader)
         {
             var type = (ItemTypes)reader.GetFieldValue<int>("type");
@@ -96,10 +48,8 @@ namespace eshop.DAL.Database
             var commandText = 
                 "select count(*) from catalog";
 
-            var result = await ExecuteReaderAsync(commandText, (reader) =>
-            {
-                return int.TryParse(reader[0]?.ToString(), out var count) ? count : 0;
-            }, cancellationToken);
+            var result = await ExecuteReaderAsync(commandText, 
+                reader => int.TryParse(reader[0].ToString(), out var count) ? count : 0, cancellationToken);
 
             return result;
         }
@@ -111,7 +61,7 @@ namespace eshop.DAL.Database
                 $@"select c.*, s.amount 
                     from catalog c
                         left join stock s on c.Id = s.Id
-                    where type = 1 and c.id = {id}";
+                    where c.id = {id}";
 
             var result = await ExecuteReaderAsync(commandText, GetSaleItem, cancellationToken);
 

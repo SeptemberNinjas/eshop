@@ -1,15 +1,15 @@
-﻿using eshop.Core;
+﻿using eshop.Application.Order;
 
 namespace eshop.Commands.OrderCommands;
 
 public class ClearBasketCommand : IEshopCommand
 {
-    private readonly IRepository<Basket> _basket;
+    private readonly ClearBasketHandler _handler;
 
     /// <inheritdoc cref="CreateOrderCommand"/>
-    public ClearBasketCommand(IRepository<Basket> basket)
+    public ClearBasketCommand(ClearBasketHandler handler)
     {
-        _basket = basket;
+        _handler = handler;
     }
    
     public const string Info = "Очистить корзину";
@@ -22,15 +22,7 @@ public class ClearBasketCommand : IEshopCommand
     /// <inheritdoc />
     public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var currentBasket = (await _basket.GetAllAsync(cancellationToken)).FirstOrDefault();
-        if (currentBasket is null)
-        {
-            Result = "Корзина не найдена";
-            return;
-        }
-        currentBasket.Clear();
-        await _basket.UpdateAsync(currentBasket, cancellationToken);
-
-        Result = "Корзина очищена";
+        var result = await _handler.ClearBasketAsync(cancellationToken);
+        Result = result.ToString();
     }
 }
