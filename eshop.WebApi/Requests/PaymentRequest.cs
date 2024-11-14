@@ -8,6 +8,7 @@ namespace eshop.WebApi.Requests
         [JsonPropertyName("orderId")]
         public int OrderId { get; set; }
 
+        [JsonPropertyName("paymentType")]
         [Range(1, 2, ErrorMessage = "Тип оплаты должен быть: 1 (наличная оплата) или 2 (безналичная оплата)")]
         public byte PaymentType { get; set; }
 
