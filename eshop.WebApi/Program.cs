@@ -10,6 +10,7 @@ builder.Services
     .AddControllers(options =>
     {
         options.Filters.Add<IncomingRequestFilter>();
+        options.Filters.Add<GlobalExceptionFilter>();
     })
     .ConfigureApiBehaviorOptions(options =>
     {
