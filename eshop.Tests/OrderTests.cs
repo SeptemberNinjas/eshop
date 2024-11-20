@@ -126,9 +126,9 @@ namespace eshop.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(createOrderResult.IsSuccess, Is.True, "Не удалось создать заказ");
+                Assert.That(createOrderResult.IsSuccess, Is.True, createOrderResult.ToString());
                 Assert.That(getBasketResult.IsFailed, Is.True, "Корзина не пустая");
-                Assert.That(getOrdersResult.IsSuccess, Is.True, "Не удалось получить список заказов");
+                Assert.That(getOrdersResult.IsSuccess, Is.True, getOrdersResult.ToString());
                 Assert.That(getOrdersResult.Value.Count(), Is.EqualTo(1), "Некорректное количество заказов");
             });   
         }

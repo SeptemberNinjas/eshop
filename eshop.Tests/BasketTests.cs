@@ -77,8 +77,8 @@ namespace eshop.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(addLineResult.IsSuccess, Is.True, "Не удалось добавить товар в корзину");
-                Assert.That(getBasketResult.IsSuccess, Is.True, "Не удалось получить коризну");
+                Assert.That(addLineResult.IsSuccess, Is.True, addLineResult.ToString());
+                Assert.That(getBasketResult.IsSuccess, Is.True, getBasketResult.ToString());
                 Assert.That(getBasketResult.Value.Lines.Count, Is.EqualTo(1), "В корзине некорректное количество товаров");
             });
         }
