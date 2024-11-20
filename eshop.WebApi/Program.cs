@@ -61,6 +61,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseAuthorization();
 
 app.UseMiddleware<ApiKeyMiddleware>();
