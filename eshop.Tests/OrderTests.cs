@@ -48,10 +48,7 @@ namespace eshop.Tests
 
             stockRepository
                 .Setup(item => item.UpdateAsync(It.IsAny<Stock>(), It.IsAny<CancellationToken>()))
-                .Returns((Stock stock, CancellationToken cancellationToken) =>
-                {
-                    return Task.CompletedTask;
-                });
+                .Returns(Task.CompletedTask);
 
             var orderRepository = new Mock<IRepository<Order>>();
 
