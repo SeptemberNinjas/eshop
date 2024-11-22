@@ -42,6 +42,7 @@ namespace eshop.Tests
                 .AddScoped(sp => repositoryFactory.Object)
                 .AddScoped<GetBasketHandler>()
                 .AddScoped<AddBasketLineHandler>()
+                .AddScoped<ClearBasketHandler>()
                 .BuildServiceProvider();
         }
 
@@ -76,9 +77,28 @@ namespace eshop.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(addLineResult.IsSuccess, Is.True, "Не удалось добавить товар в корзину");
-                Assert.That(getBasketResult.IsSuccess, Is.True, "Не удалось получить коризну");
+                Assert.That(addLineResult.IsSuccess, Is.True, addLineResult.ToString());
+                Assert.That(getBasketResult.IsSuccess, Is.True, getBasketResult.ToString());
                 Assert.That(getBasketResult.Value.Lines.Count, Is.EqualTo(1), "В корзине некорректное количество товаров");
+            });
+        }
+
+        [Test(Description = "Очистка корзины")]
+        [Order(3)]
+        public async Task ClearBasketSuccess()
+        {
+            var scope = _serviceProvider.CreateScope();
+
+            var clearBasketHandler = scope.ServiceProvider.GetRequiredService<ClearBasketHandler>();
+            var getBasketHandler = scope.ServiceProvider.GetRequiredService<GetBasketHandler>();
+
+            var clearBasketResult = await clearBasketHandler.ClearBasketAsync(CancellationToken.None);
+            var getBasketResult = await getBasketHandler.GetBasketAsync(CancellationToken.None);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(clearBasketResult.IsSuccess, Is.True, "Не удалось очистить корзину");
+                Assert.That(getBasketResult.IsFailed, Is.True, "Не удалось получить ошибку при получении несуществующей корзины");
             });
         }
     }

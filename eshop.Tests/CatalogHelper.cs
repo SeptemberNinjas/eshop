@@ -10,5 +10,19 @@ namespace eshop.Tests
                 new Service(3, "Побелить стену", 54.99M),
                 new Service(4, "Покрастить дом", 500M)
             ];
+
+        public static IEnumerable<Stock> Stocks
+        {
+            get
+            {
+                return Catalog
+                        .Where(item => item.ItemType == ItemTypes.Product)
+                        .Select(item => new Stock
+                        {
+                            ItemId = item.Id,
+                            Amount = ((Product)item).Stock
+                        });
+            }
+        }
     }
 }
