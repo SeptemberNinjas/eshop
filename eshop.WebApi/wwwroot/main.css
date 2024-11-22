@@ -1,0 +1,7 @@
+.eshop-product-card {
+    width: 250px;    
+    cursor: pointer;
+}
+.eshop-product-card:hover {
+    box-shadow: var(--bs-box-shadow);
+}
