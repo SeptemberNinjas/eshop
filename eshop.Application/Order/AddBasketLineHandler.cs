@@ -13,18 +13,22 @@ namespace eshop.Application.Order
             _repositoryFactory = repositoryFactory;
         }
 
-        public async Task<Result> AddLineAsync(int itemId, int count, CancellationToken cancellationToken)
+        public async Task<Result> AddLineAsync(string customer, int itemId, int count,
+            CancellationToken cancellationToken)
         {
             try
             {
                 var basketRepository = _repositoryFactory.CreateBasketRepository();
-                var currentBasket = (await basketRepository.GetAllAsync(cancellationToken)).FirstOrDefault();
-                if (currentBasket is null)
+                
+                var baskets = await basketRepository.GetAllAsync(cancellationToken);
+                var customerBasket = baskets.FirstOrDefault(b => b.Customer == customer);
+                if (customerBasket is null)
                 {
-                    await basketRepository.InsertAsync(new Basket(), cancellationToken);
-                    currentBasket = (await basketRepository.GetAllAsync(cancellationToken)).FirstOrDefault();
+                    await basketRepository.InsertAsync(new Basket(customer), cancellationToken);
+                    customerBasket = (await basketRepository.GetAllAsync(cancellationToken))
+                        .FirstOrDefault(b => b.Customer == customer);
                 }
-                if (currentBasket is null)
+                if (customerBasket is null)
                     return Result.Fail("Корзина не найдена");
 
                 var itemsRepository = _repositoryFactory.CreateSaleItemRepository();
@@ -34,8 +38,8 @@ namespace eshop.Application.Order
           
                 var result = item switch
                 {
-                    Product product => await AddLineAsync(product, count, currentBasket, basketRepository),
-                    Service service => AddLine(service, currentBasket),
+                    Product product => await AddLineAsync(product, count, customerBasket, basketRepository),
+                    Service service => AddLine(service, customerBasket),
                     _ => Result.Fail("Неизвестный тип товарной единицы")
                 };
 

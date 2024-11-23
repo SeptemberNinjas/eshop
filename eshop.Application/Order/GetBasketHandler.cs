@@ -13,16 +13,17 @@ namespace eshop.Application.Order
             _repositoryFactory = repositoryFactory;
         }
 
-        public async Task<Result<Basket>> GetBasketAsync(CancellationToken cancellationToken)
+        public async Task<Result<Basket>> GetBasketAsync(string customer, CancellationToken cancellationToken)
         {
             try
             {
                 var repository = _repositoryFactory.CreateBasketRepository();
-                var currentBasket = (await repository.GetAllAsync(cancellationToken)).FirstOrDefault();
-                if (currentBasket is null || currentBasket.Lines.Count == 0)
-                    return Result.Fail("Корзина не найдена");
+                var baskets = await repository.GetAllAsync(cancellationToken);
+                var customerBasket = baskets.FirstOrDefault(b => b.Customer == customer);
+                if (customerBasket is null)
+                    return Result.Fail($"Корзина покупателя с логином {customer} не найдена");
                 
-                return Result.Ok(currentBasket);
+                return Result.Ok(customerBasket);
             }
             catch (Exception ex)
             {

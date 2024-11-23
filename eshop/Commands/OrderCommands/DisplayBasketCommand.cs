@@ -36,7 +36,7 @@ public class DisplayBasketCommand : ICommandWithCommandsList
     /// <inheritdoc />
     public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var result = await _handler.GetBasketAsync(cancellationToken);
+        var result = await _handler.GetBasketAsync(args?[0] ?? string.Empty, cancellationToken);
         ExecutionSuccess = result.IsSuccess;
         Result = result.Value.ToString();
     }

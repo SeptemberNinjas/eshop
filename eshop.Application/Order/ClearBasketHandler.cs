@@ -12,17 +12,18 @@ public class ClearBasketHandler
         _repositoryFactory = repositoryFactory;
     }
 
-    public async Task<Result> ClearBasketAsync(CancellationToken cancellationToken)
+    public async Task<Result> ClearBasketAsync(string customer, CancellationToken cancellationToken)
     {
         try
         {
             var repository = _repositoryFactory.CreateBasketRepository();
-            var currentBasket = (await repository.GetAllAsync(cancellationToken)).FirstOrDefault();
-            if (currentBasket is null)
+            var baskets = await repository.GetAllAsync(cancellationToken);
+            var customerBasket = baskets.FirstOrDefault(b => b.Customer == customer);
+            if (customerBasket is null)
                 return Result.Fail("Корзина не найдена");
             
-            currentBasket.Clear();
-            await repository.UpdateAsync(currentBasket, cancellationToken);
+            customerBasket.Clear();
+            await repository.UpdateAsync(customerBasket, cancellationToken);
                 
             return Result.Ok()
                 .WithSuccess("Корзина очищена");
