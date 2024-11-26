@@ -59,7 +59,7 @@ namespace eshop.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result.IsSuccess, Is.True, "Не удалось получить корзину");
-                Assert.That(result.Value.Lines, Is.Empty, "Линии в пустой корзине");
+                Assert.That(result.Value.Items, Is.Empty, "Линии в пустой корзине");
             });
         }
 
@@ -80,7 +80,7 @@ namespace eshop.Tests
             {
                 Assert.That(addLineResult.IsSuccess, Is.True, addLineResult.ToString());
                 Assert.That(getBasketResult.IsSuccess, Is.True, getBasketResult.ToString());
-                Assert.That(getBasketResult.Value.Lines.Count, Is.EqualTo(1), "В корзине некорректное количество товаров");
+                Assert.That(getBasketResult.Value.Items.Count, Is.EqualTo(1), "В корзине некорректное количество товаров");
             });
         }
 
@@ -100,7 +100,7 @@ namespace eshop.Tests
             {
                 Assert.That(clearBasketResult.IsSuccess, Is.True, "Не удалось очистить корзину");
                 Assert.That(getBasketResult.IsSuccess, Is.True, "Не удалось получить корзину");
-                Assert.That(getBasketResult.Value.Lines, Is.Empty, "Линии в пустой корзине");
+                Assert.That(getBasketResult.Value.Items, Is.Empty, "Линии в пустой корзине");
             });
         }
     }
