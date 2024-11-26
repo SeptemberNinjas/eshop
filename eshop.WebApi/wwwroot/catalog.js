@@ -1,5 +1,7 @@
 'use strict'
 
+import {addBasketLine, getBasketSize} from "./basket.js";
+
 const loadProducts = async () => {    
     const productsResponse = await fetch('/Catalog/products')    
     if (productsResponse.status !== 200)
@@ -9,11 +11,7 @@ const loadProducts = async () => {
 }
 
 const loadServices = async () => {
-    const servicesResponse = await fetch('/Catalog/services', {
-        headers: {
-            'Authorization': '123'
-        }
-    })
+    const servicesResponse = await fetch('/Catalog/services')
     if (servicesResponse.status !== 200)
         return []
 
@@ -23,6 +21,12 @@ const loadServices = async () => {
 const loadCatalog = async () => {
     await loadList('#products-list', loadProducts, getProductTemplate, 'Товары не найдены')
     await loadList('#services-list', loadServices, getServicesTemplate, 'Услуги не найдены')
+    await updateBasketSize()
+}
+
+const updateBasketSize = async () => {
+    const basketSize = await getBasketSize()
+    document.querySelector('#basket-lines-badge').innerHTML = basketSize === 0 ? '' : basketSize
 }
 
 const loadList = async (containerSelector, loadFunc, templateFunc, errorMessage) => {
@@ -35,8 +39,9 @@ const loadList = async (containerSelector, loadFunc, templateFunc, errorMessage)
     for (const item of items) {
         const element = document.createElement('div')
         element.innerHTML = templateFunc(item)
-        element.addEventListener('click', () => {
-            alert(JSON.stringify(item))
+        element.addEventListener('click', async () => {
+            await addBasketLine(item)
+            await updateBasketSize()
         })
         listContainer.appendChild(element)
     }
