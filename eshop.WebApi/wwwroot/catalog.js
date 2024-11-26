@@ -1,11 +1,7 @@
 'use strict'
 
 const loadProducts = async () => {    
-    const productsResponse = await fetch('/Catalog/products', {
-        headers: {
-            'Authorization': '123'
-        }
-    })
+    const productsResponse = await fetch('/Catalog/products')    
     if (productsResponse.status !== 200)
         return []
     

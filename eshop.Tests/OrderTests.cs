@@ -97,7 +97,7 @@ namespace eshop.Tests
             var basket = new Basket(1, [
                 new ItemsListLine(product!, productCount),
                 new ItemsListLine(service!)
-            ]);
+            ], "customer");
 
             _baskets.Add(basket);
         }
@@ -121,13 +121,13 @@ namespace eshop.Tests
             var getOrdersHandler = scope.ServiceProvider.GetRequiredService<GetOrdersHandler>();
 
             var createOrderResult = await createOrderHandler.CreateOrderAsync(CancellationToken.None);
-            var getBasketResult = await getBasketHandler.GetBasketAsync(CancellationToken.None);
+            var getBasketResult = await getBasketHandler.GetBasketAsync("customer", CancellationToken.None);
             var getOrdersResult = await getOrdersHandler.GetOrdersAsync(CancellationToken.None);
 
             Assert.Multiple(() =>
             {
                 Assert.That(createOrderResult.IsSuccess, Is.True, createOrderResult.ToString());
-                Assert.That(getBasketResult.IsFailed, Is.True, "Корзина не пустая");
+                Assert.That(getBasketResult.Value.Lines, Is.Empty, "Корзина не пустая");
                 Assert.That(getOrdersResult.IsSuccess, Is.True, getOrdersResult.ToString());
                 Assert.That(getOrdersResult.Value.Count(), Is.EqualTo(1), "Некорректное количество заказов");
             });   

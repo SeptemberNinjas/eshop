@@ -35,7 +35,7 @@ public class AddBasketLineCommand : IEshopCommand
         }
         
         var count = args.Length < 2 || !int.TryParse(args[1], out var countFromArgs) ? 0 : countFromArgs;
-        var result = await _handler.AddLineAsync(id, count, cancellationToken);
+        var result = await _handler.AddLineAsync(args.Length == 3 ? args[2] : args[1], id, count, cancellationToken);
         Result = result.ToString();
     }
 }

@@ -19,7 +19,7 @@ namespace eshop.Tests
         {
             var basketRepository = new Mock<IRepository<Basket>>();
 
-            _basket = new Basket(1, []);
+            _basket = new Basket(1, [], "customer");
 
             basketRepository
                 .Setup(item => item.GetAllAsync(It.IsAny<CancellationToken>()))
@@ -54,11 +54,12 @@ namespace eshop.Tests
 
             var getBasketHandler = scope.ServiceProvider.GetRequiredService<GetBasketHandler>();
 
-            var result = await getBasketHandler.GetBasketAsync(CancellationToken.None);
+            var result = await getBasketHandler.GetBasketAsync("customer", CancellationToken.None);
 
             Assert.Multiple(() =>
             {
-                Assert.That(result.IsFailed, Is.True, "Не удалось получить ошибку при получении несуществующей корзины");
+                Assert.That(result.IsSuccess, Is.True, "Не удалось получить корзину");
+                Assert.That(result.Value.Lines, Is.Empty, "Линии в пустой корзине");
             });
         }
 
@@ -72,8 +73,8 @@ namespace eshop.Tests
             var addBasketLineHandler = scope.ServiceProvider.GetRequiredService<AddBasketLineHandler>();
             var getBasketHandler = scope.ServiceProvider.GetRequiredService<GetBasketHandler>();
 
-            var addLineResult = await addBasketLineHandler.AddLineAsync(saleItemId, count, CancellationToken.None);
-            var getBasketResult = await getBasketHandler.GetBasketAsync(CancellationToken.None);
+            var addLineResult = await addBasketLineHandler.AddLineAsync("customer", saleItemId, count, CancellationToken.None);
+            var getBasketResult = await getBasketHandler.GetBasketAsync("customer", CancellationToken.None);
 
             Assert.Multiple(() =>
             {
@@ -92,13 +93,14 @@ namespace eshop.Tests
             var clearBasketHandler = scope.ServiceProvider.GetRequiredService<ClearBasketHandler>();
             var getBasketHandler = scope.ServiceProvider.GetRequiredService<GetBasketHandler>();
 
-            var clearBasketResult = await clearBasketHandler.ClearBasketAsync(CancellationToken.None);
-            var getBasketResult = await getBasketHandler.GetBasketAsync(CancellationToken.None);
+            var clearBasketResult = await clearBasketHandler.ClearBasketAsync("customer", CancellationToken.None);
+            var getBasketResult = await getBasketHandler.GetBasketAsync("customer", CancellationToken.None);
 
             Assert.Multiple(() =>
             {
                 Assert.That(clearBasketResult.IsSuccess, Is.True, "Не удалось очистить корзину");
-                Assert.That(getBasketResult.IsFailed, Is.True, "Не удалось получить ошибку при получении несуществующей корзины");
+                Assert.That(getBasketResult.IsSuccess, Is.True, "Не удалось получить корзину");
+                Assert.That(getBasketResult.Value.Lines, Is.Empty, "Линии в пустой корзине");
             });
         }
     }

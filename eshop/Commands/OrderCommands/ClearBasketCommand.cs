@@ -22,7 +22,7 @@ public class ClearBasketCommand : IEshopCommand
     /// <inheritdoc />
     public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var result = await _handler.ClearBasketAsync(cancellationToken);
+        var result = await _handler.ClearBasketAsync(args?[0] ?? string.Empty, cancellationToken);
         Result = result.ToString();
     }
 }

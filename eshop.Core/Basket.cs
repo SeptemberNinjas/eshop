@@ -15,15 +15,19 @@ public class Basket
     /// Линии корзины
     /// </summary>
     public IReadOnlyCollection<ItemsListLine> Lines => _lines;
+    
+    public string Customer { get; }
 
-    public Basket()
+    public Basket(string customer)
     {
+        Customer = customer;
         _lines = [];
     }
 
-    public Basket(int id, IEnumerable<ItemsListLine> lines)
+    public Basket(int id, IEnumerable<ItemsListLine> lines, string customer)
     {
         Id = id;
+        Customer = customer;
         _lines = lines.ToList();
     }
 
