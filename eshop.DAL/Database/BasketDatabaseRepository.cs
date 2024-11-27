@@ -1,13 +1,17 @@
 ﻿using System.Data;
 using System.Data.Common;
 using eshop.Core;
+using Prometheus;
 
 namespace eshop.DAL.Database;
 
 internal class BasketDatabaseRepository : DatabaseContext, IRepository<Basket>
 {
+    private readonly Gauge _notEmptyBaskets; 
+    
     public BasketDatabaseRepository(string connectionString) : base(connectionString)
     {
+        _notEmptyBaskets = Metrics.CreateGauge("eshop_not_empty_baskets", "Количество не пустых корзин");
     }
 
     public async Task UpdateAsync(Basket item, CancellationToken cancellationToken)
@@ -48,12 +52,16 @@ internal class BasketDatabaseRepository : DatabaseContext, IRepository<Basket>
              """;
 
         var result = await ExecuteReaderListAsync(commandText, GetBasketLine, cancellationToken);
-        return result
+        var baskets = result
             .GroupBy(r => r.Id)
             .Select(g => new Basket(g.Key, g
                 .Where(i => i.Item is not null)
                 .Select(i => i.Item!), g.First().Customer))
             .ToArray();
+        
+        _notEmptyBaskets.Set(baskets.Count(b => b.Lines.Count != 0));
+
+        return baskets;
     }
 
     public async Task<int> GetCountAsync(CancellationToken cancellationToken = default)

@@ -13,7 +13,7 @@ namespace eshop.WebApi
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            _logger.LogInformation($"{DateTime.UtcNow:g}: route: {context.HttpContext.Request.Path}");
+            _logger.LogDebug("{date:g}: route: {route}", DateTime.UtcNow, context.HttpContext.Request.Path);
 
             await next();
         }
