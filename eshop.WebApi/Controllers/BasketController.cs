@@ -26,7 +26,7 @@ public class BasketController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<Basket>> GetBasketAsync(CancellationToken cancellationToken)
+    public async Task<ActionResult<BasketDto>> GetBasketAsync(CancellationToken cancellationToken)
     {
         var customer = User.Identity?.Name!;
         var result = await _getHandler.GetBasketAsync(customer, cancellationToken);
@@ -37,7 +37,7 @@ public class BasketController : ControllerBase
     }
     
     [HttpDelete]
-    public async Task<ActionResult<Basket>> ClearBasketAsync(CancellationToken cancellationToken)
+    public async Task<ActionResult> ClearBasketAsync(CancellationToken cancellationToken)
     {
         var customer = User.Identity?.Name!;
         var result = await _clearBasketHandler.ClearBasketAsync(customer, cancellationToken);

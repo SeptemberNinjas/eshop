@@ -14,12 +14,17 @@
     <div class="container">
         <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center justify-content-between">
             <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center justify-content-lg-start">
-            <div><i class="bi-shop"></i></div>
-            <div>EShop</div>
+                <div><i class="bi-shop"></i></div>
+                <div>EShop</div>
             </div>
-            <div>
-            <a href="/login.html"><div class="btn btn-light">Войти</div></a>
-            <div class="btn btn-light" onclick="document.querySelector('#logout').submit()">Выйти</div>
+            <div class="d-flex gap-2 align-items-end">
+                <a href="/login.html"><div class="btn btn-light">Войти</div></a>                
+                <button type="button" class="btn btn-light" onclick="document.querySelector('#logout').submit()">Выйти</button>
+                <div class="position-relative">
+                    <a href="/basket.html"><div class="bi-cart3 btn btn-light"></div></a>
+                    <span id="basket-lines-badge"
+                          class="fs-6 position-relative top-0 end-0 translate-middle badge rounded-pill bg-danger">5</span>
+                </div>
             </div>
         </div>
     </div>
