@@ -3,8 +3,23 @@ using eshop.WebApi;
 using FluentResults;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Prometheus;
+using Prometheus.DotNetRuntime;
+using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Compact;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var logger = new LoggerConfiguration()
+    .Enrich.WithProperty("ApplicationName", "eshop")
+    .ReadFrom.Configuration(builder.Configuration)
+    .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information)
+    .WriteTo.File(new CompactJsonFormatter(), "logs.txt")
+    .CreateLogger();
+
+builder.Services.AddSerilog(logger);
+Log.Logger = logger;
 
 builder.Services.RegisterApplicationDependencies(builder.Configuration);
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -35,6 +50,9 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+DotNetRuntimeStatsBuilder.Default().StartCollecting();
+
+app.UseSerilogRequestLogging();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -43,6 +61,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
+app.UseMetricServer();
 app.UseAuthorization();
 
 app.MapControllers();
