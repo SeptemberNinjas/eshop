@@ -1,15 +1,20 @@
 ﻿using eshop.Core;
 using eshop.DAL;
+using eshop.DAL.Database;
 using FluentResults;
 
 namespace eshop.Application.Order;
 
 public class CreateOrderHandler
 {
+    private readonly DatabaseContext _databaseContext;
     private readonly RepositoryFactory _repositoryFactory;
 
-    public CreateOrderHandler(RepositoryFactory repositoryFactory)
+    public CreateOrderHandler(
+        DatabaseContext databaseContext,
+        RepositoryFactory repositoryFactory)
     {
+        _databaseContext = databaseContext;
         _repositoryFactory = repositoryFactory;
     }
 
@@ -17,6 +22,8 @@ public class CreateOrderHandler
     {
         try
         {
+            await _databaseContext.BeginTransactionAsync();
+
             var basketRepository = _repositoryFactory.CreateBasketRepository();
             var currentBasket = (await basketRepository.GetAllAsync(cancellationToken)).FirstOrDefault();
             if (currentBasket is null || currentBasket.Lines.Count == 0)
@@ -47,6 +54,8 @@ public class CreateOrderHandler
                 stock.Amount -= count;
                 await stockRepository.UpdateAsync(stock, cancellationToken);
             }
+
+            await _databaseContext.CommitTransactionAsync();
 
             return Result.Ok()
                 .WithSuccess($"Создан заказ {id}");
