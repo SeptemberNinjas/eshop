@@ -12,7 +12,9 @@ public static class ConfigurationExtensions
 {
     public static IServiceCollection RegisterApplicationDependencies(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<RepositoryFactory>(_ => new DatabaseRepositoryFactory(configuration["ConnectionString"] ?? ""))
+        services
+            .AddScoped(_ => new DatabaseContext(configuration["ConnectionString"] ?? ""))
+            .AddScoped<RepositoryFactory,DatabaseRepositoryFactory>()
             // Регистрация обработчиков
             .AddScoped<ClearBasketHandler>()
             .AddScoped<GetOrdersHandler>()

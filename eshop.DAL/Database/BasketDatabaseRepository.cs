@@ -5,11 +5,11 @@ using Prometheus;
 
 namespace eshop.DAL.Database;
 
-internal class BasketDatabaseRepository : DatabaseContext, IRepository<Basket>
+public class BasketDatabaseRepository : BaseRepository, IRepository<Basket>
 {
     private readonly Gauge _notEmptyBaskets; 
     
-    public BasketDatabaseRepository(string connectionString) : base(connectionString)
+    public BasketDatabaseRepository(DatabaseContext databaseContext) : base(databaseContext)
     {
         _notEmptyBaskets = Metrics.CreateGauge("eshop_not_empty_baskets", "Количество не пустых корзин");
     }

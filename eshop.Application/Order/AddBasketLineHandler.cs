@@ -1,16 +1,17 @@
 ﻿using eshop.Core;
 using eshop.DAL;
+using eshop.DAL.Database;
 using FluentResults;
 
 namespace eshop.Application.Order
 {
     public class AddBasketLineHandler
     {
-        private readonly RepositoryFactory _repositoryFactory;
+        private readonly DatabaseContext _databaseContext;
 
-        public AddBasketLineHandler(RepositoryFactory repositoryFactory)
+        public AddBasketLineHandler(DatabaseContext databaseContext)
         {
-            _repositoryFactory = repositoryFactory;
+            _databaseContext = databaseContext;
         }
 
         public async Task<Result> AddLineAsync(string customer, int itemId, int count,
@@ -18,7 +19,9 @@ namespace eshop.Application.Order
         {
             try
             {
-                var basketRepository = _repositoryFactory.CreateBasketRepository();
+                await _databaseContext.BeginTransactionAsync();
+                
+                var basketRepository = new BasketDatabaseRepository(_databaseContext);
                 
                 var baskets = await basketRepository.GetAllAsync(cancellationToken);
                 var customerBasket = baskets.FirstOrDefault(b => b.Customer == customer);
@@ -31,7 +34,7 @@ namespace eshop.Application.Order
                 if (customerBasket is null)
                     return Result.Fail("Корзина не найдена");
 
-                var itemsRepository = _repositoryFactory.CreateSaleItemRepository();
+                var itemsRepository = new SaleItemDatabaseRepository(_databaseContext);
                 var item = await itemsRepository.GetByIdAsync(itemId, cancellationToken);
                 if (item is null)
                     return Result.Fail("Товар или услуга не найдены");
@@ -45,6 +48,8 @@ namespace eshop.Application.Order
 
                 if (result.IsSuccess)
                     await basketRepository.UpdateAsync(result.Value, cancellationToken);
+
+                await _databaseContext.CommitTransactionAsync();
 
                 return result.ToResult();
             }

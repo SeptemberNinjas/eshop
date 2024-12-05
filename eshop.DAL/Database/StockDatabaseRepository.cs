@@ -7,9 +7,9 @@ namespace eshop.DAL.Database
     /// <summary>
     /// Реализация репозитория для хранения остатков в БД
     /// </summary>
-    internal class StockDatabaseRepository : DatabaseContext, IRepository<Stock>
+    internal class StockDatabaseRepository : BaseRepository, IRepository<Stock>
     {
-        public StockDatabaseRepository(string connectionString) : base(connectionString) { }
+        public StockDatabaseRepository(DatabaseContext databaseContext) : base(databaseContext) { }
 
         /// <inheritdoc/>
         public IReadOnlyCollection<Stock> GetAll()
