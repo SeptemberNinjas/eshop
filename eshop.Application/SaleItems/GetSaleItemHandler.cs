@@ -6,20 +6,18 @@ namespace eshop.Application.SaleItems
 {
     public class GetSaleItemHandler
     {
-        private readonly RepositoryFactory _repositoryFactory;
+        private readonly IReadOnlyRepository<SaleItem> _saleItemRepository;
 
-        public GetSaleItemHandler(RepositoryFactory repositoryFactory)
+        public GetSaleItemHandler(IReadOnlyRepository<SaleItem> saleItemRepository)
         {
-            _repositoryFactory = repositoryFactory;
+            _saleItemRepository = saleItemRepository;
         }
 
         public async Task<Result<IEnumerable<SaleItemDto>>> GetItemsAsync(ItemTypes itemType, int? count, CancellationToken cancellationToken)
         {
-            var repository = _repositoryFactory.CreateSaleItemRepository();
-
             try
             {
-                var items = (await repository
+                var items = (await _saleItemRepository
                     .GetAllAsync(cancellationToken))
                     .Where(i => i.ItemType == itemType);
 
