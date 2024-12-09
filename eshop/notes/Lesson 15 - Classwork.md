@@ -164,7 +164,7 @@
           }
 
           public async Task<Result> AddLineAsync(string customer, int itemId, int count,
-              CancellationToken cancellationToken)
+    CancellationToken cancellationToken)
           {
               try
               {
@@ -172,11 +172,31 @@
                   
                   var basketRepository = new BasketDatabaseRepository(_databaseContext);
                   
-                  ...
+                  var baskets = await basketRepository.GetAllAsync(cancellationToken);
+                  var customerBasket = baskets.FirstOrDefault(b => b.Customer == customer);
+                  if (customerBasket is null)
+                  {
+                      await basketRepository.InsertAsync(new Basket(customer), cancellationToken);
+                      customerBasket = (await basketRepository.GetAllAsync(cancellationToken))
+                          .FirstOrDefault(b => b.Customer == customer);
+                  }
+                  if (customerBasket is null)
+                      return Result.Fail("Корзина не найдена");
 
                   var itemsRepository = new SaleItemDatabaseRepository(_databaseContext);
-                  
-                  ...
+                  var item = await itemsRepository.GetByIdAsync(itemId, cancellationToken);
+                  if (item is null)
+                      return Result.Fail("Товар или услуга не найдены");
+            
+                  var result = item switch
+                  {
+                      Product product => await AddLineAsync(product, count, customerBasket, basketRepository),
+                      Service service => AddLine(service, customerBasket),
+                      _ => Result.Fail("Неизвестный тип товарной единицы")
+                  };
+
+                  if (result.IsSuccess)
+                      await basketRepository.UpdateAsync(result.Value, cancellationToken);
 
                   await _databaseContext.CommitTransactionAsync();
 
@@ -221,7 +241,36 @@
               {
                   await _databaseContext.BeginTransactionAsync();
 
-                  ...
+                  var basketRepository = _repositoryFactory.CreateBasketRepository();
+                  var currentBasket = (await basketRepository.GetAllAsync(cancellationToken)).FirstOrDefault();
+                  if (currentBasket is null || currentBasket.Lines.Count == 0)
+                      return Result.Fail("Корзина не найдена");
+            
+                  var order = currentBasket.CreateOrderFromBasket();
+                  if (order is null)
+                      return Result.Fail("Ошибка при создании заказа. Корзина пуста");
+
+                  var stockRepository = _repositoryFactory.CreateStockRepository();
+                  var orderedProductsWithCount = order.Lines
+                      .Where(l => l.ItemType is ItemTypes.Product)
+                      .Join(await stockRepository.GetAllAsync(cancellationToken),
+                          orderLine => orderLine.ItemId, 
+                          stock => stock.ItemId,
+                          (orderLine, stock) => (stock, orderLine.Count));
+                      
+                  // Тут происходят взаимосвязанные изменения в трёх репозиториях
+                  // Хорошее место, чтобы показать транзакцию
+                  var ordersRepository = _repositoryFactory.CreateOrdersRepository();
+                  var id = await ordersRepository.InsertAsync(order, cancellationToken);
+                  await basketRepository.UpdateAsync(currentBasket, cancellationToken);
+                  foreach (var (stock, count) in orderedProductsWithCount)
+                  {
+                      if (stock.Amount - count < 0)
+                          return Result.Fail("Недостаточно товара");
+
+                      stock.Amount -= count;
+                      await stockRepository.UpdateAsync(stock, cancellationToken);
+                  }
 
                   await _databaseContext.CommitTransactionAsync();
 
@@ -344,7 +393,18 @@
     ```csharp
       public static IServiceCollection RegisterApplicationDependencies(this IServiceCollection services, IConfiguration configuration)
       {
-          ...
+          services
+              .AddScoped(_ => new DatabaseContext(configuration["ConnectionString"] ?? ""))
+              .AddScoped<RepositoryFactory,DatabaseRepositoryFactory>()
+              // Регистрация обработчиков
+              .AddScoped<ClearBasketHandler>()
+              .AddScoped<GetOrdersHandler>()
+              .AddScoped<GetSaleItemHandler>()
+              .AddScoped<GetBasketHandler>()
+              .AddScoped<CreateOrderHandler>()
+              .AddScoped<AddBasketLineHandler>()
+              .AddScoped<PayOrderByCashHandler>()
+              .AddScoped<PayOrderByCashlessHandler>();
 
           services.AddLinqToDBContext<LinqToDbContext>((sp, options) =>
           {
@@ -359,7 +419,7 @@
           services.AddScoped<IReadOnlyRepository<SaleItem>, SaleItemLinqToDbRepository>();
 
           return services;
-      } 
+      }
     ```
 
 14. Меняем в хэндлере `GetSaleItemHandler` реализацию репозитрия:
@@ -382,7 +442,12 @@
                       .GetAllAsync(cancellationToken))
                       .Where(i => i.ItemType == itemType);
 
-                  ...
+                  var requestedItems = count is null or <= 0
+                      ? items
+                      : items.Take(count.Value);
+
+                  return Result.Ok(requestedItems
+                      .Select(i => new SaleItemDto(i.ItemType, i.Id, i.Name, i.Price, (i as Product)?.Stock)));
               }
               catch (Exception ex)
               {
