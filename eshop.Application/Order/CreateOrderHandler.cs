@@ -1,16 +1,19 @@
 ﻿using eshop.Core;
 using eshop.DAL;
 using FluentResults;
+using Microsoft.Extensions.Logging;
 
 namespace eshop.Application.Order;
 
 public class CreateOrderHandler
 {
     private readonly RepositoryFactory _repositoryFactory;
+    private readonly ILogger<CreateOrderHandler> _logger;
 
-    public CreateOrderHandler(RepositoryFactory repositoryFactory)
+    public CreateOrderHandler(RepositoryFactory repositoryFactory, ILogger<CreateOrderHandler> logger)
     {
         _repositoryFactory = repositoryFactory;
+        _logger = logger;
     }
 
     public async Task<Result> CreateOrderAsync(CancellationToken cancellationToken)
@@ -53,9 +56,9 @@ public class CreateOrderHandler
         }
         catch (Exception ex)
         {
-            return Result.Fail("Не удалось создать заказ")
-                .WithError(ex.Message)
-                .WithError(ex.StackTrace);
+            _logger.LogError(ex, "Ошибка при создании заказа. {message}", ex.Message);
+            
+            return Result.Fail("Не удалось создать заказ");
         }
     }
 }

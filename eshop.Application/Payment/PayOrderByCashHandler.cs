@@ -1,11 +1,13 @@
 ﻿using eshop.DAL;
 using FluentResults;
+using Microsoft.Extensions.Logging;
 
 namespace eshop.Application.Payment
 {
     public class PayOrderByCashHandler : PayOrderBaseHandler
-    {    
-        public PayOrderByCashHandler(RepositoryFactory repositoryFactory) : base(repositoryFactory)
+    {
+        public PayOrderByCashHandler(RepositoryFactory repositoryFactory, ILogger<PayOrderByCashHandler> logger)
+            : base(repositoryFactory, logger)
         {
         }
 

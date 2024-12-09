@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace eshop.WebApi
+namespace eshop.WebApi.Filters
 {
     public class IncomingRequestFilter : IAsyncActionFilter
     {

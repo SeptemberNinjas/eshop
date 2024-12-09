@@ -1,16 +1,19 @@
 ﻿using eshop.Core;
 using eshop.DAL;
 using FluentResults;
+using Microsoft.Extensions.Logging;
 
 namespace eshop.Application.Order
 {
     public class GetBasketHandler
     {
         private readonly RepositoryFactory _repositoryFactory;
+        private readonly ILogger<GetBasketHandler> _logger;
 
-        public GetBasketHandler(RepositoryFactory repositoryFactory)
+        public GetBasketHandler(RepositoryFactory repositoryFactory, ILogger<GetBasketHandler> logger)
         {
             _repositoryFactory = repositoryFactory;
+            _logger = logger;
         }
 
         public async Task<Result<BasketDto>> GetBasketAsync(string customer, CancellationToken cancellationToken)
@@ -27,9 +30,9 @@ namespace eshop.Application.Order
             }
             catch (Exception ex)
             {
-                return Result.Fail("Не удалось получить корзину")
-                    .WithError(ex.Message)
-                    .WithError(ex.StackTrace);
+                _logger.LogError(ex, "Ошибка при получении корзины. {message}", ex.Message);
+                
+                return Result.Fail("Не удалось получить корзину");
             }
         }
 

@@ -1,5 +1,6 @@
 using eshop.Application;
-using eshop.WebApi;
+using eshop.WebApi.Filters;
+using eshop.WebApi.Middlewares;
 using FluentResults;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var logger = new LoggerConfiguration()
     .Enrich.WithProperty("ApplicationName", "eshop")
+    .Enrich.FromLogContext()
     .ReadFrom.Configuration(builder.Configuration)
     .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information)
     .WriteTo.File(new CompactJsonFormatter(), "logs.txt")
@@ -52,7 +54,13 @@ var app = builder.Build();
 
 DotNetRuntimeStatsBuilder.Default().StartCollecting();
 
-app.UseSerilogRequestLogging();
+app.UseAuthentication();
+app.UseMiddleware<LogUserMiddleware>();
+
+app.UseSerilogRequestLogging(ops =>
+{
+    ops.Logger = logger;
+});
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

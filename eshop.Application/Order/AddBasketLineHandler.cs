@@ -1,16 +1,19 @@
 ﻿using eshop.Core;
 using eshop.DAL;
 using FluentResults;
+using Microsoft.Extensions.Logging;
 
 namespace eshop.Application.Order
 {
     public class AddBasketLineHandler
     {
         private readonly RepositoryFactory _repositoryFactory;
+        private readonly ILogger<AddBasketLineHandler> _logger;
 
-        public AddBasketLineHandler(RepositoryFactory repositoryFactory)
+        public AddBasketLineHandler(RepositoryFactory repositoryFactory, ILogger<AddBasketLineHandler> logger)
         {
             _repositoryFactory = repositoryFactory;
+            _logger = logger;
         }
 
         public async Task<Result> AddLineAsync(string customer, int itemId, int count,
@@ -19,7 +22,7 @@ namespace eshop.Application.Order
             try
             {
                 var basketRepository = _repositoryFactory.CreateBasketRepository();
-                
+
                 var baskets = await basketRepository.GetAllAsync(cancellationToken);
                 var customerBasket = baskets.FirstOrDefault(b => b.Customer == customer);
                 if (customerBasket is null)
@@ -28,6 +31,7 @@ namespace eshop.Application.Order
                     customerBasket = (await basketRepository.GetAllAsync(cancellationToken))
                         .FirstOrDefault(b => b.Customer == customer);
                 }
+
                 if (customerBasket is null)
                     return Result.Fail("Корзина не найдена");
 
@@ -35,7 +39,7 @@ namespace eshop.Application.Order
                 var item = await itemsRepository.GetByIdAsync(itemId, cancellationToken);
                 if (item is null)
                     return Result.Fail("Товар или услуга не найдены");
-          
+
                 var result = item switch
                 {
                     Product product => await AddLineAsync(product, count, customerBasket, basketRepository),
@@ -50,15 +54,16 @@ namespace eshop.Application.Order
             }
             catch (Exception ex)
             {
-                return Result.Fail("Не удалось получить корзину")
-                    .WithError(ex.Message)
-                    .WithError(ex.StackTrace);
+                _logger.LogError(ex, "Ошибка при добавлении элемента в корзину. {message}", ex.Message);
+
+                return Result.Fail("Не удалось добавить элемент в корзину");
             }
         }
-      
-        private static async Task<Result<Basket>> AddLineAsync(Product product, int requestedCount, Basket currentBasket, IRepository<Basket> repository)
+
+        private static async Task<Result<Basket>> AddLineAsync(Product product, int requestedCount,
+            Basket currentBasket, IRepository<Basket> repository)
         {
-           if (requestedCount < 1)
+            if (requestedCount < 1)
                 return Result.Fail("Запрашиваемое количество товара должно быть больше 0");
 
             // Вычисляем доступные остатки с учетом всех корзин
@@ -67,12 +72,12 @@ namespace eshop.Application.Order
                 .Where(p => p.ItemType is ItemTypes.Product && p.ItemId == product.Id)
                 .Sum(p => p.Count);
             var remainsWithBaskets = product.Stock - productsInBaskets;
-        
+
             if (remainsWithBaskets < requestedCount)
                 return Result.Fail($"Нельзя добавить товар в корзину, недостаточно остатков.{Environment.NewLine}" +
-                       $"Имеется {product.Stock} из них в корзине {productsInBaskets}, требуется {requestedCount}");
+                                   $"Имеется {product.Stock} из них в корзине {productsInBaskets}, требуется {requestedCount}");
 
-            
+
             if (IsLineExists(product, currentBasket.Lines, out var line))
                 line.Count += requestedCount;
             else
@@ -88,11 +93,11 @@ namespace eshop.Application.Order
                 return Result.Fail($"Ошибка при добавлении услуги. Услуга \'{service.Name}\' уже добавлена в корзину");
 
             currentBasket.AddLine(service);
-           
+
             return Result.Ok(currentBasket)
                 .WithSuccess($"В корзину добавлена услуга \'{service.Name}\'");
         }
-        
+
         private static bool IsLineExists(SaleItem saleItem, IEnumerable<ItemsListLine> lines, out ItemsListLine line)
         {
             foreach (var ln in lines)
