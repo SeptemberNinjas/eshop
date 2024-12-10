@@ -1,16 +1,19 @@
 ﻿using eshop.Core;
 using eshop.DAL;
 using FluentResults;
+using Microsoft.Extensions.Logging;
 
 namespace eshop.Application.SaleItems
 {
     public class GetSaleItemHandler
     {
         private readonly IReadOnlyRepository<SaleItem> _saleItemRepository;
+        private readonly ILogger<GetSaleItemHandler> _logger;
 
-        public GetSaleItemHandler(IReadOnlyRepository<SaleItem> saleItemRepository)
+        public GetSaleItemHandler(IReadOnlyRepository<SaleItem> saleItemRepository, ILogger<GetSaleItemHandler> logger)
         {
             _saleItemRepository = saleItemRepository;
+            _logger = logger;
         }
 
         public async Task<Result<IEnumerable<SaleItemDto>>> GetItemsAsync(ItemTypes itemType, int? count, CancellationToken cancellationToken)
@@ -30,9 +33,8 @@ namespace eshop.Application.SaleItems
             }
             catch (Exception ex)
             {
-                return Result.Fail("Не удалось получить коллекцию торговых единиц")
-                    .WithError(ex.Message)
-                    .WithError(ex.StackTrace);
+                _logger.LogError(ex, "Ошибка при получении торговых единиц. {message}", ex.Message);
+                return Result.Fail("Не удалось получить коллекцию торговых единиц");
             }
         }
     }

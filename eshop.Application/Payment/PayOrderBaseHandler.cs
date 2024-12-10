@@ -1,15 +1,18 @@
 ﻿using eshop.DAL;
 using FluentResults;
+using Microsoft.Extensions.Logging;
 
 namespace eshop.Application.Payment
 {
     public abstract class PayOrderBaseHandler
     {
         private readonly RepositoryFactory _repositoryFactory;
+        private readonly ILogger<PayOrderBaseHandler> _logger;
 
-        public PayOrderBaseHandler(RepositoryFactory repositoryFactory)
+        public PayOrderBaseHandler(RepositoryFactory repositoryFactory, ILogger<PayOrderBaseHandler> logger)
         {
             _repositoryFactory = repositoryFactory;
+            _logger = logger;
         }
 
         protected async Task<Result> PayAsync(int orderId, decimal amount, CancellationToken cancellationToken)
@@ -42,9 +45,9 @@ namespace eshop.Application.Payment
             }
             catch (Exception ex)
             {
-                return Result.Fail("Не удалось оплатить заказ")
-                    .WithError(ex.Message)
-                    .WithError(ex.StackTrace);
+                _logger.LogError(ex, "Ошибка при оплате закза. {message}", ex.Message);
+                
+                return Result.Fail("Не удалось оплатить заказ");
             }
         }
 

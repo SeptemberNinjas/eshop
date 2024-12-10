@@ -1,15 +1,18 @@
 ﻿using eshop.DAL;
 using FluentResults;
+using Microsoft.Extensions.Logging;
 
 namespace eshop.Application.Order;
 
 public class ClearBasketHandler
 {
     private readonly RepositoryFactory _repositoryFactory;
+    private readonly ILogger<ClearBasketHandler> _logger;
 
-    public ClearBasketHandler(RepositoryFactory repositoryFactory)
+    public ClearBasketHandler(RepositoryFactory repositoryFactory, ILogger<ClearBasketHandler> logger)
     {
         _repositoryFactory = repositoryFactory;
+        _logger = logger;
     }
 
     public async Task<Result> ClearBasketAsync(string customer, CancellationToken cancellationToken)
@@ -30,9 +33,9 @@ public class ClearBasketHandler
         }
         catch (Exception ex)
         {
-            return Result.Fail("Не удалось очистить корзину")
-                .WithError(ex.Message)
-                .WithError(ex.StackTrace);
+            _logger.LogError(ex, "Ошибка при очистке корзины. {message}", ex.Message);
+            
+            return Result.Fail("Не удалось очистить корзину");
         }
     }
 }
