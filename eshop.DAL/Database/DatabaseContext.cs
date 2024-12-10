@@ -8,11 +8,13 @@ namespace eshop.DAL.Database
     /// <summary>
     /// Контекст подключения к СУБД
     /// </summary>
-    internal class DatabaseContext : IDisposable
+    public class DatabaseContext : IDisposable
     {
         private readonly string _connectionString;
 
         private NpgsqlConnection? _connection;
+
+        private NpgsqlTransaction? _transaction;
 
         public DatabaseContext(string connectionString)
         {
@@ -23,21 +25,6 @@ namespace eshop.DAL.Database
         public void Dispose()
         {
             _connection?.Dispose();
-        }
-
-        /// <summary>
-        /// Получить соединение с БД
-        /// </summary>
-        private NpgsqlConnection GetConnection()
-        {
-            if (_connection != null && _connection.State == ConnectionState.Open)
-                return _connection;
-
-            _connection = new NpgsqlConnection(_connectionString);
-
-            _connection.Open();
-
-            return _connection;
         }
 
         private async Task<NpgsqlConnection> GetConnectionAsync()
@@ -52,58 +39,39 @@ namespace eshop.DAL.Database
             return _connection;
         } 
 
+        public async Task BeginTransactionAsync()
+        {
+            var connection = await GetConnectionAsync();
+
+            _transaction = await connection.BeginTransactionAsync();
+        }
+
+        public async Task CommitTransactionAsync()
+        {
+            if (_transaction != null)
+                await _transaction.CommitAsync();
+        }
+
         /// <summary>
         /// Получить команду для СУБД
         /// </summary>
-        protected NpgsqlCommand GetCommand(string text)
+        public NpgsqlCommand GetCommand(string text)
+        {
+            return Task.Run(async () => await GetCommandAsync(text)).Result;
+        }
+
+        public async Task<NpgsqlCommand> GetCommandAsync(string text)
         {
             return new NpgsqlCommand
             {
-                Connection = GetConnection(),
+                Connection = await GetConnectionAsync(),
                 CommandType = CommandType.Text,
                 CommandText = text
             };
         }
 
-        protected async Task<List<T>> ExecuteReaderListAsync<T>(string commandText, Func<DbDataReader, T> binging, CancellationToken cancellationToken)
-        {
-            using var connection = await GetConnectionAsync();
+        
 
-            var command = GetCommand(commandText);
-            using var reader = await command.ExecuteReaderAsync(cancellationToken);
-
-            var result = new List<T>();
-
-            while (await reader.ReadAsync(cancellationToken))
-            {
-                result.Add(binging(reader));
-            }
-
-            return result;
-        }
-
-        protected async Task<T?> ExecuteReaderAsync<T>(string commandText, Func<DbDataReader, T> binding, CancellationToken cancellationToken)
-        {
-            using var connection = await GetConnectionAsync();
-
-            var command = GetCommand(commandText);
-
-            using var reader = await command.ExecuteReaderAsync(cancellationToken);
-
-            if (await reader.ReadAsync(cancellationToken))
-                return binding(reader);
-
-
-            return default;
-        }
-
-        protected async Task<string?> ExecuteScalarAsync(string commandText, CancellationToken cancellationToken)
-        {
-            await using var connection = await GetConnectionAsync();
-            var command = GetCommand(commandText);
-
-            var reader = await command.ExecuteScalarAsync(cancellationToken);
-            return reader?.ToString();
-        }
+        
     }
 }

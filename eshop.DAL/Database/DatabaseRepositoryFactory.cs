@@ -7,33 +7,33 @@ namespace eshop.DAL.Database
     /// </summary>
     public class DatabaseRepositoryFactory : RepositoryFactory
     {
-        private readonly string _connectionString;
+        private DatabaseContext _databaseContext;
 
-        public DatabaseRepositoryFactory(string connectionString)
+        public DatabaseRepositoryFactory(DatabaseContext databaseContext)
         {
-            _connectionString = connectionString;
+            _databaseContext = databaseContext;
         }
 
         public override IRepository<Basket> CreateBasketRepository()
         {
-            return new BasketDatabaseRepository(_connectionString);
+            return new BasketDatabaseRepository(_databaseContext);
         }
 
         public override IRepository<Order> CreateOrdersRepository()
         {
-            return new OrderDatabaseRepository(_connectionString);
+            return new OrderDatabaseRepository(_databaseContext);
         }
 
         /// <inheritdoc/>
         public override IReadOnlyRepository<SaleItem> CreateSaleItemRepository()
         {
-            return new SaleItemDatabaseRepository(_connectionString);
+            return new SaleItemDatabaseRepository(_databaseContext);
         }
 
         /// <inheritdoc/>
         public override IRepository<Stock> CreateStockRepository()
         {
-            return new StockDatabaseRepository(_connectionString);
+            return new StockDatabaseRepository(_databaseContext);
         }
     }
 }

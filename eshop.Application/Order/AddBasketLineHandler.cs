@@ -1,5 +1,6 @@
 ﻿using eshop.Core;
 using eshop.DAL;
+using eshop.DAL.Database;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
@@ -7,12 +8,12 @@ namespace eshop.Application.Order
 {
     public class AddBasketLineHandler
     {
-        private readonly RepositoryFactory _repositoryFactory;
+        private readonly DatabaseContext _databaseContext;
         private readonly ILogger<AddBasketLineHandler> _logger;
 
-        public AddBasketLineHandler(RepositoryFactory repositoryFactory, ILogger<AddBasketLineHandler> logger)
+        public AddBasketLineHandler(DatabaseContext databaseContext, ILogger<AddBasketLineHandler> logger)
         {
-            _repositoryFactory = repositoryFactory;
+            _databaseContext = databaseContext;
             _logger = logger;
         }
 
@@ -21,8 +22,10 @@ namespace eshop.Application.Order
         {
             try
             {
-                var basketRepository = _repositoryFactory.CreateBasketRepository();
-
+                await _databaseContext.BeginTransactionAsync();
+                
+                var basketRepository = new BasketDatabaseRepository(_databaseContext);
+                
                 var baskets = await basketRepository.GetAllAsync(cancellationToken);
                 var customerBasket = baskets.FirstOrDefault(b => b.Customer == customer);
                 if (customerBasket is null)
@@ -35,7 +38,7 @@ namespace eshop.Application.Order
                 if (customerBasket is null)
                     return Result.Fail("Корзина не найдена");
 
-                var itemsRepository = _repositoryFactory.CreateSaleItemRepository();
+                var itemsRepository = new SaleItemDatabaseRepository(_databaseContext);
                 var item = await itemsRepository.GetByIdAsync(itemId, cancellationToken);
                 if (item is null)
                     return Result.Fail("Товар или услуга не найдены");
@@ -49,6 +52,8 @@ namespace eshop.Application.Order
 
                 if (result.IsSuccess)
                     await basketRepository.UpdateAsync(result.Value, cancellationToken);
+
+                await _databaseContext.CommitTransactionAsync();
 
                 return result.ToResult();
             }
