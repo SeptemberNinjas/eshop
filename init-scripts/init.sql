@@ -12,7 +12,8 @@ create table "stock"(
 
 create table basket (
     id serial primary key,
-    customer varchar(128) not null UNIQUE
+    customer varchar(128) not null UNIQUE,
+    last_update timestamp not null
 );
 
 create table basket_line (

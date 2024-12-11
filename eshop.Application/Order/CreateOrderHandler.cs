@@ -1,4 +1,5 @@
 ﻿using eshop.Core;
+using eshop.Core.Cache;
 using eshop.DAL.Database;
 using FluentResults;
 using Microsoft.Extensions.Logging;
@@ -12,18 +13,21 @@ public class CreateOrderHandler
     private readonly IRepository<Basket> _basketRepository;
     private readonly IRepository<Stock> _stockRepository;
     private readonly ILogger<CreateOrderHandler> _logger;
+    private readonly CacheKeysStorage _keysStorage;
 
     public CreateOrderHandler(
         DatabaseContext databaseContext,
         IRepository<Core.Order> ordersRepository,
         IRepository<Basket> basketRepository,
         IRepository<Stock> stockRepository,
-        ILogger<CreateOrderHandler> logger)
+        ILogger<CreateOrderHandler> logger,
+        CacheKeysStorage keysStorage)
     {
         _databaseContext = databaseContext;
         _ordersRepository = ordersRepository;
         _basketRepository = basketRepository;
         _logger = logger;
+        _keysStorage = keysStorage;
         _stockRepository = stockRepository;
     }
 
@@ -65,7 +69,8 @@ public class CreateOrderHandler
             }
 
             await _databaseContext.CommitTransactionAsync(cancellationToken);
-
+            _keysStorage.RemoveGroupCache(CacheKeysStorage.SaleItemsGroup);
+            
             return Result.Ok()
                 .WithSuccess($"Создан заказ {id}");
         }

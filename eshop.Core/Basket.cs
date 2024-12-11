@@ -17,6 +17,8 @@ public class Basket
     public IReadOnlyCollection<ItemsListLine> Lines => _lines;
     
     public string Customer { get; }
+    
+    public DateTime LastUpdate { get; }
 
     public Basket(string customer)
     {
@@ -24,10 +26,11 @@ public class Basket
         _lines = [];
     }
 
-    public Basket(int id, IEnumerable<ItemsListLine> lines, string customer)
+    public Basket(int id, IEnumerable<ItemsListLine> lines, string customer, DateTime lastUpdate)
     {
         Id = id;
         Customer = customer;
+        LastUpdate = lastUpdate;
         _lines = lines.ToList();
     }
 

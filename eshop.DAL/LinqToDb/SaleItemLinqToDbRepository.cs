@@ -13,7 +13,7 @@ namespace eshop.DAL.LinqToDb
             _context = context;
         }
 
-        private static SaleItem GetSaleItem(Catalog catalog, LinqToDb.Schema.Stock stock)
+        private static SaleItem GetSaleItem(Catalog catalog, Schema.Stock stock)
         {
             var type = (ItemTypes)catalog.Type;
 

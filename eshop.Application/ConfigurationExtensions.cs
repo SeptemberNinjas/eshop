@@ -41,7 +41,8 @@ public static class ConfigurationExtensions
 
         services.AddScoped<DatabaseContext>();
 
-        services.AddScoped<IReadOnlyRepository<SaleItem>, SaleItemLinqToDbRepository>();
+        services.AddScoped<SaleItemLinqToDbRepository>();
+        services.AddScoped<IReadOnlyRepository<SaleItem>, SaleItemCashedLinqToDbRepository>();
         services.AddScoped<IRepository<Basket>, BasketLinqToDbRepository>();
         services.AddScoped<IRepository<Core.Order>, OrdersLinqToDbRepository>();
         services.AddScoped<IRepository<Stock>, StockLinqToDbRepository>();
