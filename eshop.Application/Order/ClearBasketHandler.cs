@@ -1,4 +1,4 @@
-﻿using eshop.DAL;
+﻿using eshop.Core;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
@@ -6,12 +6,12 @@ namespace eshop.Application.Order;
 
 public class ClearBasketHandler
 {
-    private readonly RepositoryFactory _repositoryFactory;
+    private readonly IRepository<Basket> _basketRepository;
     private readonly ILogger<ClearBasketHandler> _logger;
 
-    public ClearBasketHandler(RepositoryFactory repositoryFactory, ILogger<ClearBasketHandler> logger)
+    public ClearBasketHandler(IRepository<Basket> basketRepository, ILogger<ClearBasketHandler> logger)
     {
-        _repositoryFactory = repositoryFactory;
+        _basketRepository = basketRepository;
         _logger = logger;
     }
 
@@ -19,14 +19,13 @@ public class ClearBasketHandler
     {
         try
         {
-            var repository = _repositoryFactory.CreateBasketRepository();
-            var baskets = await repository.GetAllAsync(cancellationToken);
+            var baskets = await _basketRepository.GetAllAsync(cancellationToken);
             var customerBasket = baskets.FirstOrDefault(b => b.Customer == customer);
             if (customerBasket is null)
                 return Result.Fail("Корзина не найдена");
             
             customerBasket.Clear();
-            await repository.UpdateAsync(customerBasket, cancellationToken);
+            await _basketRepository.UpdateAsync(customerBasket, cancellationToken);
                 
             return Result.Ok()
                 .WithSuccess("Корзина очищена");

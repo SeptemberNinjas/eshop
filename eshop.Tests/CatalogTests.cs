@@ -1,8 +1,11 @@
 ﻿using eshop.Application.SaleItems;
 using eshop.Core;
-using eshop.DAL;
+using eshop.DAL.Database;
 using eshop.Tests.Mocks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 
 namespace eshop.Tests
 {
@@ -15,12 +18,14 @@ namespace eshop.Tests
         public void Init()
         {
             _serviceProvider = new ServiceCollection()
-                .AddScoped<RepositoryFactory, RepositoryFactoryMock>()
+                .AddSingleton<IReadOnlyRepository<SaleItem>, SaleItemRepositoryMock>()
+                .AddSingleton<ILogger<GetSaleItemHandler>, NullLogger<GetSaleItemHandler>>()
+                .AddScoped<DatabaseContext>(_ => Mock.Of<DatabaseContext>())
                 .AddScoped<GetSaleItemHandler>()
                 .BuildServiceProvider();
         }
 
-        [Test(Description = "Получеие списка товаров")]
+        [Test(Description = "Получение списка товаров")]
         public async Task GetAllProductsSuccess()
         {
             using var scope = _serviceProvider.CreateScope();

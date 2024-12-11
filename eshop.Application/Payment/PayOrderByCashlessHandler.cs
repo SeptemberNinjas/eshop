@@ -1,4 +1,4 @@
-﻿using eshop.DAL;
+﻿using eshop.Core;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
@@ -6,8 +6,8 @@ namespace eshop.Application.Payment
 {
     public class PayOrderByCashlessHandler : PayOrderBaseHandler
     {
-        public PayOrderByCashlessHandler(RepositoryFactory repositoryFactory, ILogger<PayOrderByCashlessHandler> logger) 
-            : base(repositoryFactory, logger)
+        public PayOrderByCashlessHandler(IRepository<Core.Order> orderRepository, ILogger<PayOrderByCashlessHandler> logger) 
+            : base(orderRepository, logger)
         {
         }
 

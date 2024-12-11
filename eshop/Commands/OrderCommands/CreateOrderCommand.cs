@@ -25,7 +25,7 @@ public class CreateOrderCommand : IEshopCommand
     /// <inheritdoc />
     public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var result = await _handler.CreateOrderAsync(cancellationToken);
+        var result = await _handler.CreateOrderAsync(string.Empty, cancellationToken);
         Result = result.ToString();
     }
 }

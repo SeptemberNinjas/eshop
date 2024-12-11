@@ -1,5 +1,6 @@
 ﻿using eshop.Application.Order;
 using eshop.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eshop.WebApi.Controllers;
@@ -28,9 +29,11 @@ public class OrderController : ControllerBase
     }
     
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<string>> CreateOrderAsync(CancellationToken cancellationToken)
     {
-        var result = await _createOrderHandler.CreateOrderAsync(cancellationToken);
+        var customer = User.Identity?.Name!;
+        var result = await _createOrderHandler.CreateOrderAsync(customer, cancellationToken);
         if (result.IsFailed)
             return BadRequest(result.ToString());
 

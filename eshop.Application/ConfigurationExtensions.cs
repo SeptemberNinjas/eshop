@@ -1,8 +1,8 @@
-﻿using eshop.Application.Order;
+﻿using System.Diagnostics;
+using eshop.Application.Order;
 using eshop.Application.Payment;
 using eshop.Application.SaleItems;
 using eshop.Core;
-using eshop.DAL;
 using eshop.DAL.Database;
 using eshop.DAL.LinqToDb;
 using LinqToDB;
@@ -19,8 +19,6 @@ public static class ConfigurationExtensions
     public static IServiceCollection RegisterApplicationDependencies(this IServiceCollection services, IConfiguration configuration)
     {
         services
-            .AddScoped(_ => new DatabaseContext(configuration["ConnectionString"] ?? ""))
-            .AddScoped<RepositoryFactory,DatabaseRepositoryFactory>()
             // Регистрация обработчиков
             .AddScoped<ClearBasketHandler>()
             .AddScoped<GetOrdersHandler>()
@@ -38,10 +36,15 @@ public static class ConfigurationExtensions
             return options
                 .UsePostgreSQL(configuration["ConnectionString"] ?? "")
                 .UseLoggerFactory(loggerFactory)
-                .UseTraceLevel(System.Diagnostics.TraceLevel.Verbose);
+                .UseTraceLevel(TraceLevel.Verbose);
         });
 
+        services.AddScoped<DatabaseContext>();
+
         services.AddScoped<IReadOnlyRepository<SaleItem>, SaleItemLinqToDbRepository>();
+        services.AddScoped<IRepository<Basket>, BasketLinqToDbRepository>();
+        services.AddScoped<IRepository<Core.Order>, OrdersLinqToDbRepository>();
+        services.AddScoped<IRepository<Stock>, StockLinqToDbRepository>();
 
         return services;
     } 
