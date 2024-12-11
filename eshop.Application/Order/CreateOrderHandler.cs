@@ -32,7 +32,6 @@ public class CreateOrderHandler
         try
         {
             await _databaseContext.BeginTransactionAsync(cancellationToken);
-            
             var currentBasket = (await _basketRepository.GetAllAsync(cancellationToken))
                 .FirstOrDefault(b => b.Customer == customer);
             if (currentBasket is null || currentBasket.Lines.Count == 0)
@@ -56,7 +55,10 @@ public class CreateOrderHandler
             foreach (var (stock, count) in orderedProductsWithCount)
             {
                 if (stock.Amount - count < 0)
+                {
+                    await _databaseContext.RollbackTransactionAsync(cancellationToken);
                     return Result.Fail("Недостаточно товара");
+                }
 
                 stock.Amount -= count;
                 await _stockRepository.UpdateAsync(stock, cancellationToken);
