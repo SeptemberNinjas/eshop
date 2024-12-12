@@ -1,6 +1,4 @@
 ﻿using eshop.Core;
-using eshop.DAL;
-using eshop.DAL.Database;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
@@ -8,12 +6,17 @@ namespace eshop.Application.Order
 {
     public class AddBasketLineHandler
     {
-        private readonly DatabaseContext _databaseContext;
+        private readonly IReadOnlyRepository<SaleItem> _saleItemsRepository;
+        private readonly IRepository<Basket> _basketRepository;
         private readonly ILogger<AddBasketLineHandler> _logger;
 
-        public AddBasketLineHandler(DatabaseContext databaseContext, ILogger<AddBasketLineHandler> logger)
+        public AddBasketLineHandler(
+            IReadOnlyRepository<SaleItem> saleItemsRepository,
+            IRepository<Basket> basketRepository,
+            ILogger<AddBasketLineHandler> logger)
         {
-            _databaseContext = databaseContext;
+            _saleItemsRepository = saleItemsRepository;
+            _basketRepository = basketRepository;
             _logger = logger;
         }
 
@@ -22,38 +25,29 @@ namespace eshop.Application.Order
         {
             try
             {
-                await _databaseContext.BeginTransactionAsync();
-                
-                var basketRepository = new BasketDatabaseRepository(_databaseContext);
-                
-                var baskets = await basketRepository.GetAllAsync(cancellationToken);
+                var baskets = await _basketRepository.GetAllAsync(cancellationToken);
                 var customerBasket = baskets.FirstOrDefault(b => b.Customer == customer);
                 if (customerBasket is null)
                 {
-                    await basketRepository.InsertAsync(new Basket(customer), cancellationToken);
-                    customerBasket = (await basketRepository.GetAllAsync(cancellationToken))
-                        .FirstOrDefault(b => b.Customer == customer);
+                    var id = await _basketRepository.InsertAsync(new Basket(customer), cancellationToken);
+                    customerBasket = await _basketRepository.GetByIdAsync(id, cancellationToken);
                 }
-
                 if (customerBasket is null)
-                    return Result.Fail("Корзина не найдена");
+                    return Result.Fail("Не удалось создать корзину");
 
-                var itemsRepository = new SaleItemDatabaseRepository(_databaseContext);
-                var item = await itemsRepository.GetByIdAsync(itemId, cancellationToken);
+                var item = await _saleItemsRepository.GetByIdAsync(itemId, cancellationToken);
                 if (item is null)
                     return Result.Fail("Товар или услуга не найдены");
 
                 var result = item switch
                 {
-                    Product product => await AddLineAsync(product, count, customerBasket, basketRepository),
+                    Product product => await AddLineAsync(product, count, customerBasket, _basketRepository),
                     Service service => AddLine(service, customerBasket),
                     _ => Result.Fail("Неизвестный тип товарной единицы")
                 };
 
                 if (result.IsSuccess)
-                    await basketRepository.UpdateAsync(result.Value, cancellationToken);
-
-                await _databaseContext.CommitTransactionAsync();
+                    await _basketRepository.UpdateAsync(result.Value, cancellationToken);
 
                 return result.ToResult();
             }

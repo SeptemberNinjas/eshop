@@ -1,77 +1,42 @@
-﻿using Npgsql;
+﻿using eshop.DAL.LinqToDb;
+using LinqToDB.Data;
 
-using System.Data;
-using System.Data.Common;
+namespace eshop.DAL.Database;
 
-namespace eshop.DAL.Database
+/// <summary>
+/// Контекст подключения к СУБД
+/// </summary>
+public class DatabaseContext : IDisposable
 {
-    /// <summary>
-    /// Контекст подключения к СУБД
-    /// </summary>
-    public class DatabaseContext : IDisposable
+    private readonly LinqToDbContext? _context;
+    private DataConnectionTransaction? _transaction;
+
+    public DatabaseContext(LinqToDbContext context)
     {
-        private readonly string _connectionString;
+        _context = context;
+    }
 
-        private NpgsqlConnection? _connection;
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        _context?.Dispose();
+    }
 
-        private NpgsqlTransaction? _transaction;
+    public async Task BeginTransactionAsync(CancellationToken cancellationToken)
+    {
+        if (_context is not null)
+            _transaction = await _context.BeginTransactionAsync(cancellationToken);
+    }
 
-        public DatabaseContext(string connectionString)
-        {
-            _connectionString = connectionString;
-        }
+    public async Task CommitTransactionAsync(CancellationToken cancellationToken)
+    {
+        if (_transaction is not null)
+            await _transaction.CommitAsync(cancellationToken);
+    }
 
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            _connection?.Dispose();
-        }
-
-        private async Task<NpgsqlConnection> GetConnectionAsync()
-        {
-            if (_connection != null && _connection.State == ConnectionState.Open)
-                return _connection;
-
-            _connection = new NpgsqlConnection(_connectionString);
-
-            await _connection.OpenAsync();
-
-            return _connection;
-        } 
-
-        public async Task BeginTransactionAsync()
-        {
-            var connection = await GetConnectionAsync();
-
-            _transaction = await connection.BeginTransactionAsync();
-        }
-
-        public async Task CommitTransactionAsync()
-        {
-            if (_transaction != null)
-                await _transaction.CommitAsync();
-        }
-
-        /// <summary>
-        /// Получить команду для СУБД
-        /// </summary>
-        public NpgsqlCommand GetCommand(string text)
-        {
-            return Task.Run(async () => await GetCommandAsync(text)).Result;
-        }
-
-        public async Task<NpgsqlCommand> GetCommandAsync(string text)
-        {
-            return new NpgsqlCommand
-            {
-                Connection = await GetConnectionAsync(),
-                CommandType = CommandType.Text,
-                CommandText = text
-            };
-        }
-
-        
-
-        
+    public async Task RollbackTransactionAsync(CancellationToken cancellationToken)
+    {
+        if (_transaction is not null)
+            await _transaction.RollbackAsync(cancellationToken);
     }
 }

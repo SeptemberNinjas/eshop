@@ -1,5 +1,4 @@
 ﻿using eshop.Core;
-using eshop.DAL;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
@@ -7,12 +6,12 @@ namespace eshop.Application.Order
 {
     public class GetBasketHandler
     {
-        private readonly RepositoryFactory _repositoryFactory;
+        private readonly IRepository<Basket> _basketsRepository;
         private readonly ILogger<GetBasketHandler> _logger;
 
-        public GetBasketHandler(RepositoryFactory repositoryFactory, ILogger<GetBasketHandler> logger)
+        public GetBasketHandler(IRepository<Basket> basketsRepository, ILogger<GetBasketHandler> logger)
         {
-            _repositoryFactory = repositoryFactory;
+            _basketsRepository = basketsRepository;
             _logger = logger;
         }
 
@@ -20,8 +19,7 @@ namespace eshop.Application.Order
         {
             try
             {
-                var repository = _repositoryFactory.CreateBasketRepository();
-                var baskets = await repository.GetAllAsync(cancellationToken);
+                var baskets = await _basketsRepository.GetAllAsync(cancellationToken);
                 var customerBasket = baskets.FirstOrDefault(b => b.Customer == customer);
                 if (customerBasket is null)
                     return Result.Fail($"Корзина покупателя с логином {customer} не найдена");

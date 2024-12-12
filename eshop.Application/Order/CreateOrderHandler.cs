@@ -1,5 +1,4 @@
 ﻿using eshop.Core;
-using eshop.DAL;
 using eshop.DAL.Database;
 using FluentResults;
 using Microsoft.Extensions.Logging;
@@ -9,63 +8,70 @@ namespace eshop.Application.Order;
 public class CreateOrderHandler
 {
     private readonly DatabaseContext _databaseContext;
-    private readonly RepositoryFactory _repositoryFactory;
+    private readonly IRepository<Core.Order> _ordersRepository;
+    private readonly IRepository<Basket> _basketRepository;
+    private readonly IRepository<Stock> _stockRepository;
     private readonly ILogger<CreateOrderHandler> _logger;
 
     public CreateOrderHandler(
         DatabaseContext databaseContext,
-        RepositoryFactory repositoryFactory,
+        IRepository<Core.Order> ordersRepository,
+        IRepository<Basket> basketRepository,
+        IRepository<Stock> stockRepository,
         ILogger<CreateOrderHandler> logger)
     {
         _databaseContext = databaseContext;
-        _repositoryFactory = repositoryFactory;
+        _ordersRepository = ordersRepository;
+        _basketRepository = basketRepository;
         _logger = logger;
+        _stockRepository = stockRepository;
     }
 
-    public async Task<Result> CreateOrderAsync(CancellationToken cancellationToken)
+    public async Task<Result> CreateOrderAsync(string customer, CancellationToken cancellationToken)
     {
         try
         {
-            await _databaseContext.BeginTransactionAsync();
-
-            var basketRepository = _repositoryFactory.CreateBasketRepository();
-            var currentBasket = (await basketRepository.GetAllAsync(cancellationToken)).FirstOrDefault();
+            await _databaseContext.BeginTransactionAsync(cancellationToken);
+            var currentBasket = (await _basketRepository.GetAllAsync(cancellationToken))
+                .FirstOrDefault(b => b.Customer == customer);
             if (currentBasket is null || currentBasket.Lines.Count == 0)
                 return Result.Fail("Корзина не найдена");
   
             var order = currentBasket.CreateOrderFromBasket();
             if (order is null)
                 return Result.Fail("Ошибка при создании заказа. Корзина пуста");
-
-            var stockRepository = _repositoryFactory.CreateStockRepository();
+            
             var orderedProductsWithCount = order.Lines
                 .Where(l => l.ItemType is ItemTypes.Product)
-                .Join(await stockRepository.GetAllAsync(cancellationToken),
+                .Join(await _stockRepository.GetAllAsync(cancellationToken),
                     orderLine => orderLine.ItemId, 
                     stock => stock.ItemId,
                     (orderLine, stock) => (stock, orderLine.Count));
                 
             // Тут происходят взаимосвязанные изменения в трёх репозиториях
             // Хорошее место, чтобы показать транзакцию
-            var ordersRepository = _repositoryFactory.CreateOrdersRepository();
-            var id = await ordersRepository.InsertAsync(order, cancellationToken);
-            await basketRepository.UpdateAsync(currentBasket, cancellationToken);
+            var id = await _ordersRepository.InsertAsync(order, cancellationToken);
+            await _basketRepository.UpdateAsync(currentBasket, cancellationToken);
             foreach (var (stock, count) in orderedProductsWithCount)
             {
                 if (stock.Amount - count < 0)
+                {
+                    await _databaseContext.RollbackTransactionAsync(cancellationToken);
                     return Result.Fail("Недостаточно товара");
+                }
 
                 stock.Amount -= count;
-                await stockRepository.UpdateAsync(stock, cancellationToken);
+                await _stockRepository.UpdateAsync(stock, cancellationToken);
             }
 
-            await _databaseContext.CommitTransactionAsync();
+            await _databaseContext.CommitTransactionAsync(cancellationToken);
 
             return Result.Ok()
                 .WithSuccess($"Создан заказ {id}");
         }
         catch (Exception ex)
         {
+            await _databaseContext.RollbackTransactionAsync(cancellationToken);
             _logger.LogError(ex, "Ошибка при создании заказа. {message}", ex.Message);
             
             return Result.Fail("Не удалось создать заказ");

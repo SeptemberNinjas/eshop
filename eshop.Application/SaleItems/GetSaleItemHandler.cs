@@ -1,5 +1,4 @@
 ﻿using eshop.Core;
-using eshop.DAL;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 

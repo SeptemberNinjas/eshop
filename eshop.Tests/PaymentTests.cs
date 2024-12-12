@@ -1,14 +1,9 @@
-﻿using eshop.Application.Order;
-using eshop.Application.Payment;
+﻿using eshop.Application.Payment;
 using eshop.Core;
-using eshop.DAL;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace eshop.Tests
 {
@@ -35,14 +30,10 @@ namespace eshop.Tests
                 .Setup(item => item.UpdateAsync(It.IsAny<Order>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            var repositoryFactory = new Mock<RepositoryFactory>();
-
-            repositoryFactory
-                .Setup(item => item.CreateOrdersRepository())
-                .Returns(() => orderRepository.Object);
-
             _serviceProvider = new ServiceCollection()
-                .AddScoped(sp => repositoryFactory.Object)
+                .AddSingleton<ILogger<PayOrderByCashHandler>, NullLogger<PayOrderByCashHandler>>()
+                .AddSingleton<ILogger<PayOrderByCashlessHandler>, NullLogger<PayOrderByCashlessHandler>>()
+                .AddScoped<IRepository<Order>>(_ => orderRepository.Object)
                 .AddScoped<PayOrderByCashHandler>()
                 .AddScoped<PayOrderByCashlessHandler>()
                 .BuildServiceProvider();
@@ -51,7 +42,8 @@ namespace eshop.Tests
         [SetUp]
         public void Setup()
         {
-            var order = new Order(1, OrderStatus.New, CatalogHelper.Catalog.Take(1).Select(item => new ItemsListLine(item, 1)));
+            var order = new Order(1, OrderStatus.New,
+                CatalogHelper.Catalog.Take(1).Select(item => new ItemsListLine(item, 1)));
 
             _orders.Add(order);
         }
@@ -91,7 +83,7 @@ namespace eshop.Tests
         }
 
         private decimal GetAmountOfAllOrders() => _orders
-                .SelectMany(order => order.Lines)
-                .Sum(item => item.Count * item.SaleItem.Price);
+            .SelectMany(order => order.Lines)
+            .Sum(item => item.Count * item.SaleItem.Price);
     }
 }

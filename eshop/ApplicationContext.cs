@@ -4,7 +4,6 @@ using eshop.Commands.CatalogCommands;
 using eshop.Commands.OrderCommands;
 using eshop.Commands.PaymentCommands;
 using eshop.Commands.SystemCommands;
-using eshop.DAL;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -40,14 +39,13 @@ public class ApplicationContext
     public IEshopCommand CreateCommand(CommandType commandType)
     {
         using var scope = _serviceProvider.CreateScope();
-        var repositoryFactory = scope.ServiceProvider.GetRequiredService<RepositoryFactory>();
-
+        
         return commandType switch
         {
             CommandType.Exit => new ExitCommand(),
             CommandType.Back => new BackCommand(),
             CommandType.GoToRoot => new GoToRootPageCommand(),
-            CommandType.DisplaySaleItems => new DisplaySaleItemsCommand(),
+            CommandType.DisplaySaleItems => scope.ServiceProvider.GetRequiredService<DisplaySaleItemsCommand>(),
             CommandType.DisplayProducts => scope.ServiceProvider.GetRequiredService<DisplayProductsCommand>(),
             CommandType.DisplayServices => scope.ServiceProvider.GetRequiredService<DisplayServicesCommand>(),
             CommandType.DisplayBasket => scope.ServiceProvider.GetRequiredService<DisplayBasketCommand>(),
@@ -55,9 +53,9 @@ public class ApplicationContext
             CommandType.AddServiceToBasket => scope.ServiceProvider.GetRequiredService<AddBasketLineCommand>(),
             CommandType.CreateOrder => scope.ServiceProvider.GetRequiredService<CreateOrderCommand>(),
             CommandType.DisplayOrders => scope.ServiceProvider.GetRequiredService<DisplayOrdersCommand>(),
-            CommandType.StartOrderPayment => new StartOrderPaymentCommand(repositoryFactory.CreateOrdersRepository()),
+            CommandType.StartOrderPayment => scope.ServiceProvider.GetRequiredService<StartOrderPaymentCommand>(),
             CommandType.SelectPaymentType => new SelectPaymentTypeCommand(),
-            CommandType.TransferMoney => new TransferMoneyCommand(repositoryFactory.CreateOrdersRepository()),
+            CommandType.TransferMoney => scope.ServiceProvider.GetRequiredService<TransferMoneyCommand>(),
             CommandType.ClearBasket => scope.ServiceProvider.GetRequiredService<ClearBasketCommand>(),
             _ => throw new NotSupportedException()
         };

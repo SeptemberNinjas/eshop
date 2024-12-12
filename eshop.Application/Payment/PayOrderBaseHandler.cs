@@ -1,4 +1,4 @@
-﻿using eshop.DAL;
+﻿using eshop.Core;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
@@ -6,12 +6,13 @@ namespace eshop.Application.Payment
 {
     public abstract class PayOrderBaseHandler
     {
-        private readonly RepositoryFactory _repositoryFactory;
+        private readonly IRepository<Core.Order> _ordersRepository;
         private readonly ILogger<PayOrderBaseHandler> _logger;
 
-        public PayOrderBaseHandler(RepositoryFactory repositoryFactory, ILogger<PayOrderBaseHandler> logger)
+        public PayOrderBaseHandler(IRepository<Core.Order> ordersRepository, ILogger<PayOrderBaseHandler> logger)
         {
-            _repositoryFactory = repositoryFactory;
+           
+            _ordersRepository = ordersRepository;
             _logger = logger;
         }
 
@@ -19,14 +20,12 @@ namespace eshop.Application.Payment
         {
             try
             {
-                var ordersRepository = _repositoryFactory.CreateOrdersRepository();
-
-                var order = await ordersRepository.GetByIdAsync(orderId, cancellationToken);
+                var order = await _ordersRepository.GetByIdAsync(orderId, cancellationToken);
 
                 if (order == null)
                     return Result.Fail($"Заказ с идентификатором {orderId} не найден");
 
-                if (order.Status is not Core.OrderStatus.New)
+                if (order.Status is not OrderStatus.New)
                     return Result.Fail($"Заказ с идентификатором {orderId} нельзя оплатить");
 
                 var result = PaymentProcessing(order, amount);
@@ -37,7 +36,7 @@ namespace eshop.Application.Payment
 
                 if (order.SetPaidStatus())
                 {
-                    await ordersRepository.UpdateAsync(order, cancellationToken);
+                    await _ordersRepository.UpdateAsync(order, cancellationToken);
                 }
 
                 return Result.Ok()

@@ -1,8 +1,10 @@
 ﻿using eshop.Application.Order;
 using eshop.Core;
-using eshop.DAL;
+using eshop.DAL.Database;
 using eshop.Tests.Mocks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace eshop.Tests
@@ -23,23 +25,14 @@ namespace eshop.Tests
 
             basketRepository
                 .Setup(item => item.GetAllAsync(It.IsAny<CancellationToken>()))
-                .Returns((CancellationToken cancellationToken) =>
-                {
-                    return Task.FromResult((IReadOnlyCollection<Basket>)[_basket]);
-                });
-
-            var repositoryFactory = new Mock<RepositoryFactory>();
-
-            repositoryFactory
-                .Setup(item => item.CreateBasketRepository())
-                .Returns(() => basketRepository.Object);
-
-            repositoryFactory
-                .Setup(item => item.CreateSaleItemRepository())
-                .Returns(() => new SaleItemRepositoryMock());
+                .Returns((CancellationToken _) => Task.FromResult((IReadOnlyCollection<Basket>) [_basket]));
 
             _serviceProvider = new ServiceCollection()
-                .AddScoped(sp => repositoryFactory.Object)
+                .AddSingleton<IReadOnlyRepository<SaleItem>, SaleItemRepositoryMock>()
+                .AddSingleton<ILogger<GetBasketHandler>, NullLogger<GetBasketHandler>>()
+                .AddSingleton<ILogger<ClearBasketHandler>, NullLogger<ClearBasketHandler>>()
+                .AddSingleton<ILogger<AddBasketLineHandler>, NullLogger<AddBasketLineHandler>>()
+                .AddScoped<IRepository<Basket>>(_ => basketRepository.Object)
                 .AddScoped<GetBasketHandler>()
                 .AddScoped<AddBasketLineHandler>()
                 .AddScoped<ClearBasketHandler>()
@@ -73,14 +66,16 @@ namespace eshop.Tests
             var addBasketLineHandler = scope.ServiceProvider.GetRequiredService<AddBasketLineHandler>();
             var getBasketHandler = scope.ServiceProvider.GetRequiredService<GetBasketHandler>();
 
-            var addLineResult = await addBasketLineHandler.AddLineAsync("customer", saleItemId, count, CancellationToken.None);
+            var addLineResult =
+                await addBasketLineHandler.AddLineAsync("customer", saleItemId, count, CancellationToken.None);
             var getBasketResult = await getBasketHandler.GetBasketAsync("customer", CancellationToken.None);
 
             Assert.Multiple(() =>
             {
                 Assert.That(addLineResult.IsSuccess, Is.True, addLineResult.ToString());
                 Assert.That(getBasketResult.IsSuccess, Is.True, getBasketResult.ToString());
-                Assert.That(getBasketResult.Value.Items.Count, Is.EqualTo(1), "В корзине некорректное количество товаров");
+                Assert.That(getBasketResult.Value.Items.Count, Is.EqualTo(1),
+                    "В корзине некорректное количество товаров");
             });
         }
 

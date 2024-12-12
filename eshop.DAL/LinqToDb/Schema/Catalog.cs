@@ -16,5 +16,8 @@ namespace eshop.DAL.LinqToDb.Schema
 
         [Column("type")]
         public short Type { get; set; }
+        
+        [Association(ThisKey = "Id", OtherKey = "Id", CanBeNull = true)]
+        public Stock? Stock { get; set; }
     }
 }

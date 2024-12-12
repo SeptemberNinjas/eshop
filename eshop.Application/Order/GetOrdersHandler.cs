@@ -1,4 +1,4 @@
-﻿using eshop.DAL;
+﻿using eshop.Core;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
@@ -6,12 +6,12 @@ namespace eshop.Application.Order;
 
 public class GetOrdersHandler
 {
-    private readonly RepositoryFactory _repositoryFactory;
+    private readonly IRepository<Core.Order> _ordersRepository;
     private readonly ILogger<GetOrdersHandler> _logger;
 
-    public GetOrdersHandler(RepositoryFactory repositoryFactory, ILogger<GetOrdersHandler> logger)
+    public GetOrdersHandler(IRepository<Core.Order> ordersRepository, ILogger<GetOrdersHandler> logger)
     {
-        _repositoryFactory = repositoryFactory;
+        _ordersRepository = ordersRepository;
         _logger = logger;
     }
 
@@ -19,8 +19,7 @@ public class GetOrdersHandler
     {
         try
         {
-            var repository = _repositoryFactory.CreateOrdersRepository();
-            var orders = await repository.GetAllAsync(cancellationToken);
+            var orders = await _ordersRepository.GetAllAsync(cancellationToken);
             return Result.Ok(orders.AsEnumerable());
         }
         catch (Exception ex)
