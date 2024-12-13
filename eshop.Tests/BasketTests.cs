@@ -21,7 +21,7 @@ namespace eshop.Tests
         {
             var basketRepository = new Mock<IRepository<Basket>>();
 
-            _basket = new Basket(1, [], "customer");
+            _basket = new Basket(1, [], "customer", DateTime.UtcNow);
 
             basketRepository
                 .Setup(item => item.GetAllAsync(It.IsAny<CancellationToken>()))

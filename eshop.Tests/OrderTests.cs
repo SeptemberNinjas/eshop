@@ -93,7 +93,7 @@ namespace eshop.Tests
             var basket = new Basket(1, [
                 new ItemsListLine(product!, productCount),
                 new ItemsListLine(service!)
-            ], "customer");
+            ], "customer", DateTime.UtcNow);
 
             _baskets.Add(basket);
         }

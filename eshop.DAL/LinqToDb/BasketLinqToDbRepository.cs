@@ -51,6 +51,7 @@ namespace eshop.DAL.LinqToDb
                 await _context.Baskets
                     .Where(r => r.Id == item.Id)
                     .Set(r => r.Customer, item.Customer)
+                    .Set(r => r.LastUpdate, DateTime.UtcNow)
                     .UpdateAsync(cancellationToken);
 
                 await _context.BasketLines
@@ -85,7 +86,7 @@ namespace eshop.DAL.LinqToDb
 
         public async Task<int> InsertAsync(Basket item, CancellationToken cancellationToken = default)
         {
-            var id = await _context.Baskets.InsertWithIdentityAsync(() => new BasketRow { Customer = item.Customer }, cancellationToken);
+            var id = await _context.Baskets.InsertWithIdentityAsync(() => new BasketRow { Customer = item.Customer, LastUpdate = DateTime.UtcNow }, cancellationToken);
             
            return (int)id;
         }
@@ -108,7 +109,8 @@ namespace eshop.DAL.LinqToDb
             return new Basket(
                 basket.Id,
                 basket.Lines?.Select(MapBasketLine) ?? [],
-                basket.Customer!);
+                basket.Customer!,
+                basket.LastUpdate);
         }
     }
 }

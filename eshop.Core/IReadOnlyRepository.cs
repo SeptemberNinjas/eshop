@@ -18,6 +18,5 @@ public interface IReadOnlyRepository<T>
     /// <summary>
     /// Найти элемент по идентификатору
     /// </summary>
-    /// <param name="id">Идентификатор</param>
     Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 }

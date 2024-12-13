@@ -1,9 +1,12 @@
 using eshop.Application;
+using eshop.Application.Order;
+using eshop.Core.Cache;
 using eshop.WebApi.Filters;
 using eshop.WebApi.Middlewares;
 using FluentResults;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Prometheus;
 using Prometheus.DotNetRuntime;
 using Serilog;
@@ -49,6 +52,11 @@ builder.Services
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddResponseCaching();
+builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
+builder.Services.AddSingleton<CacheKeysStorage>();
+
+builder.Services.AddHostedService<ClearBasketsBackgroundService>();
 
 var app = builder.Build();
 
@@ -70,6 +78,7 @@ if (app.Environment.IsDevelopment())
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseMetricServer();
+app.UseResponseCaching();
 app.UseAuthorization();
 
 app.MapControllers();
