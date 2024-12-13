@@ -22,8 +22,9 @@ public class CacheKeysStorage
             _ => [key],
             (_, keys) =>
             {
-                keys.Add(key);
-                return keys;
+                var result = keys.ToHashSet();
+                result.Add(key);
+                return result;
             });
     }
 

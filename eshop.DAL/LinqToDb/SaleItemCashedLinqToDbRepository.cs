@@ -27,7 +27,7 @@ namespace eshop.DAL.LinqToDb
 
         public async Task<SaleItem?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            const string cacheKey = $"{nameof(SaleItemCashedLinqToDbRepository)}{nameof(GetByIdAsync)}";
+            var cacheKey = $"{nameof(SaleItemCashedLinqToDbRepository)}{nameof(GetByIdAsync)}{id}";
             return await WrapWithCacheAsync(cacheKey, () => _repository.GetByIdAsync(id, cancellationToken));
         }
 
