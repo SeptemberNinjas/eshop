@@ -1,5 +1,6 @@
 using eshop.Application;
 using eshop.Application.Order;
+using eshop.Application.Payment;
 using eshop.Core.Cache;
 using eshop.WebApi.Filters;
 using eshop.WebApi.Middlewares;
@@ -57,6 +58,14 @@ builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
 builder.Services.AddSingleton<CacheKeysStorage>();
 
 builder.Services.AddHostedService<ClearBasketsBackgroundService>();
+
+builder.Services.AddHttpClient<PayOrderByCashlessHandler>(h =>
+{
+    var baseAddress = builder.Configuration["PaymentGateway"];
+    if (baseAddress is null)
+        throw new ApplicationException("Не указаны настройки сервиса оплаты");
+    h.BaseAddress = new Uri(baseAddress);
+});
 
 var app = builder.Build();
 

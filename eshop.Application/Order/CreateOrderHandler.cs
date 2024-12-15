@@ -14,6 +14,7 @@ public class CreateOrderHandler
     private readonly IRepository<Stock> _stockRepository;
     private readonly ILogger<CreateOrderHandler> _logger;
     private readonly CacheKeysStorage _keysStorage;
+    private readonly ICustomerOrdersRepository _customerOrdersRepository;
 
     public CreateOrderHandler(
         DatabaseContext databaseContext,
@@ -21,13 +22,15 @@ public class CreateOrderHandler
         IRepository<Basket> basketRepository,
         IRepository<Stock> stockRepository,
         ILogger<CreateOrderHandler> logger,
-        CacheKeysStorage keysStorage)
+        CacheKeysStorage keysStorage, 
+        ICustomerOrdersRepository customerOrdersRepository)
     {
         _databaseContext = databaseContext;
         _ordersRepository = ordersRepository;
         _basketRepository = basketRepository;
         _logger = logger;
         _keysStorage = keysStorage;
+        _customerOrdersRepository = customerOrdersRepository;
         _stockRepository = stockRepository;
     }
 
@@ -67,6 +70,8 @@ public class CreateOrderHandler
                 stock.Amount -= count;
                 await _stockRepository.UpdateAsync(stock, cancellationToken);
             }
+
+            await _customerOrdersRepository.LinkOrderToCustomerAsync(customer, id, cancellationToken);
 
             await _databaseContext.CommitTransactionAsync(cancellationToken);
             _keysStorage.RemoveGroupCache(CacheKeysStorage.SaleItemsGroup);

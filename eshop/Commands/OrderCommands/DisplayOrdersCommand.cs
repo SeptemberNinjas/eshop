@@ -37,7 +37,7 @@ public class DisplayOrdersCommand : ICommandWithCommandsList
     /// <inheritdoc />
     public async Task ExecuteAsync(string[]? args, CancellationToken cancellationToken)
     {
-        var ordersListResult = await _handler.GetOrdersAsync(cancellationToken);
+        var ordersListResult = await _handler.GetOrdersAsync(string.Empty, cancellationToken);
         ExecutionSuccess = ordersListResult.IsSuccess;
         if (ordersListResult.IsFailed)
         {

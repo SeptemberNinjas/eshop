@@ -11,22 +11,22 @@ namespace eshop.Application.Payment
         {
         }
 
-        public async Task<Result> PayHandler(int orderId, decimal amount, CancellationToken cancellationToken)
+        public async Task<Result<PaymentResult>> PayHandler(int orderId, decimal amount, CancellationToken cancellationToken)
         {
             return await PayAsync(orderId, amount, cancellationToken);
         }
 
-        protected override Result<string> PaymentProcessing(Core.Order order, decimal amount)
+        protected override Task<Result<PaymentResult>> PaymentProcessingAsync(Core.Order order, decimal amount)
         {
             var sum = order.Sum;
 
             if (amount < sum)
-                return Result.Fail("Недостаточно средств");
+                return Task.FromResult<Result<PaymentResult>>(Result.Fail("Недостаточно средств"));
 
             if (amount == sum)
-                return Result.Ok("Заказ оплачен");
+                return Task.FromResult(Result.Ok(new PaymentResult(true, "Заказ оплачен")));
 
-            return Result.Ok($"Заказ оплачен, сдача {amount - sum:F2}");
+            return Task.FromResult(Result.Ok(new PaymentResult(true, $"Заказ оплачен, сдача {amount - sum:F2}")));
         }
     }
 }

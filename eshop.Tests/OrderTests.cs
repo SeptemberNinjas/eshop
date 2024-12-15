@@ -118,7 +118,7 @@ namespace eshop.Tests
 
             var createOrderResult = await createOrderHandler.CreateOrderAsync("customer", CancellationToken.None);
             var getBasketResult = await getBasketHandler.GetBasketAsync("customer", CancellationToken.None);
-            var getOrdersResult = await getOrdersHandler.GetOrdersAsync(CancellationToken.None);
+            var getOrdersResult = await getOrdersHandler.GetOrdersAsync("customer", CancellationToken.None);
 
             Assert.Multiple(() =>
             {

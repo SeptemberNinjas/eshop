@@ -100,7 +100,7 @@ namespace eshop.DAL.LinqToDb
             return new ItemsListLine(item, line.Count);
         }
 
-        private static Order MapOrder(OrderRow order)
+        internal static Order MapOrder(OrderRow order)
         {
             return new Order(
                 order.Id,

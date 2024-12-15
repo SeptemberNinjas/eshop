@@ -48,13 +48,3 @@ export const getBasketSize = async () => {
 
     return (await basketResponse.json())?.items?.length ?? 0
 }
-
-export const getBasketItemTemplate = (item, index) => `
-    <tr>
-        <th scope="row">${index}</th>
-        <td>${item.name}</td>
-        <td>${item.price}</td>
-        <td>${item.amount}</td>
-        <td>${item.sum}</td>
-    </tr>
-`

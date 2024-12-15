@@ -33,11 +33,23 @@
             <div>
                 Покупатель - <span id="customer-name"></span>
             </div>
-            <button id="clear-basket" type="button" class="btn btn-dark">Очистить корзину</button>
+            <div>
+                <button id="clear-basket" type="button" class="btn btn-dark">Очистить корзину</button>
+                <button id="create-order" type="button" class="btn btn-dark">Оформить заказ</button>
+            </div>            
         </div>
         <hr/>
+        <div class="bg-dark-subtle fs-5 fw-bold d-flex justify-content-between pb-1">Корзина</div>
         <table id="basket-items-list" class="table table-hover">
         </table>
+    </div>
+    <div id="orders-container" class="container bg-dark-subtle p-4">
+        <div class="bg-dark-subtle fs-5 fw-bold d-flex justify-content-between">
+            Заказы           
+        </div>
+        <hr/>
+        <div id="orders-list">
+        </div>
     </div>
 </div>
 <form id="logout" style="display: none" action="/logout" method="post"></form>

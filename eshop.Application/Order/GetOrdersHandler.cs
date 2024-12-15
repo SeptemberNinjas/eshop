@@ -6,21 +6,21 @@ namespace eshop.Application.Order;
 
 public class GetOrdersHandler
 {
-    private readonly IRepository<Core.Order> _ordersRepository;
+    private readonly ICustomerOrdersRepository _ordersRepository;
     private readonly ILogger<GetOrdersHandler> _logger;
 
-    public GetOrdersHandler(IRepository<Core.Order> ordersRepository, ILogger<GetOrdersHandler> logger)
+    public GetOrdersHandler(ICustomerOrdersRepository ordersRepository, ILogger<GetOrdersHandler> logger)
     {
         _ordersRepository = ordersRepository;
         _logger = logger;
     }
 
-    public async Task<Result<IEnumerable<Core.Order>>> GetOrdersAsync(CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<OrderDto>>> GetOrdersAsync(string customer, CancellationToken cancellationToken)
     {
         try
         {
-            var orders = await _ordersRepository.GetAllAsync(cancellationToken);
-            return Result.Ok(orders.AsEnumerable());
+            var orders = await _ordersRepository.GetCustomerOrdersAsync(customer, cancellationToken);
+            return Result.Ok(orders.Select(Map));
         }
         catch (Exception ex)
         {
@@ -28,5 +28,14 @@ public class GetOrdersHandler
             
             return Result.Fail("Не удалось получить список заказов");
         }
+    }
+    
+    private static OrderDto Map(Core.Order order)
+    {
+        var totalSum = order.Lines.Sum(l => l.SaleItem.Price * l.Count);
+        return new OrderDto(order.Id, order.Status, totalSum, order.Lines
+            .Select(l =>
+                new OrderItemDto(l.ItemId, l.ItemType, l.SaleItem.Name, l.Count, l.SaleItem.Price,
+                    l.Count * l.SaleItem.Price)));
     }
 }

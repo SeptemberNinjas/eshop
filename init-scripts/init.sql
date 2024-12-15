@@ -33,6 +33,11 @@ create table order_line (
      count int not null
 );
 
+create table customer_orders (
+     customer varchar(128) not null,
+     order_id int not null UNIQUE
+);
+
 insert into "catalog"("id", "name", "price", "type")
 values 
     (1, 'Лопата', 9.99, 1),

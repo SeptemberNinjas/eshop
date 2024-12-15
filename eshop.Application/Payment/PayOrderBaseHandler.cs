@@ -16,7 +16,7 @@ namespace eshop.Application.Payment
             _logger = logger;
         }
 
-        protected async Task<Result> PayAsync(int orderId, decimal amount, CancellationToken cancellationToken)
+        protected async Task<Result<PaymentResult>> PayAsync(int orderId, decimal amount, CancellationToken cancellationToken)
         {
             try
             {
@@ -28,28 +28,27 @@ namespace eshop.Application.Payment
                 if (order.Status is not OrderStatus.New)
                     return Result.Fail($"Заказ с идентификатором {orderId} нельзя оплатить");
 
-                var result = PaymentProcessing(order, amount);
+                var result = await PaymentProcessingAsync(order, amount);
 
                 if (result.IsFailed)
                     return Result.Fail("Не удалось выполнить оплату")
                         .WithErrors(result.Errors);
 
-                if (order.SetPaidStatus())
+                if (result.Value.IsSuccess && order.SetPaidStatus())
                 {
                     await _ordersRepository.UpdateAsync(order, cancellationToken);
                 }
 
-                return Result.Ok()
-                    .WithSuccess(result.Value);
+                return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при оплате закза. {message}", ex.Message);
+                _logger.LogError(ex, "Ошибка при оплате заказа. {message}", ex.Message);
                 
                 return Result.Fail("Не удалось оплатить заказ");
             }
         }
 
-        protected abstract Result<string> PaymentProcessing(Core.Order order, decimal amount);
+        protected abstract Task<Result<PaymentResult>> PaymentProcessingAsync(Core.Order order, decimal amount);
     }
 }

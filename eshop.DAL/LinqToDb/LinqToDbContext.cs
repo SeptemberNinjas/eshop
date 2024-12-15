@@ -17,6 +17,8 @@ namespace eshop.DAL.LinqToDb
         public ITable<OrderRow> Orders => this.GetTable<OrderRow>();
         
         public ITable<OrderLine> OrderLines => this.GetTable<OrderLine>();
+        
+        public ITable<CustomerOrders> CustomerOrders => this.GetTable<CustomerOrders>();
 
         public LinqToDbContext(DataOptions options) : base(options) { }
     }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace eshop.WebApi.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("[controller]")]
 public class OrderController : ControllerBase
 {
@@ -21,7 +22,8 @@ public class OrderController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Order>>> GetOrdersAsync(CancellationToken cancellationToken)
     {
-        var result = await _getOrdersHandler.GetOrdersAsync(cancellationToken);
+        var customer = User.Identity?.Name!;
+        var result = await _getOrdersHandler.GetOrdersAsync(customer, cancellationToken);
         if (result.IsFailed)
             return NotFound();
 
@@ -29,7 +31,6 @@ public class OrderController : ControllerBase
     }
     
     [HttpPost]
-    [Authorize]
     public async Task<ActionResult<string>> CreateOrderAsync(CancellationToken cancellationToken)
     {
         var customer = User.Identity?.Name!;

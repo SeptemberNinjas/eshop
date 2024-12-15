@@ -47,6 +47,8 @@ public static class ConfigurationExtensions
         services.AddScoped<IRepository<Core.Order>, OrdersLinqToDbRepository>();
         services.AddScoped<IRepository<Stock>, StockLinqToDbRepository>();
 
+        services.AddScoped<ICustomerOrdersRepository, CustomerOrdersLinqToDbRepository>();
+
         return services;
     } 
 }
